@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual C# Express 2005
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vs2005-tibco", "vs2005-tibco.csproj", "{2AF5EBB5-9873-4B35-A8FC-8B6E74242767}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vs2005-ems", "vs2005-ems.csproj", "{2AF5EBB5-9873-4B35-A8FC-8B6E74242767}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -6,8 +6,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{2AF5EBB5-9873-4B35-A8FC-8B6E74242767}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>Apache.TibcoEMS</RootNamespace>
-    <AssemblyName>NMS.TIBCO</AssemblyName>
+    <RootNamespace>NMS.EMS</RootNamespace>
+    <AssemblyName>NMS.EMS</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -40,27 +40,27 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="src\main\csharp\TIBCO\BytesMessage.cs" />
-    <Compile Include="src\main\csharp\TIBCO\CommonAssemblyInfo.cs" />
-    <Compile Include="src\main\csharp\TIBCO\Connection.cs" />
-    <Compile Include="src\main\csharp\TIBCO\ConnectionFactory.cs" />
-    <Compile Include="src\main\csharp\TIBCO\Destination.cs" />
-    <Compile Include="src\main\csharp\TIBCO\Dispatcher.cs" />
-    <Compile Include="src\main\csharp\TIBCO\MapMessage.cs" />
-    <Compile Include="src\main\csharp\TIBCO\Message.cs" />
-    <Compile Include="src\main\csharp\TIBCO\MessageConsumer.cs" />
-    <Compile Include="src\main\csharp\TIBCO\MessageProducer.cs" />
-    <Compile Include="src\main\csharp\TIBCO\MessageProperties.cs" />
-    <Compile Include="src\main\csharp\TIBCO\ObjectMessage.cs" />
-    <Compile Include="src\main\csharp\TIBCO\Queue.cs" />
-    <Compile Include="src\main\csharp\TIBCO\Session.cs" />
-    <Compile Include="src\main\csharp\TIBCO\TemporaryQueue.cs">
+    <Compile Include="src\main\csharp\EMS\BytesMessage.cs" />
+    <Compile Include="src\main\csharp\EMS\CommonAssemblyInfo.cs" />
+    <Compile Include="src\main\csharp\EMS\Connection.cs" />
+    <Compile Include="src\main\csharp\EMS\ConnectionFactory.cs" />
+    <Compile Include="src\main\csharp\EMS\Destination.cs" />
+    <Compile Include="src\main\csharp\EMS\Dispatcher.cs" />
+    <Compile Include="src\main\csharp\EMS\MapMessage.cs" />
+    <Compile Include="src\main\csharp\EMS\Message.cs" />
+    <Compile Include="src\main\csharp\EMS\MessageConsumer.cs" />
+    <Compile Include="src\main\csharp\EMS\MessageProducer.cs" />
+    <Compile Include="src\main\csharp\EMS\MessageProperties.cs" />
+    <Compile Include="src\main\csharp\EMS\ObjectMessage.cs" />
+    <Compile Include="src\main\csharp\EMS\Queue.cs" />
+    <Compile Include="src\main\csharp\EMS\Session.cs" />
+    <Compile Include="src\main\csharp\EMS\TemporaryQueue.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="src\main\csharp\TIBCO\TemporaryTopic.cs" />
-    <Compile Include="src\main\csharp\TIBCO\TextMessage.cs" />
-    <Compile Include="src\main\csharp\TIBCO\TibcoUtil.cs" />
-    <Compile Include="src\main\csharp\TIBCO\Topic.cs" />
+    <Compile Include="src\main\csharp\EMS\TemporaryTopic.cs" />
+    <Compile Include="src\main\csharp\EMS\TextMessage.cs" />
+    <Compile Include="src\main\csharp\EMS\TibcoUtil.cs" />
+    <Compile Include="src\main\csharp\EMS\Topic.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="activemq-dotnet.snk" />
