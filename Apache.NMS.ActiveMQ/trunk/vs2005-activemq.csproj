@@ -6,8 +6,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{08321F42-4B3D-4815-B592-95962BAC3B9F}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>Apache.ActiveMQ</RootNamespace>
-    <AssemblyName>NMS.ActiveMQ</AssemblyName>
+    <RootNamespace>Apache.NMS.ActiveMQ</RootNamespace>
+    <AssemblyName>Apache.NMS.ActiveMQ</AssemblyName>
     <WarningLevel>4</WarningLevel>
     <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>activemq-dotnet.snk</AssemblyOriginatorKeyFile>
@@ -28,9 +28,9 @@
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="NMS, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Apache.NMS, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>lib\NMS.dll</HintPath>
+      <HintPath>lib\Apache.NMS.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -707,9 +707,6 @@
     <Compile Include="src\main\csharp\ActiveMQ\Util\URISupport.cs">
       <SubType>Code</SubType>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="NMS.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSHARP.Targets" />
 </Project>
