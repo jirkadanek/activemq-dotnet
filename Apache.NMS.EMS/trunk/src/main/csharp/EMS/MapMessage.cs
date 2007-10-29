@@ -18,9 +18,9 @@
 using System;
 using System.Collections;
 
-namespace Apache.TibcoEMS
+namespace Apache.NMS.EMS
 {
-	class MapMessage : Apache.TibcoEMS.Message, Apache.NMS.IMapMessage, Apache.NMS.IPrimitiveMap
+	class MapMessage : Apache.NMS.EMS.Message, Apache.NMS.IMapMessage, Apache.NMS.IPrimitiveMap
 	{
 		public TIBCO.EMS.MapMessage tibcoMapMessage
 		{

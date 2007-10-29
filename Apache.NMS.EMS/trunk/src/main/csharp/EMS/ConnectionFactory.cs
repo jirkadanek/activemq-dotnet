@@ -17,7 +17,7 @@
 using System;
 using System.Collections;
 
-namespace Apache.TibcoEMS
+namespace Apache.NMS.EMS
 {
     /// <summary>
     /// A Factory that can estbalish NMS connections to TIBCO

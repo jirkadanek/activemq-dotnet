@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-namespace Apache.TibcoEMS
+namespace Apache.NMS.EMS
 {
-	class ObjectMessage : Apache.TibcoEMS.Message, Apache.NMS.IObjectMessage
+	class ObjectMessage : Apache.NMS.EMS.Message, Apache.NMS.IObjectMessage
 	{
 		public TIBCO.EMS.ObjectMessage tibcoObjectMessage
 		{

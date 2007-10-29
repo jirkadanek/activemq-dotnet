@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-namespace Apache.TibcoEMS
+namespace Apache.NMS.EMS
 {
-	public class Topic : Apache.TibcoEMS.Destination, Apache.NMS.ITopic
+	public class Topic : Apache.NMS.EMS.Destination, Apache.NMS.ITopic
 	{
 		public TIBCO.EMS.Topic tibcoTopic
 		{

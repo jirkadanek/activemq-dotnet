@@ -17,7 +17,7 @@
 
 using System.Collections;
 
-namespace Apache.TibcoEMS
+namespace Apache.NMS.EMS
 {
 	public class MessageProperties : Apache.NMS.IPrimitiveMap
 	{

@@ -18,7 +18,7 @@ using System;
 using System.Collections;
 using System.Threading;
 
-namespace Apache.TibcoEMS
+namespace Apache.NMS.EMS
 {
 	/// <summary>
 	/// Handles the multi-threaded dispatching between the transport and the consumers

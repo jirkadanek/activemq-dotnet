@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-namespace Apache.TibcoEMS
+namespace Apache.NMS.EMS
 {
-	public class Queue : Apache.TibcoEMS.Destination, Apache.NMS.IQueue
+	public class Queue : Apache.NMS.EMS.Destination, Apache.NMS.IQueue
 	{
 		public TIBCO.EMS.Queue tibcoQueue
 		{

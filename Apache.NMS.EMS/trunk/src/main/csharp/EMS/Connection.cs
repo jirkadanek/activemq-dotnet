@@ -16,7 +16,7 @@
  */
 using System;
 
-namespace Apache.TibcoEMS
+namespace Apache.NMS.EMS
 {
     /// <summary>
     /// Represents a NMS connection to TIBCO.

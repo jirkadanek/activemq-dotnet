@@ -17,17 +17,17 @@
 
 using System;
 
-namespace Apache.TibcoEMS
+namespace Apache.NMS.EMS
 {
 	class MessageConsumer : Apache.NMS.IMessageConsumer
 	{
-		private readonly Apache.TibcoEMS.Dispatcher dispatcher = new Apache.TibcoEMS.Dispatcher();
-		protected readonly Apache.TibcoEMS.Session nmsSession;
+		private readonly Apache.NMS.EMS.Dispatcher dispatcher = new Apache.NMS.EMS.Dispatcher();
+		protected readonly Apache.NMS.EMS.Session nmsSession;
 		public TIBCO.EMS.MessageConsumer tibcoMessageConsumer;
 		private bool closed = false;
 		private bool disposed = false;
 
-		public MessageConsumer(Apache.TibcoEMS.Session session, TIBCO.EMS.MessageConsumer consumer)
+		public MessageConsumer(Apache.NMS.EMS.Session session, TIBCO.EMS.MessageConsumer consumer)
 		{
 			this.nmsSession = session;
 			this.tibcoMessageConsumer = consumer;

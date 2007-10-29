@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-namespace Apache.TibcoEMS
+namespace Apache.NMS.EMS
 {
 	public class Destination
 	{

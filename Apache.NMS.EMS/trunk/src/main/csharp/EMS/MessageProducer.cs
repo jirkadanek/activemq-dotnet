@@ -17,16 +17,16 @@
 
 using System;
 
-namespace Apache.TibcoEMS
+namespace Apache.NMS.EMS
 {
 	class MessageProducer : Apache.NMS.IMessageProducer
 	{
-		protected readonly Apache.TibcoEMS.Session nmsSession;
+		protected readonly Apache.NMS.EMS.Session nmsSession;
 		public TIBCO.EMS.MessageProducer tibcoMessageProducer;
 		private bool closed = false;
 		private bool disposed = false;
 
-		public MessageProducer(Apache.TibcoEMS.Session session, TIBCO.EMS.MessageProducer producer)
+		public MessageProducer(Apache.NMS.EMS.Session session, TIBCO.EMS.MessageProducer producer)
 		{
 			this.nmsSession = session;
 			this.tibcoMessageProducer = producer;
@@ -44,7 +44,7 @@ namespace Apache.TibcoEMS
 		/// </summary>
 		public void Send(Apache.NMS.IMessage message)
 		{
-			Apache.TibcoEMS.Message msg = (Apache.TibcoEMS.Message) message;
+			Apache.NMS.EMS.Message msg = (Apache.NMS.EMS.Message) message;
 			long timeToLive = (long) message.NMSTimeToLive.TotalMilliseconds;
 
 			if(0 == timeToLive)
@@ -64,7 +64,7 @@ namespace Apache.TibcoEMS
 		/// </summary>
 		public void Send(Apache.NMS.IMessage message, bool persistent, byte priority, TimeSpan timeToLive)
 		{
-			Apache.TibcoEMS.Message msg = (Apache.TibcoEMS.Message) message;
+			Apache.NMS.EMS.Message msg = (Apache.NMS.EMS.Message) message;
 
 			this.tibcoMessageProducer.Send(
 						msg.tibcoMessage,
@@ -78,8 +78,8 @@ namespace Apache.TibcoEMS
 		/// </summary>
 		public void Send(Apache.NMS.IDestination destination, Apache.NMS.IMessage message)
 		{
-			Apache.TibcoEMS.Destination dest = (Apache.TibcoEMS.Destination) destination;
-			Apache.TibcoEMS.Message msg = (Apache.TibcoEMS.Message) message;
+			Apache.NMS.EMS.Destination dest = (Apache.NMS.EMS.Destination) destination;
+			Apache.NMS.EMS.Message msg = (Apache.NMS.EMS.Message) message;
 			long timeToLive = (long) message.NMSTimeToLive.TotalMilliseconds;
 
 			if(0 == timeToLive)
@@ -101,8 +101,8 @@ namespace Apache.TibcoEMS
 		public void Send(Apache.NMS.IDestination destination, Apache.NMS.IMessage message,
 						bool persistent, byte priority, TimeSpan timeToLive)
 		{
-			Apache.TibcoEMS.Destination dest = (Apache.TibcoEMS.Destination) destination;
-			Apache.TibcoEMS.Message msg = (Apache.TibcoEMS.Message) message;
+			Apache.NMS.EMS.Destination dest = (Apache.NMS.EMS.Destination) destination;
+			Apache.NMS.EMS.Message msg = (Apache.NMS.EMS.Message) message;
 
 			this.tibcoMessageProducer.Send(
 						dest.tibcoDestination,

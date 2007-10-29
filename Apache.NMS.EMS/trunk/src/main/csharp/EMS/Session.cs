@@ -16,7 +16,7 @@
  */
 using System;
 
-namespace Apache.TibcoEMS
+namespace Apache.NMS.EMS
 {
     /// <summary>
 	/// Represents a NMS session to TIBCO.
@@ -46,35 +46,35 @@ namespace Apache.TibcoEMS
 
 		public Apache.NMS.IMessageProducer CreateProducer(Apache.NMS.IDestination destination)
         {
-			Apache.TibcoEMS.Destination destinationObj = (Apache.TibcoEMS.Destination) destination;
+			Apache.NMS.EMS.Destination destinationObj = (Apache.NMS.EMS.Destination) destination;
 
 			return TibcoUtil.ToNMSMessageProducer(this, this.tibcoSession.CreateProducer(destinationObj.tibcoDestination));
         }
 
 		public Apache.NMS.IMessageConsumer CreateConsumer(Apache.NMS.IDestination destination)
         {
-			Apache.TibcoEMS.Destination destinationObj = (Apache.TibcoEMS.Destination) destination;
+			Apache.NMS.EMS.Destination destinationObj = (Apache.NMS.EMS.Destination) destination;
 
 			return TibcoUtil.ToNMSMessageConsumer(this, this.tibcoSession.CreateConsumer(destinationObj.tibcoDestination));
         }
 
 		public Apache.NMS.IMessageConsumer CreateConsumer(Apache.NMS.IDestination destination, string selector)
         {
-			Apache.TibcoEMS.Destination destinationObj = (Apache.TibcoEMS.Destination) destination;
+			Apache.NMS.EMS.Destination destinationObj = (Apache.NMS.EMS.Destination) destination;
 
 			return TibcoUtil.ToNMSMessageConsumer(this, this.tibcoSession.CreateConsumer(destinationObj.tibcoDestination, selector));
 		}
 
 		public Apache.NMS.IMessageConsumer CreateConsumer(Apache.NMS.IDestination destination, string selector, bool noLocal)
         {
-			Apache.TibcoEMS.Destination destinationObj = (Apache.TibcoEMS.Destination) destination;
+			Apache.NMS.EMS.Destination destinationObj = (Apache.NMS.EMS.Destination) destination;
 
 			return TibcoUtil.ToNMSMessageConsumer(this, this.tibcoSession.CreateConsumer(destinationObj.tibcoDestination, selector, noLocal));
         }
 
 		public Apache.NMS.IMessageConsumer CreateDurableConsumer(Apache.NMS.ITopic destination, string name, string selector, bool noLocal)
         {
-			Apache.TibcoEMS.Topic topicObj = (Apache.TibcoEMS.Topic) destination;
+			Apache.NMS.EMS.Topic topicObj = (Apache.NMS.EMS.Topic) destination;
 
 			return TibcoUtil.ToNMSMessageConsumer(this, this.tibcoSession.CreateDurableSubscriber(topicObj.tibcoTopic, name, selector, noLocal));
         }

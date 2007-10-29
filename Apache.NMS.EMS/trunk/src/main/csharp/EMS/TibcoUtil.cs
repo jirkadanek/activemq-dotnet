@@ -16,7 +16,7 @@
  */
 using System;
 
-namespace Apache.TibcoEMS
+namespace Apache.NMS.EMS
 {
 	public class TibcoUtil
 	{
@@ -29,44 +29,44 @@ namespace Apache.TibcoEMS
 		public static Apache.NMS.IConnection ToNMSConnection(TIBCO.EMS.Connection tibcoConnection)
 		{
 			return (null != tibcoConnection
-			        		? new Apache.TibcoEMS.Connection(tibcoConnection)
+			        		? new Apache.NMS.EMS.Connection(tibcoConnection)
 			        		: null);
 		}
 
 		public static Apache.NMS.ISession ToNMSSession(TIBCO.EMS.Session tibcoSession)
 		{
 			return (null != tibcoSession
-			        		? new Apache.TibcoEMS.Session(tibcoSession)
+			        		? new Apache.NMS.EMS.Session(tibcoSession)
 			        		: null);
 		}
 
-		public static Apache.NMS.IMessageProducer ToNMSMessageProducer(Apache.TibcoEMS.Session session,
+		public static Apache.NMS.IMessageProducer ToNMSMessageProducer(Apache.NMS.EMS.Session session,
 					TIBCO.EMS.MessageProducer tibcoMessageProducer)
 		{
 			return (null != tibcoMessageProducer
-			        		? new Apache.TibcoEMS.MessageProducer(session, tibcoMessageProducer)
+			        		? new Apache.NMS.EMS.MessageProducer(session, tibcoMessageProducer)
 			        		: null);
 		}
 
-		public static Apache.NMS.IMessageConsumer ToNMSMessageConsumer(Apache.TibcoEMS.Session session,
+		public static Apache.NMS.IMessageConsumer ToNMSMessageConsumer(Apache.NMS.EMS.Session session,
 					TIBCO.EMS.MessageConsumer tibcoMessageConsumer)
 		{
 			return (null != tibcoMessageConsumer
-			        		? new Apache.TibcoEMS.MessageConsumer(session, tibcoMessageConsumer)
+			        		? new Apache.NMS.EMS.MessageConsumer(session, tibcoMessageConsumer)
 			        		: null);
 		}
 
 		public static Apache.NMS.IQueue ToNMSQueue(TIBCO.EMS.Queue tibcoQueue)
 		{
 			return (null != tibcoQueue
-			        		? new Apache.TibcoEMS.Queue(tibcoQueue)
+			        		? new Apache.NMS.EMS.Queue(tibcoQueue)
 			        		: null);
 		}
 
 		public static Apache.NMS.ITopic ToNMSTopic(TIBCO.EMS.Topic tibcoTopic)
 		{
 			return (null != tibcoTopic
-			        		? new Apache.TibcoEMS.Topic(tibcoTopic)
+			        		? new Apache.NMS.EMS.Topic(tibcoTopic)
 			        		: null);
 		}
 
@@ -74,7 +74,7 @@ namespace Apache.TibcoEMS
 				TIBCO.EMS.TemporaryQueue tibcoTemporaryQueue)
 		{
 			return (null != tibcoTemporaryQueue
-			        		? new Apache.TibcoEMS.TemporaryQueue(tibcoTemporaryQueue)
+			        		? new Apache.NMS.EMS.TemporaryQueue(tibcoTemporaryQueue)
 			        		: null);
 		}
 
@@ -82,7 +82,7 @@ namespace Apache.TibcoEMS
 				TIBCO.EMS.TemporaryTopic tibcoTemporaryTopic)
 		{
 			return (null != tibcoTemporaryTopic
-			        		? new Apache.TibcoEMS.TemporaryTopic(tibcoTemporaryTopic)
+			        		? new Apache.NMS.EMS.TemporaryTopic(tibcoTemporaryTopic)
 			        		: null);
 		}
 
@@ -134,14 +134,14 @@ namespace Apache.TibcoEMS
 			}
 
 			return (null != tibcoMessage
-			        		? new Apache.TibcoEMS.Message(tibcoMessage)
+			        		? new Apache.NMS.EMS.Message(tibcoMessage)
 			        		: null);
 		}
 
 		public static Apache.NMS.ITextMessage ToNMSTextMessage(TIBCO.EMS.TextMessage tibcoTextMessage)
 		{
 			return (null != tibcoTextMessage
-			        		? new Apache.TibcoEMS.TextMessage(tibcoTextMessage)
+			        		? new Apache.NMS.EMS.TextMessage(tibcoTextMessage)
 			        		: null);
 		}
 
@@ -149,14 +149,14 @@ namespace Apache.TibcoEMS
 				TIBCO.EMS.BytesMessage tibcoBytesMessage)
 		{
 			return (null != tibcoBytesMessage
-			        		? new Apache.TibcoEMS.BytesMessage(tibcoBytesMessage)
+			        		? new Apache.NMS.EMS.BytesMessage(tibcoBytesMessage)
 			        		: null);
 		}
 
 		public static Apache.NMS.IMapMessage ToNMSMapMessage(TIBCO.EMS.MapMessage tibcoMapMessage)
 		{
 			return (null != tibcoMapMessage
-			        		? new Apache.TibcoEMS.MapMessage(tibcoMapMessage)
+			        		? new Apache.NMS.EMS.MapMessage(tibcoMapMessage)
 			        		: null);
 		}
 
@@ -164,7 +164,7 @@ namespace Apache.TibcoEMS
 				TIBCO.EMS.ObjectMessage tibcoObjectMessage)
 		{
 			return (null != tibcoObjectMessage
-			        		? new Apache.TibcoEMS.ObjectMessage(tibcoObjectMessage)
+			        		? new Apache.NMS.EMS.ObjectMessage(tibcoObjectMessage)
 			        		: null);
 		}
 
@@ -232,7 +232,7 @@ namespace Apache.TibcoEMS
 		public static Apache.NMS.IPrimitiveMap ToMessageProperties(TIBCO.EMS.Message tibcoMessage)
 		{
 			return (null != tibcoMessage
-			        		? new Apache.TibcoEMS.MessageProperties(tibcoMessage)
+			        		? new Apache.NMS.EMS.MessageProperties(tibcoMessage)
 			        		: null);
 		}
 

@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-namespace Apache.TibcoEMS
+namespace Apache.NMS.EMS
 {
-	class BytesMessage : Apache.TibcoEMS.Message, Apache.NMS.IBytesMessage
+	class BytesMessage : Apache.NMS.EMS.Message, Apache.NMS.IBytesMessage
 	{
 		public TIBCO.EMS.BytesMessage tibcoBytesMessage
 		{

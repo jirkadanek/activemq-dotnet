@@ -16,7 +16,7 @@
  */
 using System;
 
-namespace Apache.TibcoEMS
+namespace Apache.NMS.EMS
 {
 	class Message : Apache.NMS.IMessage
 	{
@@ -137,7 +137,7 @@ namespace Apache.TibcoEMS
 		public Apache.NMS.IDestination NMSReplyTo
 		{
 			get { return TibcoUtil.ToNMSDestination(this.tibcoMessage.ReplyTo); }
-			set { this.tibcoMessage.ReplyTo = ((Apache.TibcoEMS.Destination) value).tibcoDestination; }
+			set { this.tibcoMessage.ReplyTo = ((Apache.NMS.EMS.Destination) value).tibcoDestination; }
 		}
 
 		/// <summary>

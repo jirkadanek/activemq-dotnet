@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-namespace Apache.TibcoEMS
+namespace Apache.NMS.EMS
 {
-	class TemporaryTopic : Apache.TibcoEMS.Destination, Apache.NMS.ITemporaryTopic
+	class TemporaryTopic : Apache.NMS.EMS.Destination, Apache.NMS.ITemporaryTopic
 	{
 		public TIBCO.EMS.TemporaryTopic tibcoTemporaryTopic
 		{
