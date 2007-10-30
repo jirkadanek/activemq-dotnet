@@ -40,27 +40,27 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="src\main\csharp\EMS\BytesMessage.cs" />
-    <Compile Include="src\main\csharp\EMS\CommonAssemblyInfo.cs" />
-    <Compile Include="src\main\csharp\EMS\Connection.cs" />
-    <Compile Include="src\main\csharp\EMS\ConnectionFactory.cs" />
-    <Compile Include="src\main\csharp\EMS\Destination.cs" />
-    <Compile Include="src\main\csharp\EMS\Dispatcher.cs" />
-    <Compile Include="src\main\csharp\EMS\MapMessage.cs" />
-    <Compile Include="src\main\csharp\EMS\Message.cs" />
-    <Compile Include="src\main\csharp\EMS\MessageConsumer.cs" />
-    <Compile Include="src\main\csharp\EMS\MessageProducer.cs" />
-    <Compile Include="src\main\csharp\EMS\MessageProperties.cs" />
-    <Compile Include="src\main\csharp\EMS\ObjectMessage.cs" />
-    <Compile Include="src\main\csharp\EMS\Queue.cs" />
-    <Compile Include="src\main\csharp\EMS\Session.cs" />
-    <Compile Include="src\main\csharp\EMS\TemporaryQueue.cs">
+    <Compile Include="src\main\csharp\BytesMessage.cs" />
+    <Compile Include="src\main\csharp\CommonAssemblyInfo.cs" />
+    <Compile Include="src\main\csharp\Connection.cs" />
+    <Compile Include="src\main\csharp\ConnectionFactory.cs" />
+    <Compile Include="src\main\csharp\Destination.cs" />
+    <Compile Include="src\main\csharp\Dispatcher.cs" />
+    <Compile Include="src\main\csharp\MapMessage.cs" />
+    <Compile Include="src\main\csharp\Message.cs" />
+    <Compile Include="src\main\csharp\MessageConsumer.cs" />
+    <Compile Include="src\main\csharp\MessageProducer.cs" />
+    <Compile Include="src\main\csharp\MessageProperties.cs" />
+    <Compile Include="src\main\csharp\ObjectMessage.cs" />
+    <Compile Include="src\main\csharp\Queue.cs" />
+    <Compile Include="src\main\csharp\Session.cs" />
+    <Compile Include="src\main\csharp\TemporaryQueue.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="src\main\csharp\EMS\TemporaryTopic.cs" />
-    <Compile Include="src\main\csharp\EMS\TextMessage.cs" />
-    <Compile Include="src\main\csharp\EMS\TibcoUtil.cs" />
-    <Compile Include="src\main\csharp\EMS\Topic.cs" />
+    <Compile Include="src\main\csharp\TemporaryTopic.cs" />
+    <Compile Include="src\main\csharp\TextMessage.cs" />
+    <Compile Include="src\main\csharp\TibcoUtil.cs" />
+    <Compile Include="src\main\csharp\Topic.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="activemq-dotnet.snk" />
