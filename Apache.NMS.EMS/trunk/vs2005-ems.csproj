@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="activemq-dotnet.snk" />
+    <EmbeddedResource Include="Apache.NMS.NMSFactory.ems" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="vendor\Apache.NMS\vs2005-nms.csproj">
