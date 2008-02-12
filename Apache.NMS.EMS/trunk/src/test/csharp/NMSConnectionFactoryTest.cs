@@ -28,7 +28,7 @@ namespace Apache.NMS.ActiveMQ
         [Test]
         public void TestEmsURI()
         {
-            NMSConnectionFactory factory = new NMSConnectionFactory("ems:tcp://localhost:61616");
+            NMSConnectionFactory factory = new NMSConnectionFactory("ems:tcp://localhost:7222");
             Assert.IsNotNull(factory);
             Assert.IsNotNull(factory.ConnectionFactory);
             Assert.IsTrue(factory.ConnectionFactory is Apache.NMS.EMS.ConnectionFactory);

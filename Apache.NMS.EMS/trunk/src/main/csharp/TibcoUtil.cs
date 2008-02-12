@@ -178,12 +178,8 @@ namespace Apache.NMS.EMS
 				sessionMode = TIBCO.EMS.SessionMode.AutoAcknowledge;
 				break;
 
-			case Apache.NMS.AcknowledgementMode.AutoClientAcknowledge:
-				sessionMode = TIBCO.EMS.SessionMode.ClientAcknowledge;
-				break;
-
 			case Apache.NMS.AcknowledgementMode.ClientAcknowledge:
-				sessionMode = TIBCO.EMS.SessionMode.ExplicitClientAcknowledge;
+				sessionMode = TIBCO.EMS.SessionMode.ClientAcknowledge;
 				break;
 
 			case Apache.NMS.AcknowledgementMode.DupsOkAcknowledge:
@@ -210,10 +206,6 @@ namespace Apache.NMS.EMS
 				break;
 
 			case TIBCO.EMS.SessionMode.ClientAcknowledge:
-				acknowledge = Apache.NMS.AcknowledgementMode.AutoClientAcknowledge;
-				break;
-
-			case TIBCO.EMS.SessionMode.ExplicitClientAcknowledge:
 				acknowledge = Apache.NMS.AcknowledgementMode.ClientAcknowledge;
 				break;
 
