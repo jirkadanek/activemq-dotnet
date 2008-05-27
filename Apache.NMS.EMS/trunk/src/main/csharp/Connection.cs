@@ -26,7 +26,8 @@ namespace Apache.NMS.EMS
     {
     	private Apache.NMS.AcknowledgementMode acknowledgementMode;
     	public readonly TIBCO.EMS.Connection tibcoConnection;
-    	private bool closed = false;
+		private readonly AtomicBoolean started = new AtomicBoolean(false);
+		private bool closed = false;
     	private bool disposed = false;
 
 		public Connection(TIBCO.EMS.Connection cnx)
@@ -47,7 +48,15 @@ namespace Apache.NMS.EMS
         /// </summary>
         public void Start()
         {
-			this.tibcoConnection.Start();
+			if(started.CompareAndSet(false, true))
+			{
+				this.tibcoConnection.Start();
+			}
+		}
+
+		public bool IsStarted
+		{
+			get { return this.started.Value; }
 		}
 
 		#endregion
@@ -59,7 +68,10 @@ namespace Apache.NMS.EMS
         /// </summary>
         public void Stop()
         {
-            this.tibcoConnection.Stop();
+			if(started.CompareAndSet(true, false))
+			{
+	            this.tibcoConnection.Stop();
+			}
 		}
 
 		#endregion

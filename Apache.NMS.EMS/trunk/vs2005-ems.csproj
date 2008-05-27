@@ -36,6 +36,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="src\main\csharp\AtomicBoolean.cs" />
     <Compile Include="src\main\csharp\BytesMessage.cs" />
     <Compile Include="src\main\csharp\CommonAssemblyInfo.cs" />
     <Compile Include="src\main\csharp\Connection.cs" />
