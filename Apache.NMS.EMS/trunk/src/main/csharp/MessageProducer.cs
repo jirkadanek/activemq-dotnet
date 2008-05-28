@@ -68,7 +68,7 @@ namespace Apache.NMS.EMS
 
 			this.tibcoMessageProducer.Send(
 						msg.tibcoMessage,
-						TibcoUtil.ToMessageDeliveryMode(persistent),
+						EMSConvert.ToMessageDeliveryMode(persistent),
 						priority,
 						(long) timeToLive.TotalMilliseconds);
 		}
@@ -107,15 +107,15 @@ namespace Apache.NMS.EMS
 			this.tibcoMessageProducer.Send(
 						dest.tibcoDestination,
 						msg.tibcoMessage,
-						TibcoUtil.ToMessageDeliveryMode(persistent),
+						EMSConvert.ToMessageDeliveryMode(persistent),
 						priority,
 						(long) timeToLive.TotalMilliseconds);
 		}
 
 		public bool Persistent
 		{
-			get { return TibcoUtil.ToPersistent(this.tibcoMessageProducer.MsgDeliveryMode); }
-			set { this.tibcoMessageProducer.MsgDeliveryMode = TibcoUtil.ToMessageDeliveryMode(value); }
+			get { return EMSConvert.ToPersistent(this.tibcoMessageProducer.MsgDeliveryMode); }
+			set { this.tibcoMessageProducer.MsgDeliveryMode = EMSConvert.ToMessageDeliveryMode(value); }
 		}
 
 		public TimeSpan TimeToLive

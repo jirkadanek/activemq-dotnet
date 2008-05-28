@@ -14,7 +14,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>build\net-2.0\debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;NET,NET_2_0</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -22,7 +22,7 @@
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>build\net-2.0\release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;NET,NET_2_0</DefineConstants>
     <ErrorReport>none</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -36,13 +36,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="src\main\csharp\AtomicBoolean.cs" />
     <Compile Include="src\main\csharp\BytesMessage.cs" />
     <Compile Include="src\main\csharp\CommonAssemblyInfo.cs" />
     <Compile Include="src\main\csharp\Connection.cs" />
     <Compile Include="src\main\csharp\ConnectionFactory.cs" />
     <Compile Include="src\main\csharp\Destination.cs" />
     <Compile Include="src\main\csharp\Dispatcher.cs" />
+    <Compile Include="src\main\csharp\EMSConvert.cs" />
     <Compile Include="src\main\csharp\MapMessage.cs" />
     <Compile Include="src\main\csharp\Message.cs" />
     <Compile Include="src\main\csharp\MessageConsumer.cs" />
@@ -56,7 +56,6 @@
     </Compile>
     <Compile Include="src\main\csharp\TemporaryTopic.cs" />
     <Compile Include="src\main\csharp\TextMessage.cs" />
-    <Compile Include="src\main\csharp\TibcoUtil.cs" />
     <Compile Include="src\main\csharp\Topic.cs" />
   </ItemGroup>
   <ItemGroup>

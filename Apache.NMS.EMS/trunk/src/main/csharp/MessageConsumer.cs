@@ -145,7 +145,7 @@ namespace Apache.NMS.EMS
 
 		private void HandleTibcoMsg(object sender, TIBCO.EMS.EMSMessageEventArgs arg)
 		{
-			Apache.NMS.IMessage message = TibcoUtil.ToNMSMessage(arg.Message);
+			Apache.NMS.IMessage message = EMSConvert.ToNMSMessage(arg.Message);
 
 			if(null != message)
 			{

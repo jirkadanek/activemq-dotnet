@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 using System;
+using Apache.NMS.Util;
 
 namespace Apache.NMS.EMS
 {
@@ -92,8 +93,8 @@ namespace Apache.NMS.EMS
 		public Apache.NMS.ISession CreateSession(Apache.NMS.AcknowledgementMode mode)
         {
 			bool isTransacted = (Apache.NMS.AcknowledgementMode.Transactional == mode);
-			return TibcoUtil.ToNMSSession(this.tibcoConnection.CreateSession(isTransacted,
-			                                                  TibcoUtil.ToSessionMode(mode)));
+			return EMSConvert.ToNMSSession(this.tibcoConnection.CreateSession(isTransacted,
+			                                                  EMSConvert.ToSessionMode(mode)));
 		}
 
 		public void Close()

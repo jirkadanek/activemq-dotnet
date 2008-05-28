@@ -98,7 +98,7 @@ namespace Apache.NMS.EMS
 		/// </summary>
 		public Apache.NMS.IConnection CreateConnection()
         {
-			return TibcoUtil.ToNMSConnection(this.tibcoConnectionFactory.CreateConnection());
+			return EMSConvert.ToNMSConnection(this.tibcoConnectionFactory.CreateConnection());
         }
 
 		/// <summary>
@@ -106,7 +106,7 @@ namespace Apache.NMS.EMS
 		/// </summary>
 		public Apache.NMS.IConnection CreateConnection(string userName, string password)
         {
-			return TibcoUtil.ToNMSConnection(this.tibcoConnectionFactory.CreateConnection(userName, password));
+			return EMSConvert.ToNMSConnection(this.tibcoConnectionFactory.CreateConnection(userName, password));
 		}
 
 		#endregion

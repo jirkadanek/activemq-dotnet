@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 using System;
+using Apache.NMS.Util;
 
 namespace Apache.NMS.EMS
 {
@@ -43,7 +44,7 @@ namespace Apache.NMS.EMS
 		/// </summary>
 		public Apache.NMS.IPrimitiveMap Properties
 		{
-			get { return TibcoUtil.ToMessageProperties(this.tibcoMessage); }
+			get { return EMSConvert.ToMessageProperties(this.tibcoMessage); }
 		}
 
 		/// <summary>
@@ -60,7 +61,7 @@ namespace Apache.NMS.EMS
 		/// </summary>
 		public Apache.NMS.IDestination NMSDestination
 		{
-			get { return TibcoUtil.ToNMSDestination(this.tibcoMessage.Destination); }
+			get { return EMSConvert.ToNMSDestination(this.tibcoMessage.Destination); }
 		}
 
 		protected TimeSpan timeToLive;
@@ -110,8 +111,8 @@ namespace Apache.NMS.EMS
 		/// </summary>
 		public bool NMSPersistent
 		{
-			get { return TibcoUtil.ToPersistent(this.tibcoMessage.MsgDeliveryMode); }
-			set { this.tibcoMessage.MsgDeliveryMode = TibcoUtil.ToMessageDeliveryMode(value); }
+			get { return EMSConvert.ToPersistent(this.tibcoMessage.MsgDeliveryMode); }
+			set { this.tibcoMessage.MsgDeliveryMode = EMSConvert.ToMessageDeliveryMode(value); }
 		}
 
 		/// <summary>
@@ -136,7 +137,7 @@ namespace Apache.NMS.EMS
 		/// </summary>
 		public Apache.NMS.IDestination NMSReplyTo
 		{
-			get { return TibcoUtil.ToNMSDestination(this.tibcoMessage.ReplyTo); }
+			get { return EMSConvert.ToNMSDestination(this.tibcoMessage.ReplyTo); }
 			set { this.tibcoMessage.ReplyTo = ((Apache.NMS.EMS.Destination) value).tibcoDestination; }
 		}
 
@@ -146,7 +147,7 @@ namespace Apache.NMS.EMS
 		/// </summary>
 		public DateTime NMSTimestamp
 		{
-			get { return TibcoUtil.ToDateTime(this.tibcoMessage.Timestamp); }
+			get { return DateUtils.ToDateTime(this.tibcoMessage.Timestamp); }
 		}
 
 		/// <summary>
