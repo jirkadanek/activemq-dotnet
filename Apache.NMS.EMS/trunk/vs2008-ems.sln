@@ -1,13 +1,13 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual Studio 2005
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vs2005-ems", "vs2005-ems.csproj", "{2AF5EBB5-9873-4B35-A8FC-8B6E74242767}"
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vs2008-ems", "vs2008-ems.csproj", "{2AF5EBB5-9873-4B35-A8FC-8B6E74242767}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vs2005-nms", "vendor\Apache.NMS\vs2005-nms.csproj", "{300C1716-0674-4D01-8F5D-151E59A504FE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vs2008-nms", "vendor\Apache.NMS\vs2008-nms.csproj", "{300C1716-0674-4D01-8F5D-151E59A504FE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vs2005-nms-test", "vendor\Apache.NMS\vs2005-nms-test.csproj", "{2F3ABCF5-EE87-43B1-9DE7-0548FD6A4E52}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vs2008-nms-test", "vendor\Apache.NMS\vs2008-nms-test.csproj", "{2F3ABCF5-EE87-43B1-9DE7-0548FD6A4E52}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vs2005-ems-test", "vs2005-ems-test.csproj", "{EB943C69-2C9B-45E7-B95B-FB916E7057ED}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vs2008-ems-test", "vs2008-ems-test.csproj", "{EB943C69-2C9B-45E7-B95B-FB916E7057ED}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
