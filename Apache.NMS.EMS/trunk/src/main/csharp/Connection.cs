@@ -97,6 +97,12 @@ namespace Apache.NMS.EMS
 			                                                  EMSConvert.ToSessionMode(mode)));
 		}
 
+		public Apache.NMS.ISession CreateSession(Apache.NMS.AcknowledgementMode mode, TimeSpan requestTimeout)
+		{
+			// Ignore: requestTimeout
+			return CreateSession(mode);
+		}
+
 		public void Close()
 		{
 			lock(this)
