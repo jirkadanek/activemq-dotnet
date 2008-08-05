@@ -109,6 +109,11 @@ namespace Apache.NMS.EMS
 			return CreateDurableConsumer(destination, name, selector, noLocal);
 		}
 
+		public void DeleteDurableConsumer(string name)
+		{
+			this.tibcoSession.Unsubscribe(name);
+		}
+
 		public Apache.NMS.IQueue GetQueue(string name)
         {
 			return EMSConvert.ToNMSQueue(this.tibcoSession.CreateQueue(name));
