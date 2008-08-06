@@ -54,6 +54,11 @@ namespace Apache.NMS.EMS.Test
 	}
 
 	[TestFixture]
+	public class MessageTest : Apache.NMS.Test.MessageTest
+	{
+	}
+
+	[TestFixture]
 	public class NMSPropertyTest : Apache.NMS.Test.NMSPropertyTest
 	{
 	}
