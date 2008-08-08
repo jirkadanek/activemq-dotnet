@@ -64,11 +64,6 @@ namespace Apache.NMS.EMS.Test
 	}
 
 	[TestFixture]
-	public class TemporaryQueueTest : Apache.NMS.Test.TemporaryQueueTest
-	{
-	}
-
-	[TestFixture]
 	public class TextMessageTest : Apache.NMS.Test.TextMessageTest
 	{
 	}
