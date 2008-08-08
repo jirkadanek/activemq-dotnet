@@ -69,7 +69,7 @@ namespace Apache.NMS.EMS.Test
 	}
 
 	[TestFixture]
-	public class TextMessage : Apache.NMS.Test.TextMessage
+	public class TextMessageTest : Apache.NMS.Test.TextMessageTest
 	{
 	}
 

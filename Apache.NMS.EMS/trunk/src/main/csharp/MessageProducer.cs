@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Threading;
 
 namespace Apache.NMS.EMS
 {
@@ -122,6 +123,12 @@ namespace Apache.NMS.EMS
 		{
 			get { return TimeSpan.FromMilliseconds(this.tibcoMessageProducer.TimeToLive); }
 			set { this.tibcoMessageProducer.TimeToLive = (long) value.TotalMilliseconds; }
+		}
+
+		public TimeSpan RequestTimeout
+		{
+			get { return TimeSpan.FromMilliseconds(Timeout.Infinite); }
+			set {  }
 		}
 
 		public byte Priority
