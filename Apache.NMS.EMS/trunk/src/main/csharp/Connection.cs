@@ -97,12 +97,6 @@ namespace Apache.NMS.EMS
 			                                                  EMSConvert.ToSessionMode(mode)));
 		}
 
-		public Apache.NMS.ISession CreateSession(Apache.NMS.AcknowledgementMode mode, TimeSpan requestTimeout)
-		{
-			// Ignore: requestTimeout
-			return CreateSession(mode);
-		}
-
 		public void Close()
 		{
 			lock(this)
@@ -153,6 +147,19 @@ namespace Apache.NMS.EMS
 			disposed = true;
 		}
 
+		#endregion
+
+		#region Attributes
+
+		/// <summary>
+		/// The default timeout for network requests.
+		/// </summary>
+		public TimeSpan RequestTimeout
+		{
+			get { return Apache.NMS.NMSConstants.defaultRequestTimeout; }
+			set { }
+		}
+
 		public Apache.NMS.AcknowledgementMode AcknowledgementMode
         {
             get { return acknowledgementMode; }
@@ -165,9 +172,9 @@ namespace Apache.NMS.EMS
             set { this.tibcoConnection.ClientID = value; }
         }
 
-		public event Apache.NMS.ExceptionListener ExceptionListener;
-
 		#endregion
+
+		public event Apache.NMS.ExceptionListener ExceptionListener;
 
 		private void HandleTibcoException(object sender, TIBCO.EMS.EMSExceptionEventArgs arg)
 		{

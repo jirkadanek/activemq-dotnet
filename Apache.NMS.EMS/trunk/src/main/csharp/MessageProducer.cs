@@ -125,10 +125,13 @@ namespace Apache.NMS.EMS
 			set { this.tibcoMessageProducer.TimeToLive = (long) value.TotalMilliseconds; }
 		}
 
+		/// <summary>
+		/// The default timeout for network requests.
+		/// </summary>
 		public TimeSpan RequestTimeout
 		{
-			get { return TimeSpan.FromMilliseconds(Timeout.Infinite); }
-			set {  }
+			get { return Apache.NMS.NMSConstants.defaultRequestTimeout; }
+			set { }
 		}
 
 		public byte Priority

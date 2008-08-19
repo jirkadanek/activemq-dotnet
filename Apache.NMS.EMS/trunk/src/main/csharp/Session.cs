@@ -51,12 +51,6 @@ namespace Apache.NMS.EMS
 			return EMSConvert.ToNMSMessageProducer(this, this.tibcoSession.CreateProducer(destinationObj.tibcoDestination));
         }
 
-		public Apache.NMS.IMessageProducer CreateProducer(Apache.NMS.IDestination destination, TimeSpan requestTimeout)
-		{
-			// Ignore: requestTimeout
-			return CreateProducer(destination);
-		}
-
 		public Apache.NMS.IMessageConsumer CreateConsumer(Apache.NMS.IDestination destination)
         {
 			Apache.NMS.EMS.Destination destinationObj = (Apache.NMS.EMS.Destination) destination;
@@ -64,23 +58,11 @@ namespace Apache.NMS.EMS
 			return EMSConvert.ToNMSMessageConsumer(this, this.tibcoSession.CreateConsumer(destinationObj.tibcoDestination));
         }
 
-		public Apache.NMS.IMessageConsumer CreateConsumer(Apache.NMS.IDestination destination, TimeSpan requestTimeout)
-		{
-			// Ignore: requestTimeout
-			return CreateConsumer(destination);
-		}
-
 		public Apache.NMS.IMessageConsumer CreateConsumer(Apache.NMS.IDestination destination, string selector)
         {
 			Apache.NMS.EMS.Destination destinationObj = (Apache.NMS.EMS.Destination) destination;
 
 			return EMSConvert.ToNMSMessageConsumer(this, this.tibcoSession.CreateConsumer(destinationObj.tibcoDestination, selector));
-		}
-
-		public Apache.NMS.IMessageConsumer CreateConsumer(Apache.NMS.IDestination destination, string selector, TimeSpan requestTimeout)
-		{
-			// Ignore: requestTimeout
-			return CreateConsumer(destination, selector);
 		}
 
 		public Apache.NMS.IMessageConsumer CreateConsumer(Apache.NMS.IDestination destination, string selector, bool noLocal)
@@ -90,12 +72,6 @@ namespace Apache.NMS.EMS
 			return EMSConvert.ToNMSMessageConsumer(this, this.tibcoSession.CreateConsumer(destinationObj.tibcoDestination, selector, noLocal));
         }
 
-		public Apache.NMS.IMessageConsumer CreateConsumer(Apache.NMS.IDestination destination, string selector, bool noLocal, TimeSpan requestTimeout)
-		{
-			// Ignore: requestTimeout
-			return CreateConsumer(destination, selector, noLocal);
-		}
-
 		public Apache.NMS.IMessageConsumer CreateDurableConsumer(Apache.NMS.ITopic destination, string name, string selector, bool noLocal)
         {
 			Apache.NMS.EMS.Topic topicObj = (Apache.NMS.EMS.Topic) destination;
@@ -103,21 +79,9 @@ namespace Apache.NMS.EMS
 			return EMSConvert.ToNMSMessageConsumer(this, this.tibcoSession.CreateDurableSubscriber(topicObj.tibcoTopic, name, selector, noLocal));
         }
 
-		public Apache.NMS.IMessageConsumer CreateDurableConsumer(Apache.NMS.ITopic destination, string name, string selector, bool noLocal, TimeSpan requestTimeout)
-		{
-			// Ignore: requestTimeout
-			return CreateDurableConsumer(destination, name, selector, noLocal);
-		}
-
 		public void DeleteDurableConsumer(string name)
 		{
 			this.tibcoSession.Unsubscribe(name);
-		}
-
-		public void DeleteDurableConsumer(string name, TimeSpan requestTimeout)
-		{
-			// Ignore: requestTimeout
-			DeleteDurableConsumer(name);
 		}
 
 		public Apache.NMS.IQueue GetQueue(string name)
@@ -193,8 +157,17 @@ namespace Apache.NMS.EMS
         }
         
         // Properties
-        
-        public bool Transacted
+
+		/// <summary>
+		/// The default timeout for network requests.
+		/// </summary>
+		public TimeSpan RequestTimeout
+		{
+			get { return Apache.NMS.NMSConstants.defaultRequestTimeout; }
+			set { }
+		}
+		
+		public bool Transacted
         {
             get { return this.tibcoSession.Transacted; }
         }
