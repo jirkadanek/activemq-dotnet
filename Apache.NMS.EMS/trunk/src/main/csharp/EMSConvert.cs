@@ -14,7 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using System;
+using System.Collections;
 
 namespace Apache.NMS.EMS
 {
@@ -23,61 +25,61 @@ namespace Apache.NMS.EMS
 		public static Apache.NMS.IConnection ToNMSConnection(TIBCO.EMS.Connection tibcoConnection)
 		{
 			return (null != tibcoConnection
-			        		? new Apache.NMS.EMS.Connection(tibcoConnection)
-			        		: null);
+							? new Apache.NMS.EMS.Connection(tibcoConnection)
+							: null);
 		}
 
 		public static Apache.NMS.ISession ToNMSSession(TIBCO.EMS.Session tibcoSession)
 		{
 			return (null != tibcoSession
-			        		? new Apache.NMS.EMS.Session(tibcoSession)
-			        		: null);
+							? new Apache.NMS.EMS.Session(tibcoSession)
+							: null);
 		}
 
 		public static Apache.NMS.IMessageProducer ToNMSMessageProducer(Apache.NMS.EMS.Session session,
 					TIBCO.EMS.MessageProducer tibcoMessageProducer)
 		{
 			return (null != tibcoMessageProducer
-			        		? new Apache.NMS.EMS.MessageProducer(session, tibcoMessageProducer)
-			        		: null);
+							? new Apache.NMS.EMS.MessageProducer(session, tibcoMessageProducer)
+							: null);
 		}
 
 		public static Apache.NMS.IMessageConsumer ToNMSMessageConsumer(Apache.NMS.EMS.Session session,
 					TIBCO.EMS.MessageConsumer tibcoMessageConsumer)
 		{
 			return (null != tibcoMessageConsumer
-			        		? new Apache.NMS.EMS.MessageConsumer(session, tibcoMessageConsumer)
-			        		: null);
+							? new Apache.NMS.EMS.MessageConsumer(session, tibcoMessageConsumer)
+							: null);
 		}
 
 		public static Apache.NMS.IQueue ToNMSQueue(TIBCO.EMS.Queue tibcoQueue)
 		{
 			return (null != tibcoQueue
-			        		? new Apache.NMS.EMS.Queue(tibcoQueue)
-			        		: null);
+							? new Apache.NMS.EMS.Queue(tibcoQueue)
+							: null);
 		}
 
 		public static Apache.NMS.ITopic ToNMSTopic(TIBCO.EMS.Topic tibcoTopic)
 		{
 			return (null != tibcoTopic
-			        		? new Apache.NMS.EMS.Topic(tibcoTopic)
-			        		: null);
+							? new Apache.NMS.EMS.Topic(tibcoTopic)
+							: null);
 		}
 
 		public static Apache.NMS.ITemporaryQueue ToNMSTemporaryQueue(
 				TIBCO.EMS.TemporaryQueue tibcoTemporaryQueue)
 		{
 			return (null != tibcoTemporaryQueue
-			        		? new Apache.NMS.EMS.TemporaryQueue(tibcoTemporaryQueue)
-			        		: null);
+							? new Apache.NMS.EMS.TemporaryQueue(tibcoTemporaryQueue)
+							: null);
 		}
 
 		public static Apache.NMS.ITemporaryTopic ToNMSTemporaryTopic(
 				TIBCO.EMS.TemporaryTopic tibcoTemporaryTopic)
 		{
 			return (null != tibcoTemporaryTopic
-			        		? new Apache.NMS.EMS.TemporaryTopic(tibcoTemporaryTopic)
-			        		: null);
+							? new Apache.NMS.EMS.TemporaryTopic(tibcoTemporaryTopic)
+							: null);
 		}
 
 		public static Apache.NMS.IDestination ToNMSDestination(TIBCO.EMS.Destination tibcoDestination)
@@ -128,38 +130,38 @@ namespace Apache.NMS.EMS
 			}
 
 			return (null != tibcoMessage
-			        		? new Apache.NMS.EMS.Message(tibcoMessage)
-			        		: null);
+							? new Apache.NMS.EMS.Message(tibcoMessage)
+							: null);
 		}
 
 		public static Apache.NMS.ITextMessage ToNMSTextMessage(TIBCO.EMS.TextMessage tibcoTextMessage)
 		{
 			return (null != tibcoTextMessage
-			        		? new Apache.NMS.EMS.TextMessage(tibcoTextMessage)
-			        		: null);
+							? new Apache.NMS.EMS.TextMessage(tibcoTextMessage)
+							: null);
 		}
 
 		public static Apache.NMS.IBytesMessage ToNMSBytesMessage(
 				TIBCO.EMS.BytesMessage tibcoBytesMessage)
 		{
 			return (null != tibcoBytesMessage
-			        		? new Apache.NMS.EMS.BytesMessage(tibcoBytesMessage)
-			        		: null);
+							? new Apache.NMS.EMS.BytesMessage(tibcoBytesMessage)
+							: null);
 		}
 
 		public static Apache.NMS.IMapMessage ToNMSMapMessage(TIBCO.EMS.MapMessage tibcoMapMessage)
 		{
 			return (null != tibcoMapMessage
-			        		? new Apache.NMS.EMS.MapMessage(tibcoMapMessage)
-			        		: null);
+							? new Apache.NMS.EMS.MapMessage(tibcoMapMessage)
+							: null);
 		}
 
 		public static Apache.NMS.IObjectMessage ToNMSObjectMessage(
 				TIBCO.EMS.ObjectMessage tibcoObjectMessage)
 		{
 			return (null != tibcoObjectMessage
-			        		? new Apache.NMS.EMS.ObjectMessage(tibcoObjectMessage)
-			        		: null);
+							? new Apache.NMS.EMS.ObjectMessage(tibcoObjectMessage)
+							: null);
 		}
 
 		public static TIBCO.EMS.SessionMode ToSessionMode(Apache.NMS.AcknowledgementMode acknowledge)
@@ -218,8 +220,8 @@ namespace Apache.NMS.EMS
 		public static Apache.NMS.IPrimitiveMap ToMessageProperties(TIBCO.EMS.Message tibcoMessage)
 		{
 			return (null != tibcoMessage
-			        		? new Apache.NMS.EMS.MessageProperties(tibcoMessage)
-			        		: null);
+							? new Apache.NMS.EMS.MessageProperties(tibcoMessage)
+							: null);
 		}
 
 		public static TIBCO.EMS.MessageDeliveryMode ToMessageDeliveryMode(bool persistent)
@@ -233,5 +235,29 @@ namespace Apache.NMS.EMS
 		{
 			return (TIBCO.EMS.MessageDeliveryMode.NonPersistent != deliveryMode);
 		}
+
+
+		#region Enumerable adapter
+
+		private class EnumerableAdapter : IEnumerable
+		{
+			private readonly IEnumerator enumerator;
+			public EnumerableAdapter(IEnumerator _enumerator)
+			{
+				this.enumerator = _enumerator;
+			}
+
+			public IEnumerator GetEnumerator()
+			{
+				return this.enumerator;
+			}
+		}
+
+		public static IEnumerable ToEnumerable(IEnumerator enumerator)
+		{
+			return new EnumerableAdapter(enumerator);
+		}
+
+		#endregion
 	}
 }

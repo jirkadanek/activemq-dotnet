@@ -138,7 +138,17 @@ namespace Apache.NMS.EMS
 		public Apache.NMS.IDestination NMSReplyTo
 		{
 			get { return EMSConvert.ToNMSDestination(this.tibcoMessage.ReplyTo); }
-			set { this.tibcoMessage.ReplyTo = ((Apache.NMS.EMS.Destination) value).tibcoDestination; }
+			set
+			{
+				if(null == value)
+				{
+					this.tibcoMessage.ReplyTo = null;
+				}
+				else
+				{
+					this.tibcoMessage.ReplyTo = ((Apache.NMS.EMS.Destination) value).tibcoDestination;
+				}
+			}
 		}
 
 		/// <summary>

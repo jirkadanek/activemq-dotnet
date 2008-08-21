@@ -42,20 +42,6 @@ namespace Apache.NMS.EMS
 
 		#endregion
 
-		private class MapEnumerable : IEnumerable
-		{
-			private readonly TIBCO.EMS.MapMessage tibcoMapMessage;
-			public MapEnumerable(TIBCO.EMS.MapMessage message)
-			{
-				this.tibcoMapMessage = message;
-			}
-
-			public IEnumerator GetEnumerator()
-			{
-				return tibcoMapMessage.MapNames;
-			}
-		}
-
 		#region IPrimitiveMap Members
 
 		public void Clear()
@@ -79,11 +65,14 @@ namespace Apache.NMS.EMS
 			get
 			{
 				int count = 0;
-				MapEnumerable mapItems = new MapEnumerable(this.tibcoMapMessage);
+				IEnumerator namesEnumerator = this.tibcoMapMessage.MapNames;
 
-				foreach(object item in mapItems)
+				if(null != namesEnumerator)
 				{
-					count++;
+					while(namesEnumerator.MoveNext())
+					{
+						count++;
+					}
 				}
 
 				return count;
@@ -95,9 +84,8 @@ namespace Apache.NMS.EMS
 			get
 			{
 				ArrayList keys = new ArrayList();
-				MapEnumerable mapItems = new MapEnumerable(this.tibcoMapMessage);
 
-				foreach(string itemName in mapItems)
+				foreach(string itemName in EMSConvert.ToEnumerable(this.tibcoMapMessage.MapNames))
 				{
 					keys.Add(itemName);
 				}
@@ -111,9 +99,8 @@ namespace Apache.NMS.EMS
 			get
 			{
 				ArrayList keys = new ArrayList();
-				MapEnumerable mapItems = new MapEnumerable(this.tibcoMapMessage);
 
-				foreach(string itemName in mapItems)
+				foreach(string itemName in EMSConvert.ToEnumerable(this.tibcoMapMessage.MapNames))
 				{
 					keys.Add(this.tibcoMapMessage.GetObject(itemName));
 				}

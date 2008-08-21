@@ -28,20 +28,6 @@ namespace Apache.NMS.EMS
 			this.tibcoMessage = message;
 		}
 
-		private class PropertyNameEnumerable : IEnumerable
-		{
-			private readonly TIBCO.EMS.Message tibcoMessage;
-			public PropertyNameEnumerable(TIBCO.EMS.Message message)
-			{
-				this.tibcoMessage = message;
-			}
-
-			public IEnumerator GetEnumerator()
-			{
-				return tibcoMessage.PropertyNames;
-			}
-		}
-
 		#region IPrimitiveMap Members
 
 		public void Clear()
@@ -65,11 +51,14 @@ namespace Apache.NMS.EMS
 			get
 			{
 				int count = 0;
-				PropertyNameEnumerable propertyNames = new PropertyNameEnumerable(this.tibcoMessage);
+				IEnumerator propertyNamesEnumerator = this.tibcoMessage.PropertyNames;
 
-				foreach(object propertyName in propertyNames)
+				if(null != propertyNamesEnumerator)
 				{
-					count++;
+					while(propertyNamesEnumerator.MoveNext())
+					{
+						count++;
+					}
 				}
 
 				return count;
@@ -81,9 +70,8 @@ namespace Apache.NMS.EMS
 			get
 			{
 				ArrayList keys = new ArrayList();
-				PropertyNameEnumerable propertyNames = new PropertyNameEnumerable(this.tibcoMessage);
 
-				foreach(string propertyName in propertyNames)
+				foreach(string propertyName in EMSConvert.ToEnumerable(this.tibcoMessage.PropertyNames))
 				{
 					keys.Add(propertyName);
 				}
@@ -97,9 +85,8 @@ namespace Apache.NMS.EMS
 			get
 			{
 				ArrayList values = new ArrayList();
-				PropertyNameEnumerable propertyNames = new PropertyNameEnumerable(this.tibcoMessage);
 
-				foreach(string propertyName in propertyNames)
+				foreach(string propertyName in EMSConvert.ToEnumerable(this.tibcoMessage.PropertyNames))
 				{
 					values.Add(this.tibcoMessage.GetObjectProperty(propertyName));
 				}
