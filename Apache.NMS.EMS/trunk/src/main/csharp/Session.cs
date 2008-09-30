@@ -18,18 +18,18 @@ using System;
 
 namespace Apache.NMS.EMS
 {
-    /// <summary>
+	/// <summary>
 	/// Represents a NMS session to TIBCO.
-    /// </summary>
-    public class Session : Apache.NMS.ISession
-    {
-    	public readonly TIBCO.EMS.Session tibcoSession;
-    	private bool closed = false;
-    	private bool disposed = false;
+	/// </summary>
+	public class Session : Apache.NMS.ISession
+	{
+		public readonly TIBCO.EMS.Session tibcoSession;
+		private bool closed = false;
+		private bool disposed = false;
 
-        public Session(TIBCO.EMS.Session session)
-        {
-        	this.tibcoSession = session;
+		public Session(TIBCO.EMS.Session session)
+		{
+			this.tibcoSession = session;
 		}
 
 		~Session()
@@ -40,44 +40,44 @@ namespace Apache.NMS.EMS
 		#region ISession Members
 
 		public Apache.NMS.IMessageProducer CreateProducer()
-        {
-            return CreateProducer(null);
-        }
+		{
+			return CreateProducer(null);
+		}
 
 		public Apache.NMS.IMessageProducer CreateProducer(Apache.NMS.IDestination destination)
-        {
+		{
 			Apache.NMS.EMS.Destination destinationObj = (Apache.NMS.EMS.Destination) destination;
 
 			return EMSConvert.ToNMSMessageProducer(this, this.tibcoSession.CreateProducer(destinationObj.tibcoDestination));
-        }
+		}
 
 		public Apache.NMS.IMessageConsumer CreateConsumer(Apache.NMS.IDestination destination)
-        {
+		{
 			Apache.NMS.EMS.Destination destinationObj = (Apache.NMS.EMS.Destination) destination;
 
 			return EMSConvert.ToNMSMessageConsumer(this, this.tibcoSession.CreateConsumer(destinationObj.tibcoDestination));
-        }
+		}
 
 		public Apache.NMS.IMessageConsumer CreateConsumer(Apache.NMS.IDestination destination, string selector)
-        {
+		{
 			Apache.NMS.EMS.Destination destinationObj = (Apache.NMS.EMS.Destination) destination;
 
 			return EMSConvert.ToNMSMessageConsumer(this, this.tibcoSession.CreateConsumer(destinationObj.tibcoDestination, selector));
 		}
 
 		public Apache.NMS.IMessageConsumer CreateConsumer(Apache.NMS.IDestination destination, string selector, bool noLocal)
-        {
+		{
 			Apache.NMS.EMS.Destination destinationObj = (Apache.NMS.EMS.Destination) destination;
 
 			return EMSConvert.ToNMSMessageConsumer(this, this.tibcoSession.CreateConsumer(destinationObj.tibcoDestination, selector, noLocal));
-        }
+		}
 
 		public Apache.NMS.IMessageConsumer CreateDurableConsumer(Apache.NMS.ITopic destination, string name, string selector, bool noLocal)
-        {
+		{
 			Apache.NMS.EMS.Topic topicObj = (Apache.NMS.EMS.Topic) destination;
 
 			return EMSConvert.ToNMSMessageConsumer(this, this.tibcoSession.CreateDurableSubscriber(topicObj.tibcoTopic, name, selector, noLocal));
-        }
+		}
 
 		public void DeleteDurableConsumer(string name)
 		{
@@ -85,52 +85,52 @@ namespace Apache.NMS.EMS
 		}
 
 		public Apache.NMS.IQueue GetQueue(string name)
-        {
+		{
 			return EMSConvert.ToNMSQueue(this.tibcoSession.CreateQueue(name));
-        }
+		}
 
 		public Apache.NMS.ITopic GetTopic(string name)
-        {
+		{
 			return EMSConvert.ToNMSTopic(this.tibcoSession.CreateTopic(name));
-        }
+		}
 
 		public Apache.NMS.ITemporaryQueue CreateTemporaryQueue()
-        {
+		{
 			return EMSConvert.ToNMSTemporaryQueue(this.tibcoSession.CreateTemporaryQueue());
-        }
+		}
 
 		public Apache.NMS.ITemporaryTopic CreateTemporaryTopic()
-        {
+		{
 			return EMSConvert.ToNMSTemporaryTopic(this.tibcoSession.CreateTemporaryTopic());
-        }
+		}
 
 		public Apache.NMS.IMessage CreateMessage()
-        {
+		{
 			return EMSConvert.ToNMSMessage(this.tibcoSession.CreateMessage());
-        }
+		}
 
 		public Apache.NMS.ITextMessage CreateTextMessage()
-        {
+		{
 			return EMSConvert.ToNMSTextMessage(this.tibcoSession.CreateTextMessage());
-        }
+		}
 
 		public Apache.NMS.ITextMessage CreateTextMessage(string text)
-        {
+		{
 			return EMSConvert.ToNMSTextMessage(this.tibcoSession.CreateTextMessage(text));
-        }
+		}
 
 		public Apache.NMS.IMapMessage CreateMapMessage()
-        {
+		{
 			return EMSConvert.ToNMSMapMessage(this.tibcoSession.CreateMapMessage());
-        }
+		}
 
 		public Apache.NMS.IBytesMessage CreateBytesMessage()
-        {
+		{
 			return EMSConvert.ToNMSBytesMessage(this.tibcoSession.CreateBytesMessage());
-        }
+		}
 
 		public Apache.NMS.IBytesMessage CreateBytesMessage(byte[] body)
-        {
+		{
 			Apache.NMS.IBytesMessage bytesMessage = CreateBytesMessage();
 
 			if(null != bytesMessage)
@@ -139,46 +139,47 @@ namespace Apache.NMS.EMS
 			}
 
 			return bytesMessage;
-        }
+		}
 
 		public Apache.NMS.IObjectMessage CreateObjectMessage(Object body)
 		{
 			return EMSConvert.ToNMSObjectMessage(this.tibcoSession.CreateObjectMessage(body));
 		}
 		
-        public void Commit()
-        {
+		public void Commit()
+		{
 			this.tibcoSession.Commit();
-        }
-        
-        public void Rollback()
-        {
+		}
+		
+		public void Rollback()
+		{
 			this.tibcoSession.Rollback();
-        }
-        
-        // Properties
+		}
+		
+		// Properties
 
 		/// <summary>
 		/// The default timeout for network requests.
 		/// </summary>
+		private TimeSpan requestTimeout = Apache.NMS.NMSConstants.defaultRequestTimeout;
 		public TimeSpan RequestTimeout
 		{
-			get { return Apache.NMS.NMSConstants.defaultRequestTimeout; }
-			set { }
+			get { return this.requestTimeout; }
+			set { this.requestTimeout = value; }
 		}
 		
 		public bool Transacted
-        {
-            get { return this.tibcoSession.Transacted; }
-        }
+		{
+			get { return this.tibcoSession.Transacted; }
+		}
 
 		public Apache.NMS.AcknowledgementMode AcknowledgementMode
-        {
-            get { return EMSConvert.ToAcknowledgementMode(this.tibcoSession.SessionAcknowledgeMode); }
-        }
+		{
+			get { return EMSConvert.ToAcknowledgementMode(this.tibcoSession.SessionAcknowledgeMode); }
+		}
 
-        public void Close()
-        {
+		public void Close()
+		{
 			lock(this)
 			{
 				if(closed)
@@ -189,7 +190,7 @@ namespace Apache.NMS.EMS
 				this.tibcoSession.Close();
 				closed = true;
 			}
-        }
+		}
 
 		#endregion
 
