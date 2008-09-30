@@ -24,6 +24,7 @@ namespace Apache.NMS.EMS
 	{
 		protected readonly Apache.NMS.EMS.Session nmsSession;
 		public TIBCO.EMS.MessageProducer tibcoMessageProducer;
+		private TimeSpan requestTimeout = NMSConstants.defaultRequestTimeout;
 		private bool closed = false;
 		private bool disposed = false;
 
@@ -31,6 +32,7 @@ namespace Apache.NMS.EMS
 		{
 			this.nmsSession = session;
 			this.tibcoMessageProducer = producer;
+			this.RequestTimeout = session.RequestTimeout;
 		}
 
 		~MessageProducer()
@@ -130,8 +132,8 @@ namespace Apache.NMS.EMS
 		/// </summary>
 		public TimeSpan RequestTimeout
 		{
-			get { return Apache.NMS.NMSConstants.defaultRequestTimeout; }
-			set { }
+			get { return requestTimeout; }
+			set { this.requestTimeout = value; }
 		}
 
 		public byte Priority
