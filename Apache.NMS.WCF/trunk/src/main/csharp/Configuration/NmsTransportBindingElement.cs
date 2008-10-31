@@ -41,7 +41,6 @@ namespace Apache.NMS.WCF
 		/// </summary>
 		public NmsTransportBindingElement()
 		{
-			Console.WriteLine(".");
 		}
 
 		/// <summary>
@@ -122,15 +121,15 @@ namespace Apache.NMS.WCF
 		/// <exception cref="ArgumentException">the requested channel does not implement <see cref="IReplyChannel" />.</exception>
 		public override IChannelFactory<TChannel> BuildChannelFactory<TChannel>(BindingContext context)
 		{
-			if (context == null)
+			if(context == null)
 			{
 				throw new ArgumentNullException("context");
 			}
-			if (!CanBuildChannelFactory<TChannel>(context))
+			if(!CanBuildChannelFactory<TChannel>(context))
 			{
 				throw new ArgumentException(String.Format("Unsupported channel type: {0}.", typeof(TChannel).Name));
 			}
-			return (IChannelFactory<TChannel>)new NmsChannelFactory(this, context);
+			return (IChannelFactory<TChannel>) new NmsChannelFactory(this, context);
 		}
 
 		/// <summary>
@@ -141,15 +140,15 @@ namespace Apache.NMS.WCF
 		/// <returns></returns>
 		public override IChannelListener<TChannel> BuildChannelListener<TChannel>(BindingContext context)
 		{
-			if (context == null)
+			if(context == null)
 			{
 				throw new ArgumentNullException("context");
 			}
-			if (!CanBuildChannelListener<TChannel>(context))
+			if(!CanBuildChannelListener<TChannel>(context))
 			{
 				throw new ArgumentException(String.Format("Unsupported channel type: {0}.", typeof(TChannel).Name));
 			}
-			return (IChannelListener<TChannel>)new NmsChannelListener(this, context);
+			return (IChannelListener<TChannel>) new NmsChannelListener(this, context);
 		}
 
 		/// <summary>
@@ -181,7 +180,7 @@ namespace Apache.NMS.WCF
 		/// <returns></returns>
 		public override T GetProperty<T>(BindingContext context)
 		{
-			if (context == null)
+			if(context == null)
 			{
 				throw new ArgumentNullException("context");
 			}
@@ -212,7 +211,7 @@ namespace Apache.NMS.WCF
 			BindingElementCollection bindingElements = context.Endpoint.Binding.CreateBindingElements();
 			MessageEncodingBindingElement encodingBindingElement = bindingElements.Find<MessageEncodingBindingElement>() ?? new TextMessageEncodingBindingElement();
 
-			if (context.WsdlPort != null)
+			if(context.WsdlPort != null)
 			{
 				AddAddressToWsdlPort(context.WsdlPort, context.Endpoint.Address, encodingBindingElement.MessageVersion.Addressing);
 			}
@@ -229,27 +228,27 @@ namespace Apache.NMS.WCF
 		/// <param name="context">The <see cref="T:System.ServiceModel.Description.PolicyConversionContext" /> that you can use to insert your custom policy assertion.</param>
 		public void ExportPolicy(MetadataExporter exporter, PolicyConversionContext context)
 		{
-			if (exporter == null)
+			if(exporter == null)
 			{
 				throw new ArgumentNullException("exporter");
 			}
 
-			if (context == null)
+			if(context == null)
 			{
 				throw new ArgumentNullException("context");
 			}
 
 			bool createdNew = false;
 			MessageEncodingBindingElement encodingBindingElement = context.BindingElements.Find<MessageEncodingBindingElement>();
-			if (encodingBindingElement == null)
+			if(encodingBindingElement == null)
 			{
 				createdNew = true;
 				encodingBindingElement = new TextMessageEncodingBindingElement();
 			}
 
-			if (createdNew && encodingBindingElement is IPolicyExportExtension)
+			if(createdNew && encodingBindingElement is IPolicyExportExtension)
 			{
-				((IPolicyExportExtension)encodingBindingElement).ExportPolicy(exporter, context);
+				((IPolicyExportExtension) encodingBindingElement).ExportPolicy(exporter, context);
 			}
 
 			AddWSAddressingAssertion(context, encodingBindingElement.MessageVersion.Addressing);
@@ -263,7 +262,7 @@ namespace Apache.NMS.WCF
 		/// <param name="addressing">The addressing.</param>
 		private static void AddAddressToWsdlPort(Port wsdlPort, EndpointAddress endpointAddress, AddressingVersion addressing)
 		{
-			if (addressing == AddressingVersion.None)
+			if(addressing == AddressingVersion.None)
 			{
 				return;
 			}
@@ -272,11 +271,11 @@ namespace Apache.NMS.WCF
 			XmlWriter xmlWriter = XmlWriter.Create(memoryStream);
 			xmlWriter.WriteStartElement("temp");
 
-			if (addressing == AddressingVersion.WSAddressing10)
+			if(addressing == AddressingVersion.WSAddressing10)
 			{
 				xmlWriter.WriteAttributeString("xmlns", "wsa10", null, AddressingVersions.WSAddressing10NameSpace);
 			}
-			else if (addressing == AddressingVersion.WSAddressingAugust2004)
+			else if(addressing == AddressingVersion.WSAddressingAugust2004)
 			{
 				xmlWriter.WriteAttributeString("xmlns", "wsa", null, AddressingVersions.WSAddressingAugust2004NameSpace);
 			}
@@ -294,7 +293,7 @@ namespace Apache.NMS.WCF
 			XmlReader xmlReader = XmlReader.Create(memoryStream);
 			xmlReader.MoveToContent();
 
-			XmlElement endpointReference = (XmlElement)XmlDoc.ReadNode(xmlReader).ChildNodes[0];
+			XmlElement endpointReference = (XmlElement) XmlDoc.ReadNode(xmlReader).ChildNodes[0];
 
 			wsdlPort.Extensions.Add(endpointReference);
 		}
@@ -308,15 +307,15 @@ namespace Apache.NMS.WCF
 		{
 			XmlElement addressingAssertion;
 
-			if (addressing == AddressingVersion.WSAddressing10)
+			if(addressing == AddressingVersion.WSAddressing10)
 			{
 				addressingAssertion = XmlDoc.CreateElement("wsaw", "UsingAddressing", "http://www.w3.org/2006/05/addressing/wsdl");
 			}
-			else if (addressing == AddressingVersion.WSAddressingAugust2004)
+			else if(addressing == AddressingVersion.WSAddressingAugust2004)
 			{
 				addressingAssertion = XmlDoc.CreateElement("wsap", "UsingAddressing", AddressingVersions.WSAddressingAugust2004NameSpace + "/policy");
 			}
-			else if (addressing == AddressingVersion.None)
+			else if(addressing == AddressingVersion.None)
 			{
 				// do nothing
 				addressingAssertion = null;
@@ -326,7 +325,7 @@ namespace Apache.NMS.WCF
 				throw new InvalidOperationException("This addressing version is not supported:\n" + addressing);
 			}
 
-			if (addressingAssertion != null)
+			if(addressingAssertion != null)
 			{
 				context.GetBindingAssertions().Add(addressingAssertion);
 			}
@@ -339,7 +338,7 @@ namespace Apache.NMS.WCF
 		{
 			get
 			{
-				if (_xmlDocument == null)
+				if(_xmlDocument == null)
 				{
 					NameTable nameTable = new NameTable();
 					nameTable.Add("Policy");

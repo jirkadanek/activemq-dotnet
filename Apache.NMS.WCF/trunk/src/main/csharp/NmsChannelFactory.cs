@@ -34,10 +34,11 @@ namespace Apache.NMS.WCF
 		/// </summary>
 		/// <param name="context">The context.</param>
 		/// <param name="transportElement">The binding element.</param>
-		internal NmsChannelFactory(NmsTransportBindingElement transportElement, BindingContext context) : base(context.Binding)
+		internal NmsChannelFactory(NmsTransportBindingElement transportElement, BindingContext context)
+			: base(context.Binding)
 		{
 			Collection<MessageEncodingBindingElement> messageEncoderBindingElements = context.BindingParameters.FindAll<MessageEncodingBindingElement>();
-			if (messageEncoderBindingElements.Count > 1)
+			if(messageEncoderBindingElements.Count > 1)
 			{
 				throw new InvalidOperationException("More than one MessageEncodingBindingElement was found in the BindingParameters of the BindingContext");
 			}
@@ -49,7 +50,7 @@ namespace Apache.NMS.WCF
 			_destination = transportElement.Destination;
 			_destinationType = transportElement.DestinationType;
 
-			Console.WriteLine("Destination ({0}) : {1}", _destinationType, _destination);
+			Tracer.DebugFormat("Destination ({0}) : {1}", _destinationType, _destination);
 		}
 
 		#endregion

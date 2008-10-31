@@ -31,7 +31,7 @@ namespace Apache.NMS.WCF
 		/// <exception cref="ArgumentOutOfRangeException">the timeout value was negative.</exception>
 		public static void ValidateTimeout(TimeSpan timeout)
 		{
-			if (timeout < TimeSpan.Zero)
+			if(timeout < TimeSpan.Zero)
 			{
 				throw new ArgumentOutOfRangeException("timeout", timeout, "Timeout must be greater than or equal to TimeSpan.Zero. To disable timeout, specify TimeSpan.MaxValue.");
 			}
@@ -54,16 +54,16 @@ namespace Apache.NMS.WCF
 		/// <param name="destinationType">Type of the destination.</param>
 		public static IDestination GetDestination(NMS.ISession session, string destination, DestinationType destinationType)
 		{
-			switch (destinationType)
+			switch(destinationType)
 			{
-				case DestinationType.Topic:
-					return session.GetTopic(destination);
-				case DestinationType.TemporaryQueue:
-					return session.CreateTemporaryQueue();
-				case DestinationType.TemporaryTopic:
-					return session.CreateTemporaryTopic();
-				default:
-					return session.GetQueue(destination);
+			case DestinationType.Topic:
+			return session.GetTopic(destination);
+			case DestinationType.TemporaryQueue:
+			return session.CreateTemporaryQueue();
+			case DestinationType.TemporaryTopic:
+			return session.CreateTemporaryTopic();
+			default:
+			return session.GetQueue(destination);
 			}
 		}
 	}

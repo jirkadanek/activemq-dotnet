@@ -85,7 +85,7 @@ namespace Apache.NMS.WCF
 		{
 			get
 			{
-				lock (ThisLock)
+				lock(ThisLock)
 				{
 					return itemQueue.ItemCount;
 				}
@@ -101,11 +101,11 @@ namespace Apache.NMS.WCF
 		{
 			Item item = default(Item);
 
-			lock (ThisLock)
+			lock(ThisLock)
 			{
-				if (_queueState == QueueState.Open)
+				if(_queueState == QueueState.Open)
 				{
-					if (itemQueue.HasAvailableItem)
+					if(itemQueue.HasAvailableItem)
 					{
 						item = itemQueue.DequeueAvailableItem();
 					}
@@ -116,13 +116,13 @@ namespace Apache.NMS.WCF
 						return reader;
 					}
 				}
-				else if (_queueState == QueueState.Shutdown)
+				else if(_queueState == QueueState.Shutdown)
 				{
-					if (itemQueue.HasAvailableItem)
+					if(itemQueue.HasAvailableItem)
 					{
 						item = itemQueue.DequeueAvailableItem();
 					}
-					else if (itemQueue.HasAnyItem)
+					else if(itemQueue.HasAnyItem)
 					{
 						AsyncQueueReader reader = new AsyncQueueReader(this, timeout, callback, state);
 						readerQueue.Enqueue(reader);
@@ -137,20 +137,20 @@ namespace Apache.NMS.WCF
 
 		public IAsyncResult BeginWaitForItem(TimeSpan timeout, AsyncCallback callback, object state)
 		{
-			lock (ThisLock)
+			lock(ThisLock)
 			{
-				if (_queueState == QueueState.Open)
+				if(_queueState == QueueState.Open)
 				{
-					if (!itemQueue.HasAvailableItem)
+					if(!itemQueue.HasAvailableItem)
 					{
 						AsyncQueueWaiter waiter = new AsyncQueueWaiter(timeout, callback, state);
 						waiterList.Add(waiter);
 						return waiter;
 					}
 				}
-				else if (_queueState == QueueState.Shutdown)
+				else if(_queueState == QueueState.Shutdown)
 				{
-					if (!itemQueue.HasAvailableItem && itemQueue.HasAnyItem)
+					if(!itemQueue.HasAvailableItem && itemQueue.HasAnyItem)
 					{
 						AsyncQueueWaiter waiter = new AsyncQueueWaiter(timeout, callback, state);
 						waiterList.Add(waiter);
@@ -164,9 +164,9 @@ namespace Apache.NMS.WCF
 
 		static void CompleteOutstandingReadersCallback(object state)
 		{
-			IQueueReader[] outstandingReaders = (IQueueReader[])state;
+			IQueueReader[] outstandingReaders = (IQueueReader[]) state;
 
-			for (int i = 0; i < outstandingReaders.Length; i++)
+			for(int i = 0; i < outstandingReaders.Length; i++)
 			{
 				outstandingReaders[i].Set(default(Item));
 			}
@@ -174,17 +174,17 @@ namespace Apache.NMS.WCF
 
 		static void CompleteWaitersFalseCallback(object state)
 		{
-			CompleteWaiters(false, (IQueueWaiter[])state);
+			CompleteWaiters(false, (IQueueWaiter[]) state);
 		}
 
 		static void CompleteWaitersTrueCallback(object state)
 		{
-			CompleteWaiters(true, (IQueueWaiter[])state);
+			CompleteWaiters(true, (IQueueWaiter[]) state);
 		}
 
 		static void CompleteWaiters(bool itemAvailable, IQueueWaiter[] waiters)
 		{
-			for (int i = 0; i < waiters.Length; i++)
+			for(int i = 0; i < waiters.Length; i++)
 			{
 				waiters[i].Set(itemAvailable);
 			}
@@ -192,9 +192,9 @@ namespace Apache.NMS.WCF
 
 		static void CompleteWaitersLater(bool itemAvailable, IQueueWaiter[] waiters)
 		{
-			if (itemAvailable)
+			if(itemAvailable)
 			{
-				if (completeWaitersTrueCallback == null)
+				if(completeWaitersTrueCallback == null)
 				{
 					completeWaitersTrueCallback = CompleteWaitersTrueCallback;
 				}
@@ -203,7 +203,7 @@ namespace Apache.NMS.WCF
 			}
 			else
 			{
-				if (completeWaitersFalseCallback == null)
+				if(completeWaitersFalseCallback == null)
 				{
 					completeWaitersFalseCallback = CompleteWaitersFalseCallback;
 				}
@@ -214,7 +214,7 @@ namespace Apache.NMS.WCF
 
 		void GetWaiters(out IQueueWaiter[] waiters)
 		{
-			if (waiterList.Count > 0)
+			if(waiterList.Count > 0)
 			{
 				waiters = waiterList.ToArray();
 				waiterList.Clear();
@@ -227,27 +227,27 @@ namespace Apache.NMS.WCF
 
 		public void Close()
 		{
-			((IDisposable)this).Dispose();
+			((IDisposable) this).Dispose();
 		}
 
 		public void Shutdown()
 		{
 			IQueueReader[] outstandingReaders = null;
-			lock (ThisLock)
+			lock(ThisLock)
 			{
-				if (_queueState == QueueState.Shutdown)
+				if(_queueState == QueueState.Shutdown)
 				{
 					return;
 				}
 
-				if (_queueState == QueueState.Closed)
+				if(_queueState == QueueState.Closed)
 				{
 					return;
 				}
 
 				_queueState = QueueState.Shutdown;
 
-				if (readerQueue.Count > 0 && itemQueue.ItemCount == 0)
+				if(readerQueue.Count > 0 && itemQueue.ItemCount == 0)
 				{
 					outstandingReaders = new IQueueReader[readerQueue.Count];
 					readerQueue.CopyTo(outstandingReaders, 0);
@@ -255,11 +255,11 @@ namespace Apache.NMS.WCF
 				}
 			}
 
-			if (outstandingReaders != null)
+			if(outstandingReaders != null)
 			{
-				for (int i = 0; i < outstandingReaders.Length; i++)
+				for(int i = 0; i < outstandingReaders.Length; i++)
 				{
-					outstandingReaders[i].Set(new Item((Exception)null, null));
+					outstandingReaders[i].Set(new Item((Exception) null, null));
 				}
 			}
 		}
@@ -268,7 +268,7 @@ namespace Apache.NMS.WCF
 		{
 			T value;
 
-			if (!Dequeue(timeout, out value))
+			if(!Dequeue(timeout, out value))
 			{
 				throw new TimeoutException(string.Format("Dequeue timed out in {0}.", timeout));
 			}
@@ -281,11 +281,11 @@ namespace Apache.NMS.WCF
 			WaitQueueReader reader = null;
 			Item item = new Item();
 
-			lock (ThisLock)
+			lock(ThisLock)
 			{
-				if (_queueState == QueueState.Open)
+				if(_queueState == QueueState.Open)
 				{
-					if (itemQueue.HasAvailableItem)
+					if(itemQueue.HasAvailableItem)
 					{
 						item = itemQueue.DequeueAvailableItem();
 					}
@@ -295,13 +295,13 @@ namespace Apache.NMS.WCF
 						readerQueue.Enqueue(reader);
 					}
 				}
-				else if (_queueState == QueueState.Shutdown)
+				else if(_queueState == QueueState.Shutdown)
 				{
-					if (itemQueue.HasAvailableItem)
+					if(itemQueue.HasAvailableItem)
 					{
 						item = itemQueue.DequeueAvailableItem();
 					}
-					else if (itemQueue.HasAnyItem)
+					else if(itemQueue.HasAnyItem)
 					{
 						reader = new WaitQueueReader(this);
 						readerQueue.Enqueue(reader);
@@ -319,7 +319,7 @@ namespace Apache.NMS.WCF
 				}
 			}
 
-			if (reader != null)
+			if(reader != null)
 			{
 				return reader.Wait(timeout, out value);
 			}
@@ -337,28 +337,28 @@ namespace Apache.NMS.WCF
 
 		protected void Dispose(bool disposing)
 		{
-			if (disposing)
+			if(disposing)
 			{
 				bool dispose = false;
 
-				lock (ThisLock)
+				lock(ThisLock)
 				{
-					if (_queueState != QueueState.Closed)
+					if(_queueState != QueueState.Closed)
 					{
 						_queueState = QueueState.Closed;
 						dispose = true;
 					}
 				}
 
-				if (dispose)
+				if(dispose)
 				{
-					while (readerQueue.Count > 0)
+					while(readerQueue.Count > 0)
 					{
 						IQueueReader reader = readerQueue.Dequeue();
 						reader.Set(default(Item));
 					}
 
-					while (itemQueue.HasAnyItem)
+					while(itemQueue.HasAnyItem)
 					{
 						Item item = itemQueue.DequeueAnyItem();
 						item.Dispose();
@@ -376,21 +376,21 @@ namespace Apache.NMS.WCF
 			IQueueWaiter[] waiters = null;
 			bool itemAvailable = true;
 
-			lock (ThisLock)
+			lock(ThisLock)
 			{
 				itemAvailable = !((_queueState == QueueState.Closed) || (_queueState == QueueState.Shutdown));
 				GetWaiters(out waiters);
 
-				if (_queueState != QueueState.Closed)
+				if(_queueState != QueueState.Closed)
 				{
 					itemQueue.MakePendingItemAvailable();
 
-					if (readerQueue.Count > 0)
+					if(readerQueue.Count > 0)
 					{
 						item = itemQueue.DequeueAvailableItem();
 						reader = readerQueue.Dequeue();
 
-						if (_queueState == QueueState.Shutdown && readerQueue.Count > 0 && itemQueue.ItemCount == 0)
+						if(_queueState == QueueState.Shutdown && readerQueue.Count > 0 && itemQueue.ItemCount == 0)
 						{
 							outstandingReaders = new IQueueReader[readerQueue.Count];
 							readerQueue.CopyTo(outstandingReaders, 0);
@@ -402,20 +402,20 @@ namespace Apache.NMS.WCF
 				}
 			}
 
-			if (outstandingReaders != null)
+			if(outstandingReaders != null)
 			{
-				if (completeOutstandingReadersCallback == null)
+				if(completeOutstandingReadersCallback == null)
 					completeOutstandingReadersCallback = CompleteOutstandingReadersCallback;
 
 				ThreadPool.QueueUserWorkItem(completeOutstandingReadersCallback, outstandingReaders);
 			}
 
-			if (waiters != null)
+			if(waiters != null)
 			{
 				CompleteWaitersLater(itemAvailable, waiters);
 			}
 
-			if (reader != null)
+			if(reader != null)
 			{
 				InvokeDequeuedCallback(item.DequeuedCallback);
 				reader.Set(item);
@@ -427,7 +427,7 @@ namespace Apache.NMS.WCF
 		{
 			T value;
 
-			if (!EndDequeue(result, out value))
+			if(!EndDequeue(result, out value))
 			{
 				throw new TimeoutException("Asynchronous Dequeue operation timed out.");
 			}
@@ -439,7 +439,7 @@ namespace Apache.NMS.WCF
 		{
 			TypedCompletedAsyncResult<T> typedResult = result as TypedCompletedAsyncResult<T>;
 
-			if (typedResult != null)
+			if(typedResult != null)
 			{
 				value = TypedCompletedAsyncResult<T>.End(result);
 				return true;
@@ -451,7 +451,7 @@ namespace Apache.NMS.WCF
 		public bool EndWaitForItem(IAsyncResult result)
 		{
 			TypedCompletedAsyncResult<bool> typedResult = result as TypedCompletedAsyncResult<bool>;
-			if (typedResult != null)
+			if(typedResult != null)
 			{
 				return TypedCompletedAsyncResult<bool>.End(result);
 			}
@@ -489,16 +489,16 @@ namespace Apache.NMS.WCF
 			IQueueWaiter[] waiters = null;
 			bool itemAvailable = true;
 
-			lock (ThisLock)
+			lock(ThisLock)
 			{
 				itemAvailable = !((_queueState == QueueState.Closed) || (_queueState == QueueState.Shutdown));
 				GetWaiters(out waiters);
 
-				if (_queueState == QueueState.Open)
+				if(_queueState == QueueState.Open)
 				{
-					if (canDispatchOnThisThread)
+					if(canDispatchOnThisThread)
 					{
-						if (readerQueue.Count == 0)
+						if(readerQueue.Count == 0)
 						{
 							itemQueue.EnqueueAvailableItem(item);
 						}
@@ -509,7 +509,7 @@ namespace Apache.NMS.WCF
 					}
 					else
 					{
-						if (readerQueue.Count == 0)
+						if(readerQueue.Count == 0)
 						{
 							itemQueue.EnqueueAvailableItem(item);
 						}
@@ -526,9 +526,9 @@ namespace Apache.NMS.WCF
 				}
 			}
 
-			if (waiters != null)
+			if(waiters != null)
 			{
-				if (canDispatchOnThisThread)
+				if(canDispatchOnThisThread)
 				{
 					CompleteWaiters(itemAvailable, waiters);
 				}
@@ -538,22 +538,22 @@ namespace Apache.NMS.WCF
 				}
 			}
 
-			if (reader != null)
+			if(reader != null)
 			{
 				InvokeDequeuedCallback(item.DequeuedCallback);
 				reader.Set(item);
 			}
 
-			if (dispatchLater)
+			if(dispatchLater)
 			{
-				if (onDispatchCallback == null)
+				if(onDispatchCallback == null)
 				{
 					onDispatchCallback = OnDispatchCallback;
 				}
 
 				ThreadPool.QueueUserWorkItem(onDispatchCallback, this);
 			}
-			else if (disposeItem)
+			else if(disposeItem)
 			{
 				InvokeDequeuedCallback(item.DequeuedCallback);
 				item.Dispose();
@@ -576,12 +576,12 @@ namespace Apache.NMS.WCF
 		// returns true.
 		bool EnqueueWithoutDispatch(Item item)
 		{
-			lock (ThisLock)
+			lock(ThisLock)
 			{
 				// Open
-				if (_queueState != QueueState.Closed && _queueState != QueueState.Shutdown)
+				if(_queueState != QueueState.Closed && _queueState != QueueState.Shutdown)
 				{
-					if (readerQueue.Count == 0)
+					if(readerQueue.Count == 0)
 					{
 						itemQueue.EnqueueAvailableItem(item);
 						return false;
@@ -598,14 +598,14 @@ namespace Apache.NMS.WCF
 
 		static void OnDispatchCallback(object state)
 		{
-			((InputQueue<T>)state).Dispatch();
+			((InputQueue<T>) state).Dispatch();
 		}
 
 		static void InvokeDequeuedCallbackLater(ItemDequeuedCallback dequeuedCallback)
 		{
-			if (dequeuedCallback != null)
+			if(dequeuedCallback != null)
 			{
-				if (onInvokeDequeuedCallback == null)
+				if(onInvokeDequeuedCallback == null)
 				{
 					onInvokeDequeuedCallback = OnInvokeDequeuedCallback;
 				}
@@ -616,7 +616,7 @@ namespace Apache.NMS.WCF
 
 		static void InvokeDequeuedCallback(ItemDequeuedCallback dequeuedCallback)
 		{
-			if (dequeuedCallback != null)
+			if(dequeuedCallback != null)
 			{
 				dequeuedCallback();
 			}
@@ -624,22 +624,22 @@ namespace Apache.NMS.WCF
 
 		static void OnInvokeDequeuedCallback(object state)
 		{
-			ItemDequeuedCallback dequeuedCallback = (ItemDequeuedCallback)state;
+			ItemDequeuedCallback dequeuedCallback = (ItemDequeuedCallback) state;
 			dequeuedCallback();
 		}
 
 		bool RemoveReader(IQueueReader reader)
 		{
-			lock (ThisLock)
+			lock(ThisLock)
 			{
-				if (_queueState == QueueState.Open || _queueState == QueueState.Shutdown)
+				if(_queueState == QueueState.Open || _queueState == QueueState.Shutdown)
 				{
 					bool removed = false;
 
-					for (int i = readerQueue.Count; i > 0; i--)
+					for(int i = readerQueue.Count; i > 0; i--)
 					{
 						IQueueReader temp = readerQueue.Dequeue();
-						if (ReferenceEquals(temp, reader))
+						if(ReferenceEquals(temp, reader))
 						{
 							removed = true;
 						}
@@ -661,11 +661,11 @@ namespace Apache.NMS.WCF
 			WaitQueueWaiter waiter = null;
 			bool itemAvailable = false;
 
-			lock (ThisLock)
+			lock(ThisLock)
 			{
-				if (_queueState == QueueState.Open)
+				if(_queueState == QueueState.Open)
 				{
-					if (itemQueue.HasAvailableItem)
+					if(itemQueue.HasAvailableItem)
 					{
 						itemAvailable = true;
 					}
@@ -675,13 +675,13 @@ namespace Apache.NMS.WCF
 						waiterList.Add(waiter);
 					}
 				}
-				else if (_queueState == QueueState.Shutdown)
+				else if(_queueState == QueueState.Shutdown)
 				{
-					if (itemQueue.HasAvailableItem)
+					if(itemQueue.HasAvailableItem)
 					{
 						itemAvailable = true;
 					}
-					else if (itemQueue.HasAnyItem)
+					else if(itemQueue.HasAnyItem)
 					{
 						waiter = new WaitQueueWaiter();
 						waiterList.Add(waiter);
@@ -734,7 +734,7 @@ namespace Apache.NMS.WCF
 
 			public void Set(Item item)
 			{
-				lock (ThisLock)
+				lock(ThisLock)
 				{
 					Debug.Assert(_item == null, "InputQueue.WaitQueueReader.Set: (this.item == null)");
 					Debug.Assert(_exception == null, "InputQueue.WaitQueueReader.Set: (this.exception == null)");
@@ -750,13 +750,13 @@ namespace Apache.NMS.WCF
 				bool isSafeToClose = false;
 				try
 				{
-					if (timeout == TimeSpan.MaxValue)
+					if(timeout == TimeSpan.MaxValue)
 					{
 						_waitEvent.WaitOne();
 					}
-					else if (!_waitEvent.WaitOne(timeout, false))
+					else if(!_waitEvent.WaitOne(timeout, false))
 					{
-						if (_inputQueue.RemoveReader(this))
+						if(_inputQueue.RemoveReader(this))
 						{
 							value = default(T);
 							isSafeToClose = true;
@@ -772,7 +772,7 @@ namespace Apache.NMS.WCF
 				}
 				finally
 				{
-					if (isSafeToClose)
+					if(isSafeToClose)
 					{
 						_waitEvent.Close();
 					}
@@ -796,7 +796,7 @@ namespace Apache.NMS.WCF
 				: base(callback, state)
 			{
 				_inputQueue = inputQueue;
-				if (timeout != TimeSpan.MaxValue)
+				if(timeout != TimeSpan.MaxValue)
 				{
 					_timer = new Timer(timerCallback, this, timeout, TimeSpan.FromMilliseconds(-1));
 				}
@@ -806,7 +806,7 @@ namespace Apache.NMS.WCF
 			{
 				AsyncQueueReader readerResult = AsyncResult.End<AsyncQueueReader>(result);
 
-				if (readerResult._expired)
+				if(readerResult._expired)
 				{
 					value = default(T);
 					return false;
@@ -818,8 +818,8 @@ namespace Apache.NMS.WCF
 
 			static void TimerCallback(object state)
 			{
-				AsyncQueueReader thisPtr = (AsyncQueueReader)state;
-				if (thisPtr._inputQueue.RemoveReader(thisPtr))
+				AsyncQueueReader thisPtr = (AsyncQueueReader) state;
+				if(thisPtr._inputQueue.RemoveReader(thisPtr))
 				{
 					thisPtr._expired = true;
 					thisPtr.Complete(false);
@@ -829,7 +829,7 @@ namespace Apache.NMS.WCF
 			public void Set(Item item)
 			{
 				_item = item.Value;
-				if (_timer != null)
+				if(_timer != null)
 				{
 					_timer.Change(-1, -1);
 				}
@@ -848,7 +848,8 @@ namespace Apache.NMS.WCF
 			/// </summary>
 			/// <param name="value">The value.</param>
 			/// <param name="dequeuedCallback">The dequeued callback.</param>
-			public Item(T value, ItemDequeuedCallback dequeuedCallback) : this(value, null, dequeuedCallback)
+			public Item(T value, ItemDequeuedCallback dequeuedCallback)
+				: this(value, null, dequeuedCallback)
 			{
 			}
 
@@ -857,7 +858,8 @@ namespace Apache.NMS.WCF
 			/// </summary>
 			/// <param name="exception">The exception.</param>
 			/// <param name="dequeuedCallback">The dequeued callback.</param>
-			public Item(Exception exception, ItemDequeuedCallback dequeuedCallback) : this(null, exception, dequeuedCallback)
+			public Item(Exception exception, ItemDequeuedCallback dequeuedCallback)
+				: this(null, exception, dequeuedCallback)
 			{
 			}
 
@@ -867,7 +869,7 @@ namespace Apache.NMS.WCF
 			/// <param name="value">The value.</param>
 			/// <param name="exception">The exception.</param>
 			/// <param name="dequeuedCallback">The dequeued callback.</param>
-			internal Item(T value, Exception exception, ItemDequeuedCallback dequeuedCallback) 
+			internal Item(T value, Exception exception, ItemDequeuedCallback dequeuedCallback)
 			{
 				_value = value;
 				_exception = exception;
@@ -906,15 +908,15 @@ namespace Apache.NMS.WCF
 			/// </summary>
 			public void Dispose()
 			{
-				if (_value != null)
+				if(_value != null)
 				{
-					if (_value is IDisposable)
+					if(_value is IDisposable)
 					{
-						((IDisposable)_value).Dispose();
+						((IDisposable) _value).Dispose();
 					}
-					else if (_value is ICommunicationObject)
+					else if(_value is ICommunicationObject)
 					{
-						((ICommunicationObject)_value).Abort();
+						((ICommunicationObject) _value).Abort();
 					}
 				}
 			}
@@ -925,7 +927,7 @@ namespace Apache.NMS.WCF
 			/// <returns></returns>
 			public T GetValue()
 			{
-				if (_exception != null)
+				if(_exception != null)
 				{
 					throw _exception;
 				}
@@ -966,7 +968,7 @@ namespace Apache.NMS.WCF
 			/// <param name="itemAvailable">if set to <see langword="true"/> [item available].</param>
 			public void Set(bool itemAvailable)
 			{
-				lock (ThisLock)
+				lock(ThisLock)
 				{
 					_itemAvailable = itemAvailable;
 					_waitEvent.Set();
@@ -980,11 +982,11 @@ namespace Apache.NMS.WCF
 			/// <returns></returns>
 			public bool Wait(TimeSpan timeout)
 			{
-				if (timeout == TimeSpan.MaxValue)
+				if(timeout == TimeSpan.MaxValue)
 				{
 					_waitEvent.WaitOne();
 				}
-				else if (!_waitEvent.WaitOne(timeout, false))
+				else if(!_waitEvent.WaitOne(timeout, false))
 				{
 					return false;
 				}
@@ -1006,9 +1008,10 @@ namespace Apache.NMS.WCF
 			/// <param name="timeout">The timeout.</param>
 			/// <param name="callback">The callback.</param>
 			/// <param name="state">The state.</param>
-			public AsyncQueueWaiter(TimeSpan timeout, AsyncCallback callback, object state) : base(callback, state)
+			public AsyncQueueWaiter(TimeSpan timeout, AsyncCallback callback, object state)
+				: base(callback, state)
 			{
-				if (timeout != TimeSpan.MaxValue)
+				if(timeout != TimeSpan.MaxValue)
 				{
 					_timer = new Timer(timerCallback, this, timeout, TimeSpan.FromMilliseconds(-1));
 				}
@@ -1043,7 +1046,7 @@ namespace Apache.NMS.WCF
 			/// <param name="state">The state.</param>
 			public static void TimerCallback(object state)
 			{
-				AsyncQueueWaiter thisPtr = (AsyncQueueWaiter)state;
+				AsyncQueueWaiter thisPtr = (AsyncQueueWaiter) state;
 				thisPtr.Complete(false);
 			}
 
@@ -1055,13 +1058,13 @@ namespace Apache.NMS.WCF
 			{
 				bool timely;
 
-				lock (ThisLock)
+				lock(ThisLock)
 				{
 					timely = (_timer == null) || _timer.Change(-1, -1);
 					_itemAvailable = itemAvailable;
 				}
 
-				if (timely)
+				if(timely)
 				{
 					Complete(false);
 				}
@@ -1089,7 +1092,7 @@ namespace Apache.NMS.WCF
 			/// <returns></returns>
 			public Item DequeueAvailableItem()
 			{
-				if (_totalCount == _pendingCount)
+				if(_totalCount == _pendingCount)
 				{
 					throw new Exception("Internal Error - ItemQueue does not contain any available items");
 				}
@@ -1102,7 +1105,7 @@ namespace Apache.NMS.WCF
 			/// <returns></returns>
 			public Item DequeueAnyItem()
 			{
-				if (_pendingCount == _totalCount)
+				if(_pendingCount == _totalCount)
 				{
 					_pendingCount--;
 				}
@@ -1115,10 +1118,10 @@ namespace Apache.NMS.WCF
 			/// <param name="item">The item.</param>
 			void EnqueueItemCore(Item item)
 			{
-				if (_totalCount == _items.Length)
+				if(_totalCount == _items.Length)
 				{
 					Item[] newItems = new Item[_items.Length * 2];
-					for (int i = 0; i < _totalCount; i++)
+					for(int i = 0; i < _totalCount; i++)
 					{
 						newItems[i] = _items[(_head + i) % _items.Length];
 					}
@@ -1136,7 +1139,7 @@ namespace Apache.NMS.WCF
 			/// <returns></returns>
 			Item DequeueItemCore()
 			{
-				if (_totalCount == 0)
+				if(_totalCount == 0)
 				{
 					throw new Exception("Internal Error - ItemQueue does not contain any items");
 				}
@@ -1171,7 +1174,7 @@ namespace Apache.NMS.WCF
 			/// </summary>
 			public void MakePendingItemAvailable()
 			{
-				if (_pendingCount == 0)
+				if(_pendingCount == 0)
 				{
 					throw new Exception("Internal Error - ItemQueue does not contain any pending items");
 				}

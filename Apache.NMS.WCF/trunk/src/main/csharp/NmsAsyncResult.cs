@@ -32,7 +32,8 @@ namespace Apache.NMS.WCF
 		/// <param name="message">The message.</param>
 		/// <param name="callback">The callback.</param>
 		/// <param name="state">The state.</param>
-		public NmsAsyncResult(NmsOutputChannel channel, Message message, AsyncCallback callback, object state) : base(callback, state)
+		public NmsAsyncResult(NmsOutputChannel channel, Message message, AsyncCallback callback, object state)
+			: base(callback, state)
 		{
 			_channel = channel;
 			_messageBuffer = _channel.EncodeMessage(message);
@@ -40,14 +41,14 @@ namespace Apache.NMS.WCF
 			try
 			{
 				IAsyncResult result = _channel.BeginSend(message, new AsyncCallback(OnSend), this);
-				if (!result.CompletedSynchronously)
+				if(!result.CompletedSynchronously)
 				{
 					return;
 				}
 
 				CompleteSend(result, true);
 			}
-			catch (Exception)
+			catch(Exception)
 			{
 				CleanupBuffer();
 				throw;
@@ -56,7 +57,7 @@ namespace Apache.NMS.WCF
 
 		private void CleanupBuffer()
 		{
-			if (_messageBuffer.Array != null)
+			if(_messageBuffer.Array != null)
 			{
 				_channel.BufferManager.ReturnBuffer(_messageBuffer.Array);
 				_messageBuffer = new ArraySegment<byte>();
@@ -74,7 +75,7 @@ namespace Apache.NMS.WCF
 
 		internal void OnSend(IAsyncResult result)
 		{
-			if (result.CompletedSynchronously)
+			if(result.CompletedSynchronously)
 			{
 				return;
 			}
@@ -83,7 +84,7 @@ namespace Apache.NMS.WCF
 			{
 				CompleteSend(result, false);
 			}
-			catch (Exception e)
+			catch(Exception e)
 			{
 				Complete(false, e);
 			}

@@ -20,7 +20,6 @@ using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.Text;
 using System.Xml;
-using Apache.NMS;
 
 namespace Apache.NMS.WCF
 {
@@ -69,10 +68,10 @@ namespace Apache.NMS.WCF
 		{
 			ThrowIfDisposedOrNotOpen();
 
-			using (NMS.ISession session = _connection.CreateSession())
+			using(NMS.ISession session = _connection.CreateSession())
 			{
 				IDestination destination = NmsChannelHelper.GetDestination(session, Destination, DestinationType);
-				using (IMessageProducer producer = session.CreateProducer(destination))
+				using(IMessageProducer producer = session.CreateProducer(destination))
 				{
 					producer.Persistent = true;
 					message.Headers.To = RemoteAddress.Uri;
@@ -83,8 +82,8 @@ namespace Apache.NMS.WCF
 					producer.Send(request);
 					producer.Close();
 
-					Console.WriteLine("Sending message:");
-					Console.WriteLine(request.Text);
+					Tracer.Info("Sending message:");
+					Tracer.Info(request.Text);
 				}
 			}
 		}
@@ -164,7 +163,7 @@ namespace Apache.NMS.WCF
 		/// <summary>
 		/// Completes an asynchronous operation to transmit a message to the destination of the output channel.
 		/// </summary>
-		/// <param name="result">The <see cref="T:System.IAsyncResult"/> returned by a call to the <see cref="System.ServiceModel.Channels.IOutputChannel.BeginSend"/>  method.</param>
+		/// <param name="result">The <see cref="T:System.IAsyncResult"/> returned by a call to the <see cref="System.ServiceModel.Channels.IOutputChannel.BeginSend(System.ServiceModel.Channels.Message, System.AsyncCallback, object)"/>  method.</param>
 		public void EndSend(IAsyncResult result)
 		{
 			NmsAsyncResult.End(result);
@@ -192,13 +191,13 @@ namespace Apache.NMS.WCF
 		/// <returns></returns>
 		public override T GetProperty<T>()
 		{
-			if (typeof(T) == typeof(IOutputChannel))
+			if(typeof(T) == typeof(IOutputChannel))
 			{
-				return (T)(object)this;
+				return (T) (object) this;
 			}
 
 			T messageEncoderProperty = Encoder.GetProperty<T>();
-			if (messageEncoderProperty != null)
+			if(messageEncoderProperty != null)
 			{
 				return messageEncoderProperty;
 			}
@@ -221,7 +220,7 @@ namespace Apache.NMS.WCF
 		/// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="timeout" /> is less than zero.</exception>
 		protected override void OnClose(TimeSpan timeout)
 		{
-			if (_connection != null)
+			if(_connection != null)
 			{
 				_connection.Close();
 				_connection.Dispose();

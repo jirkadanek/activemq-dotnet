@@ -19,8 +19,6 @@ using System;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.Text;
-using Apache.NMS;
-using ISession = Apache.NMS.ISession;
 
 namespace Apache.NMS.WCF
 {
@@ -63,13 +61,13 @@ namespace Apache.NMS.WCF
 		/// <typeparam name="T">The type of the property to attempt to retrieve.</typeparam>
 		public override T GetProperty<T>()
 		{
-			if (typeof(T) == typeof(IInputChannel))
+			if(typeof(T) == typeof(IInputChannel))
 			{
-				return (T)(object)this;
+				return (T) (object) this;
 			}
 
 			T messageEncoderProperty = Encoder.GetProperty<T>();
-			if (messageEncoderProperty != null)
+			if(messageEncoderProperty != null)
 			{
 				return messageEncoderProperty;
 			}
@@ -102,7 +100,7 @@ namespace Apache.NMS.WCF
 		public Message Receive(TimeSpan timeout)
 		{
 			Message message;
-			if (TryReceive(timeout, out message))
+			if(TryReceive(timeout, out message))
 			{
 				return message;
 			}
@@ -115,7 +113,7 @@ namespace Apache.NMS.WCF
 		/// <returns>
 		/// true if a message is received before the <paramref name="timeout" /> has been exceeded; otherwise false.
 		/// </returns>
-		/// <param name="timeout">The <see cref="T:System.IAsyncResult" /> returned by a call to one of the <see cref="System.ServiceModel.Channels.IInputChannel.BeginReceive" /> methods.</param>
+		/// <param name="timeout">The <see cref="T:System.IAsyncResult" /> returned by a call to one of the <see cref="System.ServiceModel.Channels.IInputChannel.BeginReceive(AsyncCallback, object)" /> methods.</param>
 		/// <param name="message">The <see cref="T:System.ServiceModel.Channels.Message" /> received. </param>
 		/// <exception cref="T:System.TimeoutException">The specified <paramref name="timeout" /> is exceeded before the operation is completed.</exception>
 		/// <exception cref="T:System.ArgumentOutOfRangeException">The timeout specified is less than zero.</exception>
@@ -160,7 +158,7 @@ namespace Apache.NMS.WCF
 		/// <returns>
 		/// The <see cref="T:System.ServiceModel.Channels.Message" /> received. 
 		/// </returns>
-		/// <param name="result">The <see cref="T:System.IAsyncResult" /> returned by a call to one of the <see cref="System.ServiceModel.Channels.IInputChannel.BeginReceive" /> methods.</param>
+		/// <param name="result">The <see cref="T:System.IAsyncResult" /> returned by a call to one of the <see cref="System.ServiceModel.Channels.IInputChannel.BeginReceive(AsyncCallback, object)" /> methods.</param>
 		public Message EndReceive(IAsyncResult result)
 		{
 			return _messages.EndDequeue(result);

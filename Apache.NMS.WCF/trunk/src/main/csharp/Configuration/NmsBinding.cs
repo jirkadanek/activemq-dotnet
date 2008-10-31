@@ -50,7 +50,8 @@ namespace Apache.NMS.WCF
 		/// The default transport is set to <see cref="NmsTransportBindingElement" />, while the
 		/// default message encoding is set to <see cref="TextMessageEncodingBindingElement" />.
 		/// </remarks>
-		public NmsBinding(string configurationName) : this()
+		public NmsBinding(string configurationName)
+			: this()
 		{
 			ApplyConfiguration(configurationName);
 		}
@@ -66,7 +67,7 @@ namespace Apache.NMS.WCF
 		/// <value>The message element.</value>
 		public MessageEncodingBindingElement MessageElement
 		{
-			get { return _messageElement; } 
+			get { return _messageElement; }
 			set { _messageElement = value; }
 		}
 
@@ -85,7 +86,7 @@ namespace Apache.NMS.WCF
 		/// </summary>
 		/// <value>The name of the destination.</value>
 		public string Destination
-		{ 
+		{
 			get { return _destination; }
 			set { _destination = value; }
 		}
@@ -141,9 +142,9 @@ namespace Apache.NMS.WCF
 		/// <param name="configurationName">Name of the configuration.</param>
 		private void ApplyConfiguration(string configurationName)
 		{
-			NmsBindingCollection section = (NmsBindingCollection)ConfigurationManager.GetSection(NmsConstants.NmsBindingSectionName);
+			NmsBindingCollection section = (NmsBindingCollection) ConfigurationManager.GetSection(NmsConstants.NmsBindingSectionName);
 			NmsBindingElement element = section.Bindings[configurationName];
-			if (element == null)
+			if(element == null)
 			{
 				throw new ConfigurationErrorsException(String.Format(CultureInfo.CurrentCulture, "There is no binding named {0} at {1}.", configurationName, section.BindingName));
 			}

@@ -19,8 +19,6 @@ using System;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.Text;
-using Apache.NMS;
-using ISession = Apache.NMS.ISession;
 
 namespace Apache.NMS.WCF
 {
@@ -36,21 +34,22 @@ namespace Apache.NMS.WCF
 		/// </summary>
 		/// <param name="transportElement">The binding element.</param>
 		/// <param name="context">The context.</param>
-		internal NmsChannelListener(NmsTransportBindingElement transportElement, BindingContext context) : base(context.Binding)
+		internal NmsChannelListener(NmsTransportBindingElement transportElement, BindingContext context)
+			: base(context.Binding)
 		{
-			_bufferManager = BufferManager.CreateBufferManager(transportElement.MaxBufferPoolSize, (int)transportElement.MaxReceivedMessageSize);
+			_bufferManager = BufferManager.CreateBufferManager(transportElement.MaxBufferPoolSize, (int) transportElement.MaxReceivedMessageSize);
 
 			MessageEncodingBindingElement messageEncoderBindingElement = context.BindingParameters.Remove<MessageEncodingBindingElement>();
 			_messageEncoderFactory = (messageEncoderBindingElement != null)
-				? messageEncoderBindingElement.CreateMessageEncoderFactory() 
+				? messageEncoderBindingElement.CreateMessageEncoderFactory()
 				: NmsConstants.DefaultMessageEncoderFactory;
-			
+
 			_channelQueue = new InputQueue<IInputChannel>();
 			_currentChannelLock = new object();
 			_destinationName = transportElement.Destination;
 			_destinationType = transportElement.DestinationType;
 			_uri = new Uri(context.ListenUriBaseAddress, context.ListenUriRelativeAddress);
-			Console.WriteLine("Listening to {0} at {1}/{2}", _destinationType, _uri, _destinationName);
+			Tracer.DebugFormat("Listening to {0} at {1}/{2}", _destinationType, _uri, _destinationName);
 		}
 
 		#endregion
@@ -61,7 +60,7 @@ namespace Apache.NMS.WCF
 		/// <value>The message encoder factory.</value>
 		public MessageEncoderFactory MessageEncoderFactory
 		{
-			get	{ return _messageEncoderFactory; }
+			get { return _messageEncoderFactory; }
 		}
 
 		/// <summary>
@@ -106,30 +105,30 @@ namespace Apache.NMS.WCF
 		/// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="timeout" /> is less than zero.</exception>
 		protected override void OnClose(TimeSpan timeout)
 		{
-			lock (ThisLock)
+			lock(ThisLock)
 			{
-				if (_consumer != null)
+				if(_consumer != null)
 				{
-					Console.WriteLine("Listener is terminating consumer...");
+					Tracer.Debug("Listener is terminating consumer...");
 					_consumer.Close();
 					_consumer.Dispose();
-					Console.WriteLine("Listener has terminated consumer");
+					Tracer.Debug("Listener has terminated consumer");
 				}
 
-				if (_session != null)
+				if(_session != null)
 				{
-					Console.WriteLine("Listener is terminating session...");
+					Tracer.Debug("Listener is terminating session...");
 					_session.Close();
-					Console.WriteLine("Listener has terminated session");
+					Tracer.Debug("Listener has terminated session");
 				}
 
-				if (_connection != null)
+				if(_connection != null)
 				{
-					Console.WriteLine("Listener is terminating connection...");
+					Tracer.Debug("Listener is terminating connection...");
 					_connection.Stop();
 					_connection.Close();
 					_connection.Dispose();
-					Console.WriteLine("Listener has terminated connection");
+					Tracer.Debug("Listener has terminated connection");
 				}
 
 				_channelQueue.Close();
@@ -169,7 +168,7 @@ namespace Apache.NMS.WCF
 		/// <exception cref="T:System.TimeoutException">The interval of time specified by <paramref name="timeout" /> that was allotted for the operation was exceeded before the operation was completed.</exception>
 		protected override void OnOpen(TimeSpan timeout)
 		{
-			if (Uri == null)
+			if(Uri == null)
 			{
 				throw new InvalidOperationException("Uri must be set before ChannelListener is opened.");
 			}
@@ -266,15 +265,15 @@ namespace Apache.NMS.WCF
 		/// <param name="timeout">The <see cref="T:System.TimeSpan" /> that specifies how long the accept channel operation has to complete before timing out.</param>
 		protected override IInputChannel OnAcceptChannel(TimeSpan timeout)
 		{
-			Console.WriteLine("Accepting channel");
+			Tracer.Debug("Accepting channel");
 			NmsChannelHelper.ValidateTimeout(timeout);
-			if (!IsDisposed)
+			if(!IsDisposed)
 			{
 				EnsureChannelAvailable();
 			}
 
 			IInputChannel channel;
-			if (_channelQueue.Dequeue(timeout, out channel))
+			if(_channelQueue.Dequeue(timeout, out channel))
 			{
 				return channel;
 			}
@@ -293,7 +292,7 @@ namespace Apache.NMS.WCF
 		protected override IAsyncResult OnBeginAcceptChannel(TimeSpan timeout, AsyncCallback callback, object state)
 		{
 			NmsChannelHelper.ValidateTimeout(timeout);
-			if (!IsDisposed)
+			if(!IsDisposed)
 			{
 				EnsureChannelAvailable();
 			}
@@ -310,7 +309,7 @@ namespace Apache.NMS.WCF
 		protected override IInputChannel OnEndAcceptChannel(IAsyncResult result)
 		{
 			IInputChannel channel;
-			if (_channelQueue.EndDequeue(result, out channel))
+			if(_channelQueue.EndDequeue(result, out channel))
 			{
 				return channel;
 			}
@@ -325,7 +324,7 @@ namespace Apache.NMS.WCF
 		/// <param name="state">The state.</param>
 		internal void DispatchCallback(object state)
 		{
-			Dispatch((Message)state);
+			Dispatch((Message) state);
 		}
 
 		/// <summary>
@@ -336,12 +335,12 @@ namespace Apache.NMS.WCF
 		/// </summary>
 		internal void Dispatch(Message message)
 		{
-			if (message == null)
+			if(message == null)
 			{
 				return;
 			}
 
-			Console.WriteLine("Dispatching incoming message");
+			Tracer.Debug("Dispatching incoming message");
 			try
 			{
 				NmsInputChannel newChannel;
@@ -349,16 +348,15 @@ namespace Apache.NMS.WCF
 
 				newChannel.Dispatch(message);
 
-				if (channelCreated)
+				if(channelCreated)
 				{
 					//Hand the channel off to whomever is waiting for AcceptChannel() to complete
 					_channelQueue.EnqueueAndDispatch(newChannel);
 				}
 			}
-			catch (Exception e)
+			catch(Exception e)
 			{
-				Console.WriteLine("Error dispatching Message.");
-				Console.WriteLine(e.ToString());
+				Tracer.ErrorFormat("Error dispatching Message: {0}", e.ToString());
 			}
 		}
 
@@ -370,11 +368,11 @@ namespace Apache.NMS.WCF
 		{
 			bool channelCreated = false;
 
-			if ((newChannel = _currentChannel) == null)
+			if((newChannel = _currentChannel) == null)
 			{
-				lock (_currentChannelLock)
+				lock(_currentChannelLock)
 				{
-					if ((newChannel = _currentChannel) == null)
+					if((newChannel = _currentChannel) == null)
 					{
 						newChannel = CreateNmsChannel(Uri);
 						newChannel.Closed += OnChannelClosed;
@@ -394,11 +392,11 @@ namespace Apache.NMS.WCF
 		/// <param name="args">The <see cref="System.EventArgs"/> instance containing the event data.</param>
 		private void OnChannelClosed(object sender, EventArgs args)
 		{
-			NmsInputChannel channel = (NmsInputChannel)sender;
+			NmsInputChannel channel = (NmsInputChannel) sender;
 
-			lock (_currentChannelLock)
+			lock(_currentChannelLock)
 			{
-				if (channel == _currentChannel)
+				if(channel == _currentChannel)
 				{
 					_currentChannel = null;
 				}
@@ -431,7 +429,7 @@ namespace Apache.NMS.WCF
 			IConnection connection = ConnectionFactoryManager.GetInstance().CreateConnection(uri);
 			connection.ExceptionListener += OnExceptionThrown;
 			connection.Start();
-			Console.WriteLine("Connection open");
+			Tracer.Debug("Connection open");
 			return connection;
 		}
 
@@ -444,14 +442,14 @@ namespace Apache.NMS.WCF
 		/// been started.</exception>
 		private NMS.ISession OpenSession(IConnection connection)
 		{
-			if (!connection.IsStarted)
+			if(!connection.IsStarted)
 			{
 				throw new InvalidOperationException("The connection has not yet been opened");
 			}
 
-			Console.WriteLine("Opening session...");
+			Tracer.Debug("Opening session...");
 			NMS.ISession session = connection.CreateSession();
-			Console.WriteLine("Session open");
+			Tracer.Debug("Session open");
 			return session;
 		}
 
@@ -463,9 +461,9 @@ namespace Apache.NMS.WCF
 		private IDestination OpenDestination(NMS.ISession session, Uri uri)
 		{
 			string queueName = NmsChannelHelper.GetQueueName(uri);
-			Console.WriteLine("Connecting to queue '{0}'...", queueName);
+			Tracer.DebugFormat("Connecting to queue '{0}'...", queueName);
 			IDestination destination = session.GetQueue(queueName);
-			Console.WriteLine("Connected to queue");
+			Tracer.Debug("Connected to queue");
 
 			return destination;
 		}
@@ -479,10 +477,10 @@ namespace Apache.NMS.WCF
 		/// messages will be consumed by the attached Listener.</returns>
 		private IMessageConsumer CreateConsumer(NMS.ISession session, IDestination destination)
 		{
-			Console.WriteLine("Creating message listener...");
+			Tracer.Debug("Creating message listener...");
 			IMessageConsumer consumer = session.CreateConsumer(destination);
 			consumer.Listener += OnReceiveMessage;
-			Console.WriteLine("Created message listener");
+			Tracer.Debug("Created message listener");
 			return consumer;
 		}
 
@@ -492,8 +490,8 @@ namespace Apache.NMS.WCF
 		/// <param name="message">The message.</param>
 		private void OnReceiveMessage(IMessage message)
 		{
-			Console.WriteLine("Received message");
-			string soapMsg = ((ITextMessage)message).Text;
+			Tracer.Info("Received message");
+			string soapMsg = ((ITextMessage) message).Text;
 			byte[] buffer = Encoding.ASCII.GetBytes(soapMsg);
 			int dataLength = buffer.Length;
 			byte[] data1 = _bufferManager.TakeBuffer(dataLength);
@@ -505,7 +503,7 @@ namespace Apache.NMS.WCF
 			Array.Copy(data.Array, data.Offset, msgContents, 0, msgContents.Length);
 			Message msg = _messageEncoderFactory.Encoder.ReadMessage(data, _bufferManager);
 
-			Console.WriteLine(msg);
+			Tracer.Info(msg);
 			Dispatch(msg);
 		}
 
@@ -516,15 +514,15 @@ namespace Apache.NMS.WCF
 		private void OnExceptionThrown(Exception exception)
 		{
 			// TODO: investigate whether it is normal behaviour for a NRE to be thrown during shutdown
-			if (exception.GetType() == typeof(NullReferenceException))
+			if(exception.GetType() == typeof(NullReferenceException))
 			{
 				return;
 			}
 
 			// TODO: can we recover from the exception? Do we convert to WCF exceptions?
-			Console.WriteLine("{0} thrown : {1}\n{2}", 
-				exception.GetType().Name, 
-				exception.Message, 
+			Tracer.ErrorFormat("{0} thrown : {1}\n{2}",
+				exception.GetType().Name,
+				exception.Message,
 				exception.StackTrace);
 		}
 
@@ -534,7 +532,7 @@ namespace Apache.NMS.WCF
 		private void EnsureChannelAvailable()
 		{
 			NmsInputChannel newChannel;
-			if (CreateOrRetrieveChannel(out newChannel))
+			if(CreateOrRetrieveChannel(out newChannel))
 			{
 				_channelQueue.EnqueueAndDispatch(newChannel);
 			}

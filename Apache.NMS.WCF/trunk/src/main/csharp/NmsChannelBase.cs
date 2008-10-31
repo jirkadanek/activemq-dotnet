@@ -15,11 +15,8 @@
  * limitations under the License.
  */
 
-using System;
-using System.Collections.Generic;
-using System.ServiceModel.Channels;
-using System.Text;
 using System.ServiceModel;
+using System.ServiceModel.Channels;
 
 namespace Apache.NMS.WCF
 {
@@ -39,7 +36,8 @@ namespace Apache.NMS.WCF
 		/// <param name="parent">The parent.</param>
 		/// <param name="destination">The destination.</param>
 		/// <param name="destinationType">Type of the destionation.</param>
-		public NmsChannelBase(BufferManager bufferManager, MessageEncoderFactory encoderFactory, EndpointAddress address, ChannelManagerBase parent, string destination, DestinationType destinationType) : base(parent)
+		public NmsChannelBase(BufferManager bufferManager, MessageEncoderFactory encoderFactory, EndpointAddress address, ChannelManagerBase parent, string destination, DestinationType destinationType)
+			: base(parent)
 		{
 			_bufferManager = bufferManager;
 			_encoder = encoderFactory.CreateSessionEncoder();

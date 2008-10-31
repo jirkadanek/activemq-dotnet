@@ -71,14 +71,14 @@ namespace Apache.NMS.WCF
 		{
 			get
 			{
-				if (_manualResetEvent != null)
+				if(_manualResetEvent != null)
 				{
 					return _manualResetEvent;
 				}
 
-				lock (ThisLock)
+				lock(ThisLock)
 				{
-					if (_manualResetEvent == null)
+					if(_manualResetEvent == null)
 					{
 						_manualResetEvent = new ManualResetEvent(_isCompleted);
 					}
@@ -127,14 +127,14 @@ namespace Apache.NMS.WCF
 		/// <param name="completedSynchronously">if set to <see langword="true"/> [completed synchronously].</param>
 		protected void Complete(bool completedSynchronously)
 		{
-			if (_isCompleted)
+			if(_isCompleted)
 			{
 				throw new InvalidOperationException("Cannot call Complete twice");
 			}
 
 			_completedSynchronously = completedSynchronously;
 
-			if (completedSynchronously)
+			if(completedSynchronously)
 			{
 				// If we completedSynchronously, then there's no chance that the manualResetEvent was created so
 				// we don't need to worry about a race
@@ -143,10 +143,10 @@ namespace Apache.NMS.WCF
 			}
 			else
 			{
-				lock (ThisLock)
+				lock(ThisLock)
 				{
 					_isCompleted = true;
-					if (_manualResetEvent != null)
+					if(_manualResetEvent != null)
 					{
 						_manualResetEvent.Set();
 					}
@@ -154,7 +154,7 @@ namespace Apache.NMS.WCF
 			}
 
 			// If the callback throws, there is an error in the callback implementation
-			if (_callback != null)
+			if(_callback != null)
 			{
 				_callback(this);
 			}
@@ -181,36 +181,36 @@ namespace Apache.NMS.WCF
 		/// <returns></returns>
 		protected static TAsyncResult End<TAsyncResult>(IAsyncResult result) where TAsyncResult : AsyncResult
 		{
-			if (result == null)
+			if(result == null)
 			{
 				throw new ArgumentNullException("result");
 			}
 
 			TAsyncResult asyncResult = result as TAsyncResult;
 
-			if (asyncResult == null)
+			if(asyncResult == null)
 			{
 				throw new ArgumentException("Invalid async messageBody.", "result");
 			}
 
-			if (asyncResult._endCalled)
+			if(asyncResult._endCalled)
 			{
 				throw new InvalidOperationException("Async object already ended.");
 			}
 
 			asyncResult._endCalled = true;
 
-			if (!asyncResult._isCompleted)
+			if(!asyncResult._isCompleted)
 			{
 				asyncResult.AsyncWaitHandle.WaitOne();
 			}
 
-			if (asyncResult._manualResetEvent != null)
+			if(asyncResult._manualResetEvent != null)
 			{
 				asyncResult._manualResetEvent.Close();
 			}
 
-			if (asyncResult._exception != null)
+			if(asyncResult._exception != null)
 			{
 				throw asyncResult._exception;
 			}
@@ -229,7 +229,8 @@ namespace Apache.NMS.WCF
 		/// </summary>
 		/// <param name="callback">The callback.</param>
 		/// <param name="state">The state.</param>
-		public CompletedAsyncResult(AsyncCallback callback, object state) : base(callback, state)
+		public CompletedAsyncResult(AsyncCallback callback, object state)
+			: base(callback, state)
 		{
 			Complete(true);
 		}
@@ -254,7 +255,8 @@ namespace Apache.NMS.WCF
 		/// </summary>
 		/// <param name="callback">The callback.</param>
 		/// <param name="state">The state.</param>
-		protected TypedAsyncResult(AsyncCallback callback, object state) : base(callback, state)
+		protected TypedAsyncResult(AsyncCallback callback, object state)
+			: base(callback, state)
 		{
 		}
 
@@ -299,7 +301,8 @@ namespace Apache.NMS.WCF
 		/// <param name="data">The data.</param>
 		/// <param name="callback">The callback.</param>
 		/// <param name="state">The state.</param>
-		public TypedCompletedAsyncResult(T data, AsyncCallback callback, object state) : base(callback, state)
+		public TypedCompletedAsyncResult(T data, AsyncCallback callback, object state)
+			: base(callback, state)
 		{
 			Complete(data, true);
 		}
@@ -312,7 +315,7 @@ namespace Apache.NMS.WCF
 		public new static T End(IAsyncResult result)
 		{
 			TypedCompletedAsyncResult<T> completedResult = result as TypedCompletedAsyncResult<T>;
-			if (completedResult == null)
+			if(completedResult == null)
 			{
 				throw new ArgumentException("Invalid async messageBody.", "messageBody");
 			}

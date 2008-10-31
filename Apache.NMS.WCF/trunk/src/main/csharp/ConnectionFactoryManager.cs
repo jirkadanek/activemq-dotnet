@@ -16,9 +16,6 @@
  */
 
 using System;
-using Apache.NMS;
-using Apache.NMS.ActiveMQ;
-using System.Diagnostics;
 
 namespace Apache.NMS.WCF
 {
@@ -42,7 +39,7 @@ namespace Apache.NMS.WCF
 		/// <returns></returns>
 		public static ConnectionFactoryManager GetInstance()
 		{
-			if (_instance == null)
+			if(_instance == null)
 			{
 				_instance = new ConnectionFactoryManager();
 			}
@@ -60,10 +57,10 @@ namespace Apache.NMS.WCF
 		/// <returns></returns>
 		public IConnection CreateConnection(Uri connection)
 		{
-			lock (this)
+			lock(this)
 			{
-				Console.WriteLine("Connecting to {0}{1}{2}", connection.Scheme, Uri.SchemeDelimiter, connection.Authority);
-				primaryFactory = new ConnectionFactory(connection);
+				Tracer.InfoFormat("Connecting to {0}{1}{2}", connection.Scheme, Uri.SchemeDelimiter, connection.Authority);
+				primaryFactory = new NMSConnectionFactory(connection);
 				return primaryFactory.CreateConnection();
 			}
 		}

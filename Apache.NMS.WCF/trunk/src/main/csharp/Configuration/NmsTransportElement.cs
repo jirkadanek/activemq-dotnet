@@ -16,9 +16,9 @@
  */
 
 using System;
+using System.Configuration;
 using System.ServiceModel.Channels;
 using System.ServiceModel.Configuration;
-using System.Configuration;
 
 namespace Apache.NMS.WCF
 {
@@ -36,8 +36,10 @@ namespace Apache.NMS.WCF
 		[ConfigurationProperty(NmsConfigurationStrings.Destination, IsRequired = true)]
 		public string Destination
 		{
-			get { return (string)base[NmsConfigurationStrings.Destination]; }
-			set { base[NmsConfigurationStrings.Destination] = value; 
+			get { return (string) base[NmsConfigurationStrings.Destination]; }
+			set
+			{
+				base[NmsConfigurationStrings.Destination] = value;
 			}
 		}
 
@@ -49,7 +51,7 @@ namespace Apache.NMS.WCF
 		[ConfigurationProperty(NmsConfigurationStrings.DestinationType, DefaultValue = NmsConfigurationDefaults.Destination)]
 		public DestinationType DestinationType
 		{
-			get { return (DestinationType)Enum.Parse(typeof(DestinationType), base[NmsConfigurationStrings.DestinationType].ToString(), true); }
+			get { return (DestinationType) Enum.Parse(typeof(DestinationType), base[NmsConfigurationStrings.DestinationType].ToString(), true); }
 			set { base[NmsConfigurationStrings.DestinationType] = value; }
 		}
 
@@ -93,7 +95,7 @@ namespace Apache.NMS.WCF
 		{
 			base.ApplyConfiguration(bindingElement);
 
-			NmsTransportBindingElement nmsBindingElement = (NmsTransportBindingElement)bindingElement;
+			NmsTransportBindingElement nmsBindingElement = (NmsTransportBindingElement) bindingElement;
 			nmsBindingElement.Destination = Destination;
 			nmsBindingElement.DestinationType = DestinationType;
 		}
@@ -109,7 +111,7 @@ namespace Apache.NMS.WCF
 		{
 			base.CopyFrom(from);
 
-			NmsTransportElement source = (NmsTransportElement)from;
+			NmsTransportElement source = (NmsTransportElement) from;
 			Destination = source.Destination;
 			DestinationType = source.DestinationType;
 		}
@@ -122,7 +124,7 @@ namespace Apache.NMS.WCF
 		{
 			base.InitializeFrom(bindingElement);
 
-			NmsTransportBindingElement nmsBindingElement = (NmsTransportBindingElement)bindingElement;
+			NmsTransportBindingElement nmsBindingElement = (NmsTransportBindingElement) bindingElement;
 			Destination = nmsBindingElement.Destination;
 			DestinationType = nmsBindingElement.DestinationType;
 		}

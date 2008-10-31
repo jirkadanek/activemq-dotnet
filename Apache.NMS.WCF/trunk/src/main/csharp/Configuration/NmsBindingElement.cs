@@ -33,7 +33,8 @@ namespace Apache.NMS.WCF
 		/// <summary>
 		/// Initializes a new instance of the <see cref="NmsBindingElement"/> class.
 		/// </summary>
-		public NmsBindingElement() : this(null)
+		public NmsBindingElement()
+			: this(null)
 		{
 		}
 
@@ -41,7 +42,8 @@ namespace Apache.NMS.WCF
 		/// Initializes a new instance of the <see cref="NmsBindingElement"/> class.
 		/// </summary>
 		/// <param name="configurationName">Name of the configuration.</param>
-		public NmsBindingElement(string configurationName) : base(configurationName)
+		public NmsBindingElement(string configurationName)
+			: base(configurationName)
 		{
 		}
 
@@ -56,7 +58,7 @@ namespace Apache.NMS.WCF
 		[ConfigurationProperty(NmsConfigurationStrings.Destination, IsRequired = true)]
 		public string Destination
 		{
-			get { return (string)base[NmsConfigurationStrings.Destination]; }
+			get { return (string) base[NmsConfigurationStrings.Destination]; }
 			set { base[NmsConfigurationStrings.Destination] = value; }
 		}
 
@@ -68,7 +70,7 @@ namespace Apache.NMS.WCF
 		[ConfigurationProperty(NmsConfigurationStrings.DestinationType, DefaultValue = NmsConfigurationDefaults.Destination)]
 		public DestinationType DestinationType
 		{
-			get { return (DestinationType)Enum.Parse(typeof(DestinationType), base[NmsConfigurationStrings.DestinationType].ToString(), true); }
+			get { return (DestinationType) Enum.Parse(typeof(DestinationType), base[NmsConfigurationStrings.DestinationType].ToString(), true); }
 			set { base[NmsConfigurationStrings.DestinationType] = value; }
 		}
 
@@ -102,7 +104,7 @@ namespace Apache.NMS.WCF
 		protected override void InitializeFrom(Binding binding)
 		{
 			base.InitializeFrom(binding);
-			NmsBinding nmsBinding = (NmsBinding)binding;
+			NmsBinding nmsBinding = (NmsBinding) binding;
 			Destination = nmsBinding.Destination;
 			DestinationType = nmsBinding.DestinationType;
 		}
@@ -113,17 +115,17 @@ namespace Apache.NMS.WCF
 		/// <param name="binding">A binding.</param>
 		protected override void OnApplyConfiguration(Binding binding)
 		{
-			if (binding == null)
+			if(binding == null)
 			{
 				throw new ArgumentNullException("binding");
 			}
 
-			if (binding.GetType() != typeof(NmsBinding))
+			if(binding.GetType() != typeof(NmsBinding))
 			{
 				throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, "Invalid type for binding. Expected tpye: {0}. Type passed in: {1}.", typeof(NmsBinding).AssemblyQualifiedName, binding.GetType().AssemblyQualifiedName));
 			}
 
-			NmsBinding nmsBinding = (NmsBinding)binding;
+			NmsBinding nmsBinding = (NmsBinding) binding;
 			nmsBinding.Destination = Destination;
 			nmsBinding.DestinationType = DestinationType;
 		}
