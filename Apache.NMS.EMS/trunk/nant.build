@@ -30,8 +30,8 @@
   <property name="project.cls.compliant" value="false"/>
 
   <!-- Repository organized as: organization/module/version/plaform/artifact, platform might be something like 'all' or 'net-2.0/release' -->
-  <property name="nunit.dll" value="${basedir}/lib/${current.build.framework}/nunit.framework.dll" dynamic="true"/>
-  <property name="nunit.extensions.dll" value="${basedir}/lib/${current.build.framework}/nunit.framework.extensions.dll" dynamic="true"/>
+  <property name="nunit.dll" value="${basedir}/lib/NUnit/${current.build.framework}/nunit.framework.dll" dynamic="true"/>
+  <property name="nunit.extensions.dll" value="${basedir}/lib/NUnit/${current.build.framework}/nunit.framework.extensions.dll" dynamic="true"/>
   <property name="Apache.NMS.dll" value="${basedir}/lib/Apache.NMS/${current.build.framework}/Apache.NMS.dll" dynamic="true"/>
   <property name="Apache.NMS.pdb" value="${basedir}/lib/Apache.NMS/${current.build.framework}/Apache.NMS.pdb" dynamic="true"/>
   <property name="Apache.NMS.Test.dll" value="${basedir}/lib/Apache.NMS/${current.build.framework}//Apache.NMS.Test.dll" dynamic="true"/>
@@ -64,10 +64,10 @@
               value="nunit.framework.dll,nunit.framework.extensions.dll" />
 
     <!-- Property grouping for 'vendor.tibco.org' -->
-    <property name="vendor.nunit.org.name" value="TIBCO.EMS"/>
-    <property name="vendor.nunit.org.group" value="org.tibco.ems"/>
-    <property name="vendor.nunit.org.version" value="4.1.0"/>
-    <property name="vendor.nunit.org.filenames"
+    <property name="vendor.tibco.org.name" value="TIBCO.EMS"/>
+    <property name="vendor.tibco.org.group" value="org.tibco.ems"/>
+    <property name="vendor.tibco.org.version" value="4.1.0"/>
+    <property name="vendor.tibco.org.filenames"
               value="TIBCO.EMS.dll" />
   </target>
 
