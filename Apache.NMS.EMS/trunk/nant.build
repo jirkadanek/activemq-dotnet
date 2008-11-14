@@ -111,8 +111,10 @@
     </fileset>
 
     <fileset id="install.filenames">
-      <include name="${project.name}.dll"/>
-      <include name="${project.name}.pdb"/>
+      <include name="LICENSE.txt"/>
+      <include name="NOTICE.txt"/>
+      <include name="${build.bin.dir}/${project.name}.dll"/>
+      <include name="${build.bin.dir}/${project.name}.pdb"/>
       <include name="nmsprovider-tibco.config"/>
     </fileset>
 
@@ -125,7 +127,7 @@
       <include name="${build.bin.dir}/${project.name}.Test.dll"/>
       <include name="${build.bin.dir}/${project.name}.Test.pdb"/>
       <include name="${build.bin.dir}/${project.name}.Test.xml"/>
-      <include name="${build.bin.dir}/nmsprovider-*.config"/>
+      <include name="nmsprovider-*.config"/>
     </fileset>
   </target>
 
