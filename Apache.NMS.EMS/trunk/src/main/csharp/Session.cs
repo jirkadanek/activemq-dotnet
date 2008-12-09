@@ -104,6 +104,15 @@ namespace Apache.NMS.EMS
 			return EMSConvert.ToNMSTemporaryTopic(this.tibcoSession.CreateTemporaryTopic());
 		}
 
+		/// <summary>
+		/// Delete a destination (Queue, Topic, Temp Queue, Temp Topic).
+		/// </summary>
+		public void DeleteDestination(IDestination destination)
+		{
+			// TODO: Implement if possible.  If not possible, then change exception to NotSupportedException().
+			throw new NotImplementedException();
+		}
+
 		public Apache.NMS.IMessage CreateMessage()
 		{
 			return EMSConvert.ToNMSMessage(this.tibcoSession.CreateMessage());
