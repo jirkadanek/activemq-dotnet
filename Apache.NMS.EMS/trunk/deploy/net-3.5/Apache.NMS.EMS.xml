@@ -255,6 +255,11 @@
             Represents a NMS session to TIBCO.
             </summary>
         </member>
+        <member name="M:Apache.NMS.EMS.Session.DeleteDestination(Apache.NMS.IDestination)">
+            <summary>
+            Delete a destination (Queue, Topic, Temp Queue, Temp Topic).
+            </summary>
+        </member>
         <member name="F:Apache.NMS.EMS.Session.requestTimeout">
             <summary>
             The default timeout for network requests.
