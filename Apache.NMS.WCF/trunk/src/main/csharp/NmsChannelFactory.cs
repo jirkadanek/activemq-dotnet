@@ -25,18 +25,20 @@ namespace Apache.NMS.WCF
 	/// <summary>
 	/// Factory for message channels.
 	/// </summary>
-	public class NmsChannelFactory : ChannelFactoryBase<IOutputChannel>
+	public class NmsChannelFactory<TChannel> : ChannelFactoryBase<TChannel>
 	{
 		#region Constructors
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="NmsChannelFactory"/> class.
+		/// Initializes a new instance of the <see cref="NmsChannelFactory&lt;TChannel&gt;"/> class.
 		/// </summary>
+		/// <param name="bindingElement">The binding element.</param>
 		/// <param name="context">The context.</param>
-		/// <param name="transportElement">The binding element.</param>
-		internal NmsChannelFactory(NmsTransportBindingElement transportElement, BindingContext context)
+		internal NmsChannelFactory(NmsTransportBindingElement bindingElement, BindingContext context)
 			: base(context.Binding)
 		{
+			_bindingElement = bindingElement;
+
 			Collection<MessageEncodingBindingElement> messageEncoderBindingElements = context.BindingParameters.FindAll<MessageEncodingBindingElement>();
 			if(messageEncoderBindingElements.Count > 1)
 			{
@@ -46,9 +48,9 @@ namespace Apache.NMS.WCF
 				? NmsConstants.DefaultMessageEncoderFactory
 				: messageEncoderBindingElements[0].CreateMessageEncoderFactory();
 
-			_bufferManager = BufferManager.CreateBufferManager(transportElement.MaxBufferPoolSize, Int32.MaxValue);
-			_destination = transportElement.Destination;
-			_destinationType = transportElement.DestinationType;
+			_bufferManager = BufferManager.CreateBufferManager(bindingElement.MaxBufferPoolSize, Int32.MaxValue);
+			_destination = bindingElement.Destination;
+			_destinationType = bindingElement.DestinationType;
 
 			Tracer.DebugFormat("Destination ({0}) : {1}", _destinationType, _destination);
 		}
@@ -100,9 +102,24 @@ namespace Apache.NMS.WCF
 		/// </returns>
 		/// <param name="address">The <see cref="T:System.ServiceModel.EndpointAddress" /> of the remote endpoint to which the channel sends messages.</param>
 		/// <param name="via">The <see cref="T:System.Uri" /> that contains the transport address to which messages are sent on the output channel.</param>
-		protected override IOutputChannel OnCreateChannel(EndpointAddress address, Uri via)
+		protected override TChannel OnCreateChannel(EndpointAddress address, Uri via)
 		{
-			return new NmsOutputChannel(BufferManager, MessageEncoderFactory, address, this, via);
+			if(!String.Equals(address.Uri.Scheme, _bindingElement.Scheme, StringComparison.InvariantCultureIgnoreCase))
+			{
+				throw new ArgumentException(String.Format("The scheme {0} specified in address is not supported.", address.Uri.Scheme), "remoteAddress");
+			}
+
+			if(typeof(TChannel) == typeof(IOutputChannel))
+			{
+				return (TChannel) (object) new NmsOutputChannel(this, address, via, BufferManager, MessageEncoderFactory, Destination, DestinationType);
+			}
+
+			if(typeof(TChannel) == typeof(IOutputSessionChannel))
+			{
+				return (TChannel) (object) new NmsOutputSessionChannel(this, via, address, BufferManager, MessageEncoderFactory, Destination, DestinationType);
+			}
+
+			throw new NotSupportedException(String.Format("The requested channel type {0} is not supported", typeof(TChannel)));
 		}
 
 		#endregion
@@ -156,6 +173,7 @@ namespace Apache.NMS.WCF
 		private readonly MessageEncoderFactory _encoderFactory;
 		private readonly string _destination;
 		private readonly DestinationType _destinationType;
+		private readonly NmsTransportBindingElement _bindingElement;
 
 		#endregion
 	}

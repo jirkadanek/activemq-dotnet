@@ -38,33 +38,11 @@ namespace Apache.NMS.WCF
 		}
 
 		/// <summary>
-		/// Gets the name of the queue from the URI.
+		/// Creates a unique session identifier.
 		/// </summary>
-		/// <param name="uri">The URI of the message queue.</param>
-		public static string GetQueueName(Uri uri)
+		public static string CreateUniqueSessionId()
 		{
-			return uri.LocalPath.TrimStart('/');
-		}
-
-		/// <summary>
-		/// Gets the destination.
-		/// </summary>
-		/// <param name="session">The session.</param>
-		/// <param name="destination">The destination.</param>
-		/// <param name="destinationType">Type of the destination.</param>
-		public static IDestination GetDestination(NMS.ISession session, string destination, DestinationType destinationType)
-		{
-			switch(destinationType)
-			{
-			case DestinationType.Topic:
-			return session.GetTopic(destination);
-			case DestinationType.TemporaryQueue:
-			return session.CreateTemporaryQueue();
-			case DestinationType.TemporaryTopic:
-			return session.CreateTemporaryTopic();
-			default:
-			return session.GetQueue(destination);
-			}
+			return "uuid:/session-gram/" + Guid.NewGuid();
 		}
 	}
 }

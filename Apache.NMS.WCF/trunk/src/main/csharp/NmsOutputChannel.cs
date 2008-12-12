@@ -20,28 +20,30 @@ using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.Text;
 using System.Xml;
+using Apache.NMS.Util;
 
 namespace Apache.NMS.WCF
 {
 	/// <summary>
-	/// Channel for sending messages.
+	/// Client-side implementation of the sessionless one-way channel.
 	/// </summary>
-	public class NmsOutputChannel : NmsChannelBase, IOutputChannel
+	public class NmsOutputChannel : NmsOutputChannelBase, IOutputChannel
 	{
 		#region Constructors
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="NmsOutputChannel"/> class.
 		/// </summary>
+		/// <param name="factory">The factory that created the channel.</param>
+		/// <param name="remoteAddress">The remote address of the channel.</param>
+		/// <param name="via">The URI that contains the transport address to which messages are sent on the output channel.</param>
 		/// <param name="bufferManager">The buffer manager.</param>
 		/// <param name="encoderFactory">The encoder factory.</param>
-		/// <param name="address">The address.</param>
-		/// <param name="parent">The parent.</param>
-		/// <param name="via">The via.</param>
-		public NmsOutputChannel(BufferManager bufferManager, MessageEncoderFactory encoderFactory, EndpointAddress address, NmsChannelFactory parent, Uri via)
-			: base(bufferManager, encoderFactory, address, parent, parent.Destination, parent.DestinationType)
+		/// <param name="destination">The name of the ActiveMQ destination.</param>
+		/// <param name="destinationType">The type of the ActiveMQ destination (either a queue or a topic, permanent or temporary).</param>
+		public NmsOutputChannel(ChannelManagerBase factory, EndpointAddress remoteAddress, Uri via, BufferManager bufferManager, MessageEncoderFactory encoderFactory, string destination, DestinationType destinationType)
+			: base(factory, remoteAddress, via, bufferManager, encoderFactory, destination, destinationType)
 		{
-			_via = via;
 			_connection = ConnectionFactoryManager.GetInstance().CreateConnection(via);
 			_connection.Start();
 		}
@@ -67,16 +69,14 @@ namespace Apache.NMS.WCF
 		public void Send(Message message, TimeSpan timeout)
 		{
 			ThrowIfDisposedOrNotOpen();
+			RemoteAddress.ApplyTo(message);
 
 			using(NMS.ISession session = _connection.CreateSession())
 			{
-				IDestination destination = NmsChannelHelper.GetDestination(session, Destination, DestinationType);
+				IDestination destination = SessionUtil.GetDestination(session, Destination, DestinationType);
 				using(IMessageProducer producer = session.CreateProducer(destination))
 				{
 					producer.Persistent = true;
-					message.Headers.To = RemoteAddress.Uri;
-					//TODO: check if this is synonymous with the above operation
-					//RemoteAddress.ApplyTo(message);
 
 					ITextMessage request = session.CreateTextMessage(TranslateMessage(message));
 					producer.Send(request);
@@ -94,7 +94,7 @@ namespace Apache.NMS.WCF
 		/// <param name="message">The message to be translated.</param>
 		private string TranslateMessage(Message message)
 		{
-			return (Encoder.MessageVersion == MessageVersion.Soap11)
+			return (this.Encoder.MessageVersion == MessageVersion.Soap11)
 				? TranslateMessageAsSoap11(message)
 				: TranslateMessageAsSoap12(message);
 		}
@@ -167,17 +167,6 @@ namespace Apache.NMS.WCF
 		public void EndSend(IAsyncResult result)
 		{
 			NmsAsyncResult.End(result);
-		}
-
-		/// <summary>
-		/// Gets the URI that contains the transport address to which messages are sent on the output channel.
-		/// </summary>
-		/// <returns>
-		/// The <see cref="T:System.Uri" /> that contains the transport address to which messages are sent on the output channel.
-		/// </returns>
-		public Uri Via
-		{
-			get { return _via; }
 		}
 
 		#endregion
@@ -307,7 +296,6 @@ namespace Apache.NMS.WCF
 
 		#region Private members
 
-		private readonly Uri _via;
 		private readonly IConnection _connection;
 
 		#endregion

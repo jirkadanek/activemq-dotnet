@@ -19,22 +19,23 @@ using System;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.Text;
+using Apache.NMS.Util;
 
 namespace Apache.NMS.WCF
 {
 	/// <summary>
-	/// Channel listener for messages.
+	/// Server-side listener for sessionless input channels.
 	/// </summary>
-	public class NmsChannelListener : ChannelListenerBase<IInputChannel>
+	public class NmsInputChannelListener : ChannelListenerBase<IInputChannel>
 	{
 		#region Constructors
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="NmsChannelListener"/> class.
+		/// Initializes a new instance of the <see cref="NmsInputChannelListener"/> class.
 		/// </summary>
 		/// <param name="transportElement">The binding element.</param>
 		/// <param name="context">The context.</param>
-		internal NmsChannelListener(NmsTransportBindingElement transportElement, BindingContext context)
+		internal NmsInputChannelListener(NmsTransportBindingElement transportElement, BindingContext context)
 			: base(context.Binding)
 		{
 			_bufferManager = BufferManager.CreateBufferManager(transportElement.MaxBufferPoolSize, (int) transportElement.MaxReceivedMessageSize);
@@ -53,6 +54,8 @@ namespace Apache.NMS.WCF
 		}
 
 		#endregion
+
+		#region Public properties
 
 		/// <summary>
 		/// Gets the message encoder factory.
@@ -82,6 +85,8 @@ namespace Apache.NMS.WCF
 			get { return _destinationType; }
 			set { _destinationType = value; }
 		}
+
+		#endregion
 
 		#region Implementation of CommunicationObject
 
@@ -329,7 +334,7 @@ namespace Apache.NMS.WCF
 
 		/// <summary>
 		/// Matches an incoming message to its waiting listener,
-		/// using the FilterTable to dispatch the message to the correc
+		/// using the FilterTable to dispatch the message to the correct
 		/// listener. If no listener is waiting for the message, it is silently
 		/// discarded.
 		/// </summary>
@@ -340,17 +345,18 @@ namespace Apache.NMS.WCF
 				return;
 			}
 
-			Tracer.Debug("Dispatching incoming message");
 			try
 			{
 				NmsInputChannel newChannel;
 				bool channelCreated = CreateOrRetrieveChannel(out newChannel);
 
+				Tracer.Debug("Dispatching incoming message");
 				newChannel.Dispatch(message);
 
 				if(channelCreated)
 				{
 					//Hand the channel off to whomever is waiting for AcceptChannel() to complete
+					Tracer.Debug("Handing off channel");
 					_channelQueue.EnqueueAndDispatch(newChannel);
 				}
 			}
@@ -361,9 +367,9 @@ namespace Apache.NMS.WCF
 		}
 
 		/// <summary>
-		/// Creates the or retrieve channel.
+		/// Creates or retrieves the channel.
 		/// </summary>
-		/// <param name="newChannel">The new channel.</param>
+		/// <param name="newChannel">The channel.</param>
 		private bool CreateOrRetrieveChannel(out NmsInputChannel newChannel)
 		{
 			bool channelCreated = false;
@@ -411,11 +417,11 @@ namespace Apache.NMS.WCF
 		{
 			_connection = OpenConnection(uri);
 			_session = OpenSession(_connection);
-			_destination = NmsChannelHelper.GetDestination(_session, Destination, DestinationType);
+			_destination = SessionUtil.GetDestination(_session, Destination, DestinationType);
 			_consumer = CreateConsumer(_session, _destination);
 
 			EndpointAddress address = new EndpointAddress(uri);
-			return new NmsInputChannel(_bufferManager, _messageEncoderFactory, address, this);
+			return new NmsInputChannel(this, address);
 		}
 
 		/// <summary>
@@ -437,10 +443,10 @@ namespace Apache.NMS.WCF
 		/// Opens a session to communicate with a message queue.
 		/// </summary>
 		/// <param name="connection">The connection to the ActiveMQ message broker.</param>
-		/// <returns>A sessio </returns>
+		/// <returns>A session.</returns>
 		/// <exception cref="InvalidOperationException">the <paramref name="connection" /> has not yet
 		/// been started.</exception>
-		private NMS.ISession OpenSession(IConnection connection)
+		private ISession OpenSession(IConnection connection)
 		{
 			if(!connection.IsStarted)
 			{
@@ -448,24 +454,9 @@ namespace Apache.NMS.WCF
 			}
 
 			Tracer.Debug("Opening session...");
-			NMS.ISession session = connection.CreateSession();
+			ISession session = connection.CreateSession();
 			Tracer.Debug("Session open");
 			return session;
-		}
-
-		/// <summary>
-		/// Opens the destination (which can be either a queue or a topic, for publish-subscribe).
-		/// </summary>
-		/// <param name="session">The session that will be used for communicating with the destination.</param>
-		/// <param name="uri">The URI of the destination.</param>
-		private IDestination OpenDestination(NMS.ISession session, Uri uri)
-		{
-			string queueName = NmsChannelHelper.GetQueueName(uri);
-			Tracer.DebugFormat("Connecting to queue '{0}'...", queueName);
-			IDestination destination = session.GetQueue(queueName);
-			Tracer.Debug("Connected to queue");
-
-			return destination;
 		}
 
 		/// <summary>
@@ -475,7 +466,7 @@ namespace Apache.NMS.WCF
 		/// <param name="destination">The destination.</param>
 		/// <returns>A consumer for any messages received during the session;
 		/// messages will be consumed by the attached Listener.</returns>
-		private IMessageConsumer CreateConsumer(NMS.ISession session, IDestination destination)
+		private IMessageConsumer CreateConsumer(ISession session, IDestination destination)
 		{
 			Tracer.Debug("Creating message listener...");
 			IMessageConsumer consumer = session.CreateConsumer(destination);
@@ -490,7 +481,7 @@ namespace Apache.NMS.WCF
 		/// <param name="message">The message.</param>
 		private void OnReceiveMessage(IMessage message)
 		{
-			Tracer.Info("Received message");
+			Tracer.Debug("Decoding message");
 			string soapMsg = ((ITextMessage) message).Text;
 			byte[] buffer = Encoding.ASCII.GetBytes(soapMsg);
 			int dataLength = buffer.Length;
@@ -503,27 +494,31 @@ namespace Apache.NMS.WCF
 			Array.Copy(data.Array, data.Offset, msgContents, 0, msgContents.Length);
 			Message msg = _messageEncoderFactory.Encoder.ReadMessage(data, _bufferManager);
 
-			Tracer.Info(msg);
+			Tracer.Debug(msg);
 			Dispatch(msg);
 		}
 
 		/// <summary>
 		/// Called when an exception is thrown by the ActiveMQ listener.
 		/// </summary>
+		/// <remarks>
+		/// <see cref="NMSException" />s will be caught and logged; all other exceptions will
+		/// be thrown back up to the WCF service.
+		/// </remarks>
 		/// <param name="exception">The exception that was thrown.</param>
 		private void OnExceptionThrown(Exception exception)
 		{
-			// TODO: investigate whether it is normal behaviour for a NRE to be thrown during shutdown
-			if(exception.GetType() == typeof(NullReferenceException))
+			if(exception is NMSException)
 			{
+				Tracer.ErrorFormat("{0} thrown : {1}\n{2}",
+					exception.GetType().Name,
+					exception.Message,
+					exception.StackTrace);
 				return;
 			}
 
 			// TODO: can we recover from the exception? Do we convert to WCF exceptions?
-			Tracer.ErrorFormat("{0} thrown : {1}\n{2}",
-				exception.GetType().Name,
-				exception.Message,
-				exception.StackTrace);
+			throw exception;
 		}
 
 		/// <summary>

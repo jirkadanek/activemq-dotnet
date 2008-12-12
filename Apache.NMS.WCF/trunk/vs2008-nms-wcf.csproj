@@ -66,12 +66,13 @@
     </NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Apache.NMS, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Apache.NMS, Version=1.1.0.0, Culture=neutral, PublicKeyToken=2a329723af30bc8d, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>lib\Apache.NMS\net-3.5\Apache.NMS.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Runtime.Serialization">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
@@ -121,12 +122,16 @@
     <Compile Include="src\main\csharp\ConnectionFactoryManager.cs" />
     <Compile Include="src\main\csharp\InputQueue.cs" />
     <Compile Include="src\main\csharp\NmsAsyncResult.cs" />
-    <Compile Include="src\main\csharp\NmsChannelBase.cs" />
+    <Compile Include="src\main\csharp\NmsInputQueueChannelBase.cs" />
     <Compile Include="src\main\csharp\NmsChannelFactory.cs" />
     <Compile Include="src\main\csharp\NmsChannelHelper.cs" />
-    <Compile Include="src\main\csharp\NmsChannelListener.cs" />
+    <Compile Include="src\main\csharp\NmsInputChannelListener.cs" />
     <Compile Include="src\main\csharp\NmsInputChannel.cs" />
+    <Compile Include="src\main\csharp\NmsInputSessionChannel.cs" />
+    <Compile Include="src\main\csharp\NmsInputSessionChannelListener.cs" />
     <Compile Include="src\main\csharp\NmsOutputChannel.cs" />
+    <Compile Include="src\main\csharp\NmsOutputChannelBase.cs" />
+    <Compile Include="src\main\csharp\NmsOutputSessionChannel.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSHARP.Targets" />
   <PropertyGroup>

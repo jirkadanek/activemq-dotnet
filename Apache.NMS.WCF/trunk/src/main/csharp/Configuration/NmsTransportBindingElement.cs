@@ -26,12 +26,20 @@ using System.Xml;
 namespace Apache.NMS.WCF
 {
 	/// <summary>
-	/// key class to specify the custom transport class and its schema.
-	/// Its key role in the WCF is to be the 'factory of factories'.  It determines what shape
-	/// the channel will be.  In this case by returning channel factory (for the client) that returns a IOutputChannel
-	/// and a channel listener (for the server) that returns a IInputChannel, this class determines
-	/// that this implementation is a datagram 'shape'.
+	/// Key class to specify the custom transport class and its schema.
 	/// </summary>
+	/// <remarks>
+	/// <para>
+	/// Its key role in the WCF is to be the 'factory of factories'.  It determines what shape
+	/// the channel will be. In this case by returning channel factory (for the client) that returns an
+	/// <see cref="IOutputChannel" /> or <see cref="IOutputSessionChannel" />, and a channel listener 
+	/// (for the server) that returns an <see cref="IInputChannel" /> or <see cref="IInputSessionChannel" />,
+	/// this class determines that this implementation is a datagram 'shape'.
+	/// </para>
+	/// <para>
+	/// The request/reply channel shape is not supported by WCF.
+	/// </para>
+	/// </remarks>
 	public class NmsTransportBindingElement : TransportBindingElement, IWsdlExportExtension, IPolicyExportExtension
 	{
 		#region Constructors
@@ -85,31 +93,31 @@ namespace Apache.NMS.WCF
 
 		/// <summary>
 		/// Determines whether this instance can build a channel factory in the specified context.
-		/// In this case an implementation of IOutputChannel.
+		/// Only implementations of <see cref="IOutputChannel" /> and <see cref="IOutputSessionChannel" /> are supported.
 		/// </summary>
 		/// <typeparam name="TChannel">The type of the channel.</typeparam>
 		/// <param name="context">The context.</param>
 		/// <returns>
-		/// 	<c>true</c> if this instance [can build channel factory] the specified context; otherwise, <c>false</c>.
+		/// 	<c>true</c> if the requested channel factory can be built; otherwise, <c>false</c>.
 		/// </returns>
 		public override bool CanBuildChannelFactory<TChannel>(BindingContext context)
 		{
-			return (typeof(TChannel) == typeof(IOutputChannel));
+			return (typeof(TChannel) == typeof(IOutputChannel) || typeof(TChannel) == typeof(IOutputSessionChannel));
 		}
 
 		/// <summary>
 		/// Determines whether this instance can build a channel listener in the specified context.
-		/// In this case in implementation that will return an IInputChannel.
+		/// Only implementations of <see cref="IInputChannel" /> and <see cref="IInputSessionChannel" /> are supported.
 		/// </summary>
 		/// <typeparam name="TChannel">The type of the channel.</typeparam>
 		/// <param name="context">The context.</param>
 		/// <returns>
-		/// 	<c>true</c> if this instance [can build channel listener] the specified context; otherwise, <c>false</c>.
+		/// 	<c>true</c> if the requested channel listener can be built; otherwise, <c>false</c>.
 		/// </returns>
 		/// <exception cref="ArgumentException">the requested channel does not implement <see cref="IReplyChannel" />.</exception>
 		public override bool CanBuildChannelListener<TChannel>(BindingContext context)
 		{
-			return (typeof(TChannel) == typeof(IInputChannel));
+			return (typeof(TChannel) == typeof(IInputChannel) || typeof(TChannel) == typeof(IInputSessionChannel));
 		}
 
 		/// <summary>
@@ -129,7 +137,7 @@ namespace Apache.NMS.WCF
 			{
 				throw new ArgumentException(String.Format("Unsupported channel type: {0}.", typeof(TChannel).Name));
 			}
-			return (IChannelFactory<TChannel>) new NmsChannelFactory(this, context);
+			return (IChannelFactory<TChannel>) new NmsChannelFactory<TChannel>(this, context);
 		}
 
 		/// <summary>
@@ -144,11 +152,17 @@ namespace Apache.NMS.WCF
 			{
 				throw new ArgumentNullException("context");
 			}
+
 			if(!CanBuildChannelListener<TChannel>(context))
 			{
 				throw new ArgumentException(String.Format("Unsupported channel type: {0}.", typeof(TChannel).Name));
 			}
-			return (IChannelListener<TChannel>) new NmsChannelListener(this, context);
+
+			if (typeof(TChannel) == typeof(IInputSessionChannel))
+			{
+				return (IChannelListener<TChannel>)new NmsInputSessionChannelListener(this, context);
+			}
+			return (IChannelListener<TChannel>) new NmsInputChannelListener(this, context);
 		}
 
 		/// <summary>

@@ -24,24 +24,24 @@ using System.Threading;
 namespace Apache.NMS.WCF
 {
 	// ItemDequeuedCallback is called as an item is dequeued from the InputQueue.  The 
-	// InputQueue lock is not held during the callback.  However, the user code is
-	// not notified of the item being available until the callback returns.  If you
-	// are not sure if the callback blocks for a long time, then first call 
+	// InputQueue lock is not held during the callback.  However, the user code will
+	// not be notified of the item being available until the callback returns.  If you
+	// are not sure if the callback will block for a long time, then first call 
 	// IOThreadScheduler.ScheduleCallback to get to a "safe" thread.
-	internal delegate void ItemDequeuedCallback();
+	delegate void ItemDequeuedCallback();
 
 	/// <summary>
 	/// Handles asynchronous interactions between producers and consumers. 
 	/// Producers can dispatch available data to the input queue, 
-	/// where it is dispatched to a waiting consumer or stored until a
+	/// where it will be dispatched to a waiting consumer or stored until a
 	/// consumer becomes available. Consumers can synchronously or asynchronously
-	/// request data from the queue, which is returned when data becomes
+	/// request data from the queue, which will be returned when data becomes
 	/// available.
 	/// </summary>
 	/// <typeparam name="T">The concrete type of the consumer objects that are waiting for data.</typeparam>
-	internal class InputQueue<T> : IDisposable where T : class
+	class InputQueue<T> : IDisposable where T : class
 	{
-		//Stores items that are waiting to be accessed.
+		//Stores items that are waiting to be consumed.
 		ItemQueue itemQueue;
 
 		//Each IQueueReader represents some consumer that is waiting for
@@ -51,7 +51,7 @@ namespace Apache.NMS.WCF
 
 		//Each IQueueWaiter represents some waiter that is waiting for
 		//items to appear in the queue.  When any item appears, all
-		//waiters are signaled.
+		//waiters are signalled.
 		List<IQueueWaiter> waiterList;
 
 		static WaitCallback onInvokeDequeuedCallback;
@@ -60,9 +60,9 @@ namespace Apache.NMS.WCF
 		static WaitCallback completeWaitersFalseCallback;
 		static WaitCallback completeWaitersTrueCallback;
 
-		//Represents the current state of the InputQueue.
+		//Represents the current state of the InputQueue
 		//as it transitions through its lifecycle.
-		QueueState _queueState;
+		QueueState queueState;
 		enum QueueState
 		{
 			Open,
@@ -70,15 +70,12 @@ namespace Apache.NMS.WCF
 			Closed
 		}
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="InputQueue&lt;T&gt;"/> class.
-		/// </summary>
 		public InputQueue()
 		{
-			itemQueue = new ItemQueue();
-			readerQueue = new Queue<IQueueReader>();
-			waiterList = new List<IQueueWaiter>();
-			_queueState = QueueState.Open;
+			this.itemQueue = new ItemQueue();
+			this.readerQueue = new Queue<IQueueReader>();
+			this.waiterList = new List<IQueueWaiter>();
+			this.queueState = QueueState.Open;
 		}
 
 		public int PendingCount
@@ -88,6 +85,33 @@ namespace Apache.NMS.WCF
 				lock(ThisLock)
 				{
 					return itemQueue.ItemCount;
+				}
+			}
+		}
+
+		// added by Roman
+		public int NumberOfReaders
+		{
+			get
+			{
+				lock(ThisLock)
+				{
+					return readerQueue.Count;
+				}
+			}
+		}
+		public void Open()
+		{
+			lock(ThisLock)
+			{
+				if(queueState == QueueState.Open)
+				{
+					return;
+				}
+
+				if(queueState == QueueState.Closed)
+				{
+					throw new ObjectDisposedException(this.GetType().ToString());
 				}
 			}
 		}
@@ -103,7 +127,7 @@ namespace Apache.NMS.WCF
 
 			lock(ThisLock)
 			{
-				if(_queueState == QueueState.Open)
+				if(queueState == QueueState.Open)
 				{
 					if(itemQueue.HasAvailableItem)
 					{
@@ -116,7 +140,7 @@ namespace Apache.NMS.WCF
 						return reader;
 					}
 				}
-				else if(_queueState == QueueState.Shutdown)
+				else if(queueState == QueueState.Shutdown)
 				{
 					if(itemQueue.HasAvailableItem)
 					{
@@ -139,7 +163,7 @@ namespace Apache.NMS.WCF
 		{
 			lock(ThisLock)
 			{
-				if(_queueState == QueueState.Open)
+				if(queueState == QueueState.Open)
 				{
 					if(!itemQueue.HasAvailableItem)
 					{
@@ -148,7 +172,7 @@ namespace Apache.NMS.WCF
 						return waiter;
 					}
 				}
-				else if(_queueState == QueueState.Shutdown)
+				else if(queueState == QueueState.Shutdown)
 				{
 					if(!itemQueue.HasAvailableItem && itemQueue.HasAnyItem)
 					{
@@ -196,7 +220,7 @@ namespace Apache.NMS.WCF
 			{
 				if(completeWaitersTrueCallback == null)
 				{
-					completeWaitersTrueCallback = CompleteWaitersTrueCallback;
+					completeWaitersTrueCallback = new WaitCallback(CompleteWaitersTrueCallback);
 				}
 
 				ThreadPool.QueueUserWorkItem(completeWaitersTrueCallback, waiters);
@@ -205,7 +229,7 @@ namespace Apache.NMS.WCF
 			{
 				if(completeWaitersFalseCallback == null)
 				{
-					completeWaitersFalseCallback = CompleteWaitersFalseCallback;
+					completeWaitersFalseCallback = new WaitCallback(CompleteWaitersFalseCallback);
 				}
 
 				ThreadPool.QueueUserWorkItem(completeWaitersFalseCallback, waiters);
@@ -235,19 +259,19 @@ namespace Apache.NMS.WCF
 			IQueueReader[] outstandingReaders = null;
 			lock(ThisLock)
 			{
-				if(_queueState == QueueState.Shutdown)
+				if(queueState == QueueState.Shutdown)
 				{
 					return;
 				}
 
-				if(_queueState == QueueState.Closed)
+				if(queueState == QueueState.Closed)
 				{
 					return;
 				}
 
-				_queueState = QueueState.Shutdown;
+				this.queueState = QueueState.Shutdown;
 
-				if(readerQueue.Count > 0 && itemQueue.ItemCount == 0)
+				if(readerQueue.Count > 0 && this.itemQueue.ItemCount == 0)
 				{
 					outstandingReaders = new IQueueReader[readerQueue.Count];
 					readerQueue.CopyTo(outstandingReaders, 0);
@@ -268,7 +292,7 @@ namespace Apache.NMS.WCF
 		{
 			T value;
 
-			if(!Dequeue(timeout, out value))
+			if(!this.Dequeue(timeout, out value))
 			{
 				throw new TimeoutException(string.Format("Dequeue timed out in {0}.", timeout));
 			}
@@ -283,7 +307,7 @@ namespace Apache.NMS.WCF
 
 			lock(ThisLock)
 			{
-				if(_queueState == QueueState.Open)
+				if(queueState == QueueState.Open)
 				{
 					if(itemQueue.HasAvailableItem)
 					{
@@ -295,7 +319,7 @@ namespace Apache.NMS.WCF
 						readerQueue.Enqueue(reader);
 					}
 				}
-				else if(_queueState == QueueState.Shutdown)
+				else if(queueState == QueueState.Shutdown)
 				{
 					if(itemQueue.HasAvailableItem)
 					{
@@ -323,15 +347,18 @@ namespace Apache.NMS.WCF
 			{
 				return reader.Wait(timeout, out value);
 			}
-
-			InvokeDequeuedCallback(item.DequeuedCallback);
-			value = item.GetValue();
-			return true;
+			else
+			{
+				InvokeDequeuedCallback(item.DequeuedCallback);
+				value = item.GetValue();
+				return true;
+			}
 		}
 
 		public void Dispose()
 		{
 			Dispose(true);
+
 			GC.SuppressFinalize(this);
 		}
 
@@ -343,9 +370,9 @@ namespace Apache.NMS.WCF
 
 				lock(ThisLock)
 				{
-					if(_queueState != QueueState.Closed)
+					if(queueState != QueueState.Closed)
 					{
-						_queueState = QueueState.Closed;
+						queueState = QueueState.Closed;
 						dispose = true;
 					}
 				}
@@ -378,10 +405,10 @@ namespace Apache.NMS.WCF
 
 			lock(ThisLock)
 			{
-				itemAvailable = !((_queueState == QueueState.Closed) || (_queueState == QueueState.Shutdown));
-				GetWaiters(out waiters);
+				itemAvailable = !((queueState == QueueState.Closed) || (queueState == QueueState.Shutdown));
+				this.GetWaiters(out waiters);
 
-				if(_queueState != QueueState.Closed)
+				if(queueState != QueueState.Closed)
 				{
 					itemQueue.MakePendingItemAvailable();
 
@@ -390,7 +417,7 @@ namespace Apache.NMS.WCF
 						item = itemQueue.DequeueAvailableItem();
 						reader = readerQueue.Dequeue();
 
-						if(_queueState == QueueState.Shutdown && readerQueue.Count > 0 && itemQueue.ItemCount == 0)
+						if(queueState == QueueState.Shutdown && readerQueue.Count > 0 && itemQueue.ItemCount == 0)
 						{
 							outstandingReaders = new IQueueReader[readerQueue.Count];
 							readerQueue.CopyTo(outstandingReaders, 0);
@@ -405,7 +432,9 @@ namespace Apache.NMS.WCF
 			if(outstandingReaders != null)
 			{
 				if(completeOutstandingReadersCallback == null)
-					completeOutstandingReadersCallback = CompleteOutstandingReadersCallback;
+				{
+					completeOutstandingReadersCallback = new WaitCallback(CompleteOutstandingReadersCallback);
+				}
 
 				ThreadPool.QueueUserWorkItem(completeOutstandingReadersCallback, outstandingReaders);
 			}
@@ -427,7 +456,7 @@ namespace Apache.NMS.WCF
 		{
 			T value;
 
-			if(!EndDequeue(result, out value))
+			if(!this.EndDequeue(result, out value))
 			{
 				throw new TimeoutException("Asynchronous Dequeue operation timed out.");
 			}
@@ -467,6 +496,7 @@ namespace Apache.NMS.WCF
 		public void EnqueueAndDispatch(T item, ItemDequeuedCallback dequeuedCallback)
 		{
 			EnqueueAndDispatch(item, dequeuedCallback, true);
+			//EnqueueAndDispatch(item, dequeuedCallback, false);
 		}
 
 		public void EnqueueAndDispatch(Exception exception, ItemDequeuedCallback dequeuedCallback, bool canDispatchOnThisThread)
@@ -491,10 +521,10 @@ namespace Apache.NMS.WCF
 
 			lock(ThisLock)
 			{
-				itemAvailable = !((_queueState == QueueState.Closed) || (_queueState == QueueState.Shutdown));
-				GetWaiters(out waiters);
+				itemAvailable = !((queueState == QueueState.Closed) || (queueState == QueueState.Shutdown));
+				this.GetWaiters(out waiters);
 
-				if(_queueState == QueueState.Open)
+				if(queueState == QueueState.Open)
 				{
 					if(canDispatchOnThisThread)
 					{
@@ -548,7 +578,7 @@ namespace Apache.NMS.WCF
 			{
 				if(onDispatchCallback == null)
 				{
-					onDispatchCallback = OnDispatchCallback;
+					onDispatchCallback = new WaitCallback(OnDispatchCallback);
 				}
 
 				ThreadPool.QueueUserWorkItem(onDispatchCallback, this);
@@ -572,22 +602,25 @@ namespace Apache.NMS.WCF
 			return EnqueueWithoutDispatch(new Item(exception, dequeuedCallback));
 		}
 
-		// This does not block, however, Dispatch() must be called later if this function
+		// This will not block, however, Dispatch() must be called later if this function
 		// returns true.
 		bool EnqueueWithoutDispatch(Item item)
 		{
 			lock(ThisLock)
 			{
 				// Open
-				if(_queueState != QueueState.Closed && _queueState != QueueState.Shutdown)
+				if(queueState != QueueState.Closed && queueState != QueueState.Shutdown)
 				{
 					if(readerQueue.Count == 0)
 					{
 						itemQueue.EnqueueAvailableItem(item);
 						return false;
 					}
-					itemQueue.EnqueuePendingItem(item);
-					return true;
+					else
+					{
+						itemQueue.EnqueuePendingItem(item);
+						return true;
+					}
 				}
 			}
 
@@ -632,14 +665,14 @@ namespace Apache.NMS.WCF
 		{
 			lock(ThisLock)
 			{
-				if(_queueState == QueueState.Open || _queueState == QueueState.Shutdown)
+				if(queueState == QueueState.Open || queueState == QueueState.Shutdown)
 				{
 					bool removed = false;
 
 					for(int i = readerQueue.Count; i > 0; i--)
 					{
 						IQueueReader temp = readerQueue.Dequeue();
-						if(ReferenceEquals(temp, reader))
+						if(Object.ReferenceEquals(temp, reader))
 						{
 							removed = true;
 						}
@@ -663,7 +696,7 @@ namespace Apache.NMS.WCF
 
 			lock(ThisLock)
 			{
-				if(_queueState == QueueState.Open)
+				if(queueState == QueueState.Open)
 				{
 					if(itemQueue.HasAvailableItem)
 					{
@@ -675,7 +708,7 @@ namespace Apache.NMS.WCF
 						waiterList.Add(waiter);
 					}
 				}
-				else if(_queueState == QueueState.Shutdown)
+				else if(queueState == QueueState.Shutdown)
 				{
 					if(itemQueue.HasAvailableItem)
 					{
@@ -697,7 +730,14 @@ namespace Apache.NMS.WCF
 				}
 			}
 
-			return waiter != null ? waiter.Wait(timeout) : itemAvailable;
+			if(waiter != null)
+			{
+				return waiter.Wait(timeout);
+			}
+			else
+			{
+				return itemAvailable;
+			}
 		}
 
 		interface IQueueReader
@@ -712,23 +752,23 @@ namespace Apache.NMS.WCF
 
 		class WaitQueueReader : IQueueReader
 		{
-			Exception _exception;
-			InputQueue<T> _inputQueue;
-			T _item;
-			ManualResetEvent _waitEvent;
-			object _thisLock = new object();
+			Exception exception;
+			InputQueue<T> inputQueue;
+			T item;
+			ManualResetEvent waitEvent;
+			object thisLock = new object();
 
 			public WaitQueueReader(InputQueue<T> inputQueue)
 			{
-				_inputQueue = inputQueue;
-				_waitEvent = new ManualResetEvent(false);
+				this.inputQueue = inputQueue;
+				waitEvent = new ManualResetEvent(false);
 			}
 
 			object ThisLock
 			{
 				get
 				{
-					return _thisLock;
+					return this.thisLock;
 				}
 			}
 
@@ -736,12 +776,12 @@ namespace Apache.NMS.WCF
 			{
 				lock(ThisLock)
 				{
-					Debug.Assert(_item == null, "InputQueue.WaitQueueReader.Set: (this.item == null)");
-					Debug.Assert(_exception == null, "InputQueue.WaitQueueReader.Set: (this.exception == null)");
+					Debug.Assert(this.item == null, "InputQueue.WaitQueueReader.Set: (this.item == null)");
+					Debug.Assert(this.exception == null, "InputQueue.WaitQueueReader.Set: (this.exception == null)");
 
-					_exception = item.Exception;
-					_item = item.Value;
-					_waitEvent.Set();
+					this.exception = item.Exception;
+					this.item = item.Value;
+					waitEvent.Set();
 				}
 			}
 
@@ -752,11 +792,11 @@ namespace Apache.NMS.WCF
 				{
 					if(timeout == TimeSpan.MaxValue)
 					{
-						_waitEvent.WaitOne();
+						waitEvent.WaitOne();
 					}
-					else if(!_waitEvent.WaitOne(timeout, false))
+					else if(!waitEvent.WaitOne(timeout, false))
 					{
-						if(_inputQueue.RemoveReader(this))
+						if(this.inputQueue.RemoveReader(this))
 						{
 							value = default(T);
 							isSafeToClose = true;
@@ -764,7 +804,7 @@ namespace Apache.NMS.WCF
 						}
 						else
 						{
-							_waitEvent.WaitOne();
+							waitEvent.WaitOne();
 						}
 					}
 
@@ -774,31 +814,31 @@ namespace Apache.NMS.WCF
 				{
 					if(isSafeToClose)
 					{
-						_waitEvent.Close();
+						waitEvent.Close();
 					}
 				}
 
-				value = _item;
+				value = item;
 				return true;
 			}
 		}
 
-		class AsyncQueueReader : AsyncResult, IQueueReader
+		public class AsyncQueueReader : AsyncResult, IQueueReader
 		{
 			static TimerCallback timerCallback = new TimerCallback(AsyncQueueReader.TimerCallback);
 
-			bool _expired;
-			InputQueue<T> _inputQueue;
-			T _item;
-			Timer _timer;
+			bool expired;
+			InputQueue<T> inputQueue;
+			T item;
+			Timer timer;
 
 			public AsyncQueueReader(InputQueue<T> inputQueue, TimeSpan timeout, AsyncCallback callback, object state)
 				: base(callback, state)
 			{
-				_inputQueue = inputQueue;
+				this.inputQueue = inputQueue;
 				if(timeout != TimeSpan.MaxValue)
 				{
-					_timer = new Timer(timerCallback, this, timeout, TimeSpan.FromMilliseconds(-1));
+					this.timer = new Timer(timerCallback, this, timeout, TimeSpan.FromMilliseconds(-1));
 				}
 			}
 
@@ -806,262 +846,190 @@ namespace Apache.NMS.WCF
 			{
 				AsyncQueueReader readerResult = AsyncResult.End<AsyncQueueReader>(result);
 
-				if(readerResult._expired)
+				if(readerResult.expired)
 				{
 					value = default(T);
 					return false;
 				}
-
-				value = readerResult._item;
-				return true;
+				else
+				{
+					value = readerResult.item;
+					return true;
+				}
 			}
 
 			static void TimerCallback(object state)
 			{
 				AsyncQueueReader thisPtr = (AsyncQueueReader) state;
-				if(thisPtr._inputQueue.RemoveReader(thisPtr))
+				if(thisPtr.inputQueue.RemoveReader(thisPtr))
 				{
-					thisPtr._expired = true;
+					thisPtr.expired = true;
 					thisPtr.Complete(false);
 				}
 			}
 
 			public void Set(Item item)
 			{
-				_item = item.Value;
-				if(_timer != null)
+				this.item = item.Value;
+				if(this.timer != null)
 				{
-					_timer.Change(-1, -1);
+					this.timer.Change(-1, -1);
 				}
 				Complete(false, item.Exception);
 			}
 		}
 
-		internal struct Item
+		public struct Item
 		{
-			private T _value;
-			private Exception _exception;
-			ItemDequeuedCallback _dequeuedCallback;
+			T value;
+			Exception exception;
+			ItemDequeuedCallback dequeuedCallback;
 
-			/// <summary>
-			/// Initializes a new instance of the <see cref="InputQueue&lt;T&gt;.Item"/> class.
-			/// </summary>
-			/// <param name="value">The value.</param>
-			/// <param name="dequeuedCallback">The dequeued callback.</param>
 			public Item(T value, ItemDequeuedCallback dequeuedCallback)
 				: this(value, null, dequeuedCallback)
 			{
 			}
 
-			/// <summary>
-			/// Initializes a new instance of the <see cref="InputQueue&lt;T&gt;.Item"/> class.
-			/// </summary>
-			/// <param name="exception">The exception.</param>
-			/// <param name="dequeuedCallback">The dequeued callback.</param>
 			public Item(Exception exception, ItemDequeuedCallback dequeuedCallback)
 				: this(null, exception, dequeuedCallback)
 			{
 			}
 
-			/// <summary>
-			/// Initializes a new instance of the <see cref="InputQueue&lt;T&gt;.Item"/> class.
-			/// </summary>
-			/// <param name="value">The value.</param>
-			/// <param name="exception">The exception.</param>
-			/// <param name="dequeuedCallback">The dequeued callback.</param>
-			internal Item(T value, Exception exception, ItemDequeuedCallback dequeuedCallback)
+			Item(T value, Exception exception, ItemDequeuedCallback dequeuedCallback)
 			{
-				_value = value;
-				_exception = exception;
-				_dequeuedCallback = dequeuedCallback;
+				this.value = value;
+				this.exception = exception;
+				this.dequeuedCallback = dequeuedCallback;
 			}
 
-			/// <summary>
-			/// Gets the exception.
-			/// </summary>
-			/// <value>The exception.</value>
 			public Exception Exception
 			{
-				get { return _exception; }
+				get { return this.exception; }
 			}
 
-			/// <summary>
-			/// Gets the value.
-			/// </summary>
-			/// <value>The value.</value>
 			public T Value
 			{
-				get { return _value; }
+				get { return value; }
 			}
 
-			/// <summary>
-			/// Gets the dequeued callback.
-			/// </summary>
-			/// <value>The dequeued callback.</value>
 			public ItemDequeuedCallback DequeuedCallback
 			{
-				get { return _dequeuedCallback; }
+				get { return dequeuedCallback; }
 			}
 
-			/// <summary>
-			/// Releases unmanaged and - optionally - managed resources
-			/// </summary>
 			public void Dispose()
 			{
-				if(_value != null)
+				if(value != null)
 				{
-					if(_value is IDisposable)
+					if(value is IDisposable)
 					{
-						((IDisposable) _value).Dispose();
+						((IDisposable) value).Dispose();
 					}
-					else if(_value is ICommunicationObject)
+					else if(value is ICommunicationObject)
 					{
-						((ICommunicationObject) _value).Abort();
+						((ICommunicationObject) value).Abort();
 					}
 				}
 			}
 
-			/// <summary>
-			/// Gets the value.
-			/// </summary>
-			/// <returns></returns>
 			public T GetValue()
 			{
-				if(_exception != null)
+				if(this.exception != null)
 				{
-					throw _exception;
+					throw this.exception;
 				}
 
-				return _value;
+				return this.value;
 			}
 		}
 
-		internal class WaitQueueWaiter : IQueueWaiter
+		class WaitQueueWaiter : IQueueWaiter
 		{
-			bool _itemAvailable;
-			ManualResetEvent _waitEvent;
-			object _thisLock = new object();
+			bool itemAvailable;
+			ManualResetEvent waitEvent;
+			object thisLock = new object();
 
-			/// <summary>
-			/// Initializes a new instance of the <see cref="InputQueue&lt;T&gt;.WaitQueueWaiter"/> class.
-			/// </summary>
 			public WaitQueueWaiter()
 			{
-				_waitEvent = new ManualResetEvent(false);
+				waitEvent = new ManualResetEvent(false);
 			}
 
-			/// <summary>
-			/// Gets the this lock.
-			/// </summary>
-			/// <value>The this lock.</value>
 			object ThisLock
 			{
 				get
 				{
-					return _thisLock;
+					return this.thisLock;
 				}
 			}
 
-			/// <summary>
-			/// Sets the specified item available.
-			/// </summary>
-			/// <param name="itemAvailable">if set to <see langword="true"/> [item available].</param>
 			public void Set(bool itemAvailable)
 			{
 				lock(ThisLock)
 				{
-					_itemAvailable = itemAvailable;
-					_waitEvent.Set();
+					this.itemAvailable = itemAvailable;
+					waitEvent.Set();
 				}
 			}
 
-			/// <summary>
-			/// Waits the specified timeout.
-			/// </summary>
-			/// <param name="timeout">The timeout.</param>
-			/// <returns></returns>
 			public bool Wait(TimeSpan timeout)
 			{
 				if(timeout == TimeSpan.MaxValue)
 				{
-					_waitEvent.WaitOne();
+					waitEvent.WaitOne();
 				}
-				else if(!_waitEvent.WaitOne(timeout, false))
+				else if(!waitEvent.WaitOne(timeout, false))
 				{
 					return false;
 				}
 
-				return _itemAvailable;
+				return this.itemAvailable;
 			}
 		}
 
-		internal class AsyncQueueWaiter : AsyncResult, IQueueWaiter
+		class AsyncQueueWaiter : AsyncResult, IQueueWaiter
 		{
 			static TimerCallback timerCallback = new TimerCallback(AsyncQueueWaiter.TimerCallback);
-			Timer _timer;
-			bool _itemAvailable;
-			object _thisLock = new object();
+			Timer timer;
+			bool itemAvailable;
+			object thisLock = new object();
 
-			/// <summary>
-			/// Initializes a new instance of the <see cref="InputQueue&lt;T&gt;.AsyncQueueWaiter"/> class.
-			/// </summary>
-			/// <param name="timeout">The timeout.</param>
-			/// <param name="callback">The callback.</param>
-			/// <param name="state">The state.</param>
 			public AsyncQueueWaiter(TimeSpan timeout, AsyncCallback callback, object state)
 				: base(callback, state)
 			{
 				if(timeout != TimeSpan.MaxValue)
 				{
-					_timer = new Timer(timerCallback, this, timeout, TimeSpan.FromMilliseconds(-1));
+					this.timer = new Timer(timerCallback, this, timeout, TimeSpan.FromMilliseconds(-1));
 				}
 			}
 
-			/// <summary>
-			/// Gets the this lock.
-			/// </summary>
-			/// <value>The this lock.</value>
 			object ThisLock
 			{
 				get
 				{
-					return _thisLock;
+					return this.thisLock;
 				}
 			}
 
-			/// <summary>
-			/// Ends the specified result.
-			/// </summary>
-			/// <param name="result">The result.</param>
-			/// <returns></returns>
 			public static bool End(IAsyncResult result)
 			{
 				AsyncQueueWaiter waiterResult = AsyncResult.End<AsyncQueueWaiter>(result);
-				return waiterResult._itemAvailable;
+				return waiterResult.itemAvailable;
 			}
 
-			/// <summary>
-			/// Callback that is invoked when the timer completes.
-			/// </summary>
-			/// <param name="state">The state.</param>
-			public static void TimerCallback(object state)
+			static void TimerCallback(object state)
 			{
 				AsyncQueueWaiter thisPtr = (AsyncQueueWaiter) state;
 				thisPtr.Complete(false);
 			}
 
-			/// <summary>
-			/// Sets the specified item available.
-			/// </summary>
-			/// <param name="itemAvailable">if set to <see langword="true"/> [item available].</param>
 			public void Set(bool itemAvailable)
 			{
 				bool timely;
 
 				lock(ThisLock)
 				{
-					timely = (_timer == null) || _timer.Change(-1, -1);
-					_itemAvailable = itemAvailable;
+					timely = (this.timer == null) || this.timer.Change(-1, -1);
+					this.itemAvailable = itemAvailable;
 				}
 
 				if(timely)
@@ -1071,141 +1039,103 @@ namespace Apache.NMS.WCF
 			}
 		}
 
-		internal class ItemQueue
+		class ItemQueue
 		{
-			Item[] _items;
-			int _head;
-			int _pendingCount;
-			int _totalCount;
+			Item[] items;
+			int head;
+			int pendingCount;
+			int totalCount;
 
-			/// <summary>
-			/// Initializes a new instance of the <see cref="InputQueue&lt;T&gt;.ItemQueue"/> class.
-			/// </summary>
 			public ItemQueue()
 			{
-				_items = new Item[1];
+				items = new Item[1];
 			}
 
-			/// <summary>
-			/// Dequeues the available item.
-			/// </summary>
-			/// <returns></returns>
 			public Item DequeueAvailableItem()
 			{
-				if(_totalCount == _pendingCount)
+				if(totalCount == pendingCount)
 				{
-					throw new Exception("Internal Error - ItemQueue does not contain any available items");
+					Debug.Assert(false, "ItemQueue does not contain any available items");
+					throw new Exception("Internal Error");
 				}
 				return DequeueItemCore();
 			}
 
-			/// <summary>
-			/// Dequeues any item.
-			/// </summary>
-			/// <returns></returns>
 			public Item DequeueAnyItem()
 			{
-				if(_pendingCount == _totalCount)
+				if(pendingCount == totalCount)
 				{
-					_pendingCount--;
+					pendingCount--;
 				}
 				return DequeueItemCore();
 			}
 
-			/// <summary>
-			/// Enqueues the item core.
-			/// </summary>
-			/// <param name="item">The item.</param>
 			void EnqueueItemCore(Item item)
 			{
-				if(_totalCount == _items.Length)
+				if(totalCount == items.Length)
 				{
-					Item[] newItems = new Item[_items.Length * 2];
-					for(int i = 0; i < _totalCount; i++)
+					Item[] newItems = new Item[items.Length * 2];
+					for(int i = 0; i < totalCount; i++)
 					{
-						newItems[i] = _items[(_head + i) % _items.Length];
+						newItems[i] = items[(head + i) % items.Length];
 					}
-					_head = 0;
-					_items = newItems;
+
+					head = 0;
+					items = newItems;
 				}
-				int tail = (_head + _totalCount) % _items.Length;
-				_items[tail] = item;
-				_totalCount++;
+				int tail = (head + totalCount) % items.Length;
+				items[tail] = item;
+				totalCount++;
 			}
 
-			/// <summary>
-			/// Dequeues the item core.
-			/// </summary>
-			/// <returns></returns>
 			Item DequeueItemCore()
 			{
-				if(_totalCount == 0)
+				if(totalCount == 0)
 				{
-					throw new Exception("Internal Error - ItemQueue does not contain any items");
+					Debug.Assert(false, "ItemQueue does not contain any items");
+					throw new Exception("Internal Error");
 				}
-				Item item = _items[_head];
-				_items[_head] = new Item();
-				_totalCount--;
-				_head = (_head + 1) % _items.Length;
+				Item item = items[head];
+				items[head] = new Item();
+				totalCount--;
+				head = (head + 1) % items.Length;
 				return item;
 			}
 
-			/// <summary>
-			/// Enqueues the pending item.
-			/// </summary>
-			/// <param name="item">The item.</param>
 			public void EnqueuePendingItem(Item item)
 			{
 				EnqueueItemCore(item);
-				_pendingCount++;
+				pendingCount++;
 			}
 
-			/// <summary>
-			/// Enqueues the available item.
-			/// </summary>
-			/// <param name="item">The item.</param>
 			public void EnqueueAvailableItem(Item item)
 			{
 				EnqueueItemCore(item);
 			}
 
-			/// <summary>
-			/// Makes the pending item available.
-			/// </summary>
 			public void MakePendingItemAvailable()
 			{
-				if(_pendingCount == 0)
+				if(pendingCount == 0)
 				{
-					throw new Exception("Internal Error - ItemQueue does not contain any pending items");
+					Debug.Assert(false, "ItemQueue does not contain any pending items");
+					throw new Exception("Internal Error");
 				}
-				_pendingCount--;
+				pendingCount--;
 			}
 
-			/// <summary>
-			/// Gets a value indicating whether this instance has available items.
-			/// </summary>
-			/// <value>
-			/// 	<see langword="true"/> if this instance has available item; otherwise, <see langword="false"/>.
-			/// </value>
 			public bool HasAvailableItem
 			{
-				get { return _totalCount > _pendingCount; }
+				get { return totalCount > pendingCount; }
 			}
 
-			/// <summary>
-			/// Gets a value indicating whether this instance has any item.
-			/// </summary>
-			/// <value>
-			/// 	<see langword="true"/> if this instance has any item; otherwise, <see langword="false"/>.
-			/// </value>
 			public bool HasAnyItem
 			{
-				get { return _totalCount > 0; }
+				get { return totalCount > 0; }
 			}
 
 			public int ItemCount
 			{
-				get { return _totalCount; }
+				get { return totalCount; }
 			}
 		}
 	}
