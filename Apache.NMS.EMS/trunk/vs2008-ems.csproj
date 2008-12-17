@@ -28,9 +28,8 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <SignAssembly>false</SignAssembly>
-    <AssemblyOriginatorKeyFile>
-    </AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>keyfile\NMSKey.snk</AssemblyOriginatorKeyFile>
     <SccProjectName>Svn</SccProjectName>
     <SccLocalPath>Svn</SccLocalPath>
     <SccAuxPath>Svn</SccAuxPath>
@@ -91,6 +90,7 @@
     <Compile Include="src\main\csharp\Topic.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="keyfile\NMSKey.snk" />
     <None Include="nmsprovider-ems.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

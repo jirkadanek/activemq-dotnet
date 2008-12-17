@@ -9,9 +9,8 @@
     <RootNamespace>Apache.NMS.WCF</RootNamespace>
     <AssemblyName>Apache.NMS.WCF</AssemblyName>
     <WarningLevel>4</WarningLevel>
-    <SignAssembly>false</SignAssembly>
-    <AssemblyOriginatorKeyFile>
-    </AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>keyfile\NMSKey.snk</AssemblyOriginatorKeyFile>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>2.0</OldToolsVersion>
@@ -132,6 +131,9 @@
     <Compile Include="src\main\csharp\NmsOutputChannel.cs" />
     <Compile Include="src\main\csharp\NmsOutputChannelBase.cs" />
     <Compile Include="src\main\csharp\NmsOutputSessionChannel.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="keyfile\NMSKey.snk" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSHARP.Targets" />
   <PropertyGroup>
