@@ -211,12 +211,20 @@
         </member>
         <member name="T:Apache.NMS.WCF.NmsTransportBindingElement">
             <summary>
-            key class to specify the custom transport class and its schema.
-            Its key role in the WCF is to be the 'factory of factories'.  It determines what shape
-            the channel will be.  In this case by returning channel factory (for the client) that returns a IOutputChannel
-            and a channel listener (for the server) that returns a IInputChannel, this class determines
-            that this implementation is a datagram 'shape'.
+            Key class to specify the custom transport class and its schema.
             </summary>
+            <remarks>
+            <para>
+            Its key role in the WCF is to be the 'factory of factories'.  It determines what shape
+            the channel will be. In this case by returning channel factory (for the client) that returns an
+            <see cref="T:System.ServiceModel.Channels.IOutputChannel"/> or <see cref="T:System.ServiceModel.Channels.IOutputSessionChannel"/>, and a channel listener 
+            (for the server) that returns an <see cref="T:System.ServiceModel.Channels.IInputChannel"/> or <see cref="T:System.ServiceModel.Channels.IInputSessionChannel"/>,
+            this class determines that this implementation is a datagram 'shape'.
+            </para>
+            <para>
+            The request/reply channel shape is not supported by WCF.
+            </para>
+            </remarks>
         </member>
         <member name="M:Apache.NMS.WCF.NmsTransportBindingElement.#ctor">
             <summary>
@@ -232,23 +240,23 @@
         <member name="M:Apache.NMS.WCF.NmsTransportBindingElement.CanBuildChannelFactory``1(System.ServiceModel.Channels.BindingContext)">
             <summary>
             Determines whether this instance can build a channel factory in the specified context.
-            In this case an implementation of IOutputChannel.
+            Only implementations of <see cref="T:System.ServiceModel.Channels.IOutputChannel"/> and <see cref="T:System.ServiceModel.Channels.IOutputSessionChannel"/> are supported.
             </summary>
             <typeparam name="TChannel">The type of the channel.</typeparam>
             <param name="context">The context.</param>
             <returns>
-            	<c>true</c> if this instance [can build channel factory] the specified context; otherwise, <c>false</c>.
+            	<c>true</c> if the requested channel factory can be built; otherwise, <c>false</c>.
             </returns>
         </member>
         <member name="M:Apache.NMS.WCF.NmsTransportBindingElement.CanBuildChannelListener``1(System.ServiceModel.Channels.BindingContext)">
             <summary>
             Determines whether this instance can build a channel listener in the specified context.
-            In this case in implementation that will return an IInputChannel.
+            Only implementations of <see cref="T:System.ServiceModel.Channels.IInputChannel"/> and <see cref="T:System.ServiceModel.Channels.IInputSessionChannel"/> are supported.
             </summary>
             <typeparam name="TChannel">The type of the channel.</typeparam>
             <param name="context">The context.</param>
             <returns>
-            	<c>true</c> if this instance [can build channel listener] the specified context; otherwise, <c>false</c>.
+            	<c>true</c> if the requested channel listener can be built; otherwise, <c>false</c>.
             </returns>
             <exception cref="T:System.ArgumentException">the requested channel does not implement <see cref="T:System.ServiceModel.Channels.IReplyChannel"/>.</exception>
         </member>
@@ -575,187 +583,12 @@
             <summary>
             Handles asynchronous interactions between producers and consumers. 
             Producers can dispatch available data to the input queue, 
-            where it is dispatched to a waiting consumer or stored until a
+            where it will be dispatched to a waiting consumer or stored until a
             consumer becomes available. Consumers can synchronously or asynchronously
-            request data from the queue, which is returned when data becomes
+            request data from the queue, which will be returned when data becomes
             available.
             </summary>
             <typeparam name="T">The concrete type of the consumer objects that are waiting for data.</typeparam>
-        </member>
-        <member name="M:Apache.NMS.WCF.InputQueue`1.#ctor">
-            <summary>
-            Initializes a new instance of the <see cref="T:Apache.NMS.WCF.InputQueue`1"/> class.
-            </summary>
-        </member>
-        <member name="M:Apache.NMS.WCF.InputQueue`1.Item.#ctor(`0,Apache.NMS.WCF.ItemDequeuedCallback)">
-            <summary>
-            Initializes a new instance of the <see cref="T:Apache.NMS.WCF.InputQueue`1.Item"/> class.
-            </summary>
-            <param name="value">The value.</param>
-            <param name="dequeuedCallback">The dequeued callback.</param>
-        </member>
-        <member name="M:Apache.NMS.WCF.InputQueue`1.Item.#ctor(System.Exception,Apache.NMS.WCF.ItemDequeuedCallback)">
-            <summary>
-            Initializes a new instance of the <see cref="T:Apache.NMS.WCF.InputQueue`1.Item"/> class.
-            </summary>
-            <param name="exception">The exception.</param>
-            <param name="dequeuedCallback">The dequeued callback.</param>
-        </member>
-        <member name="M:Apache.NMS.WCF.InputQueue`1.Item.#ctor(`0,System.Exception,Apache.NMS.WCF.ItemDequeuedCallback)">
-            <summary>
-            Initializes a new instance of the <see cref="T:Apache.NMS.WCF.InputQueue`1.Item"/> class.
-            </summary>
-            <param name="value">The value.</param>
-            <param name="exception">The exception.</param>
-            <param name="dequeuedCallback">The dequeued callback.</param>
-        </member>
-        <member name="M:Apache.NMS.WCF.InputQueue`1.Item.Dispose">
-            <summary>
-            Releases unmanaged and - optionally - managed resources
-            </summary>
-        </member>
-        <member name="M:Apache.NMS.WCF.InputQueue`1.Item.GetValue">
-            <summary>
-            Gets the value.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="P:Apache.NMS.WCF.InputQueue`1.Item.Exception">
-            <summary>
-            Gets the exception.
-            </summary>
-            <value>The exception.</value>
-        </member>
-        <member name="P:Apache.NMS.WCF.InputQueue`1.Item.Value">
-            <summary>
-            Gets the value.
-            </summary>
-            <value>The value.</value>
-        </member>
-        <member name="P:Apache.NMS.WCF.InputQueue`1.Item.DequeuedCallback">
-            <summary>
-            Gets the dequeued callback.
-            </summary>
-            <value>The dequeued callback.</value>
-        </member>
-        <member name="M:Apache.NMS.WCF.InputQueue`1.WaitQueueWaiter.#ctor">
-            <summary>
-            Initializes a new instance of the <see cref="T:Apache.NMS.WCF.InputQueue`1.WaitQueueWaiter"/> class.
-            </summary>
-        </member>
-        <member name="M:Apache.NMS.WCF.InputQueue`1.WaitQueueWaiter.Set(System.Boolean)">
-            <summary>
-            Sets the specified item available.
-            </summary>
-            <param name="itemAvailable">if set to <see langword="true"/> [item available].</param>
-        </member>
-        <member name="M:Apache.NMS.WCF.InputQueue`1.WaitQueueWaiter.Wait(System.TimeSpan)">
-            <summary>
-            Waits the specified timeout.
-            </summary>
-            <param name="timeout">The timeout.</param>
-            <returns></returns>
-        </member>
-        <member name="P:Apache.NMS.WCF.InputQueue`1.WaitQueueWaiter.ThisLock">
-            <summary>
-            Gets the this lock.
-            </summary>
-            <value>The this lock.</value>
-        </member>
-        <member name="M:Apache.NMS.WCF.InputQueue`1.AsyncQueueWaiter.#ctor(System.TimeSpan,System.AsyncCallback,System.Object)">
-            <summary>
-            Initializes a new instance of the <see cref="T:Apache.NMS.WCF.InputQueue`1.AsyncQueueWaiter"/> class.
-            </summary>
-            <param name="timeout">The timeout.</param>
-            <param name="callback">The callback.</param>
-            <param name="state">The state.</param>
-        </member>
-        <member name="M:Apache.NMS.WCF.InputQueue`1.AsyncQueueWaiter.End(System.IAsyncResult)">
-            <summary>
-            Ends the specified result.
-            </summary>
-            <param name="result">The result.</param>
-            <returns></returns>
-        </member>
-        <member name="M:Apache.NMS.WCF.InputQueue`1.AsyncQueueWaiter.TimerCallback(System.Object)">
-            <summary>
-            Callback that is invoked when the timer completes.
-            </summary>
-            <param name="state">The state.</param>
-        </member>
-        <member name="M:Apache.NMS.WCF.InputQueue`1.AsyncQueueWaiter.Set(System.Boolean)">
-            <summary>
-            Sets the specified item available.
-            </summary>
-            <param name="itemAvailable">if set to <see langword="true"/> [item available].</param>
-        </member>
-        <member name="P:Apache.NMS.WCF.InputQueue`1.AsyncQueueWaiter.ThisLock">
-            <summary>
-            Gets the this lock.
-            </summary>
-            <value>The this lock.</value>
-        </member>
-        <member name="M:Apache.NMS.WCF.InputQueue`1.ItemQueue.#ctor">
-            <summary>
-            Initializes a new instance of the <see cref="T:Apache.NMS.WCF.InputQueue`1.ItemQueue"/> class.
-            </summary>
-        </member>
-        <member name="M:Apache.NMS.WCF.InputQueue`1.ItemQueue.DequeueAvailableItem">
-            <summary>
-            Dequeues the available item.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Apache.NMS.WCF.InputQueue`1.ItemQueue.DequeueAnyItem">
-            <summary>
-            Dequeues any item.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Apache.NMS.WCF.InputQueue`1.ItemQueue.EnqueueItemCore(Apache.NMS.WCF.InputQueue{`0}.Item)">
-            <summary>
-            Enqueues the item core.
-            </summary>
-            <param name="item">The item.</param>
-        </member>
-        <member name="M:Apache.NMS.WCF.InputQueue`1.ItemQueue.DequeueItemCore">
-            <summary>
-            Dequeues the item core.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Apache.NMS.WCF.InputQueue`1.ItemQueue.EnqueuePendingItem(Apache.NMS.WCF.InputQueue{`0}.Item)">
-            <summary>
-            Enqueues the pending item.
-            </summary>
-            <param name="item">The item.</param>
-        </member>
-        <member name="M:Apache.NMS.WCF.InputQueue`1.ItemQueue.EnqueueAvailableItem(Apache.NMS.WCF.InputQueue{`0}.Item)">
-            <summary>
-            Enqueues the available item.
-            </summary>
-            <param name="item">The item.</param>
-        </member>
-        <member name="M:Apache.NMS.WCF.InputQueue`1.ItemQueue.MakePendingItemAvailable">
-            <summary>
-            Makes the pending item available.
-            </summary>
-        </member>
-        <member name="P:Apache.NMS.WCF.InputQueue`1.ItemQueue.HasAvailableItem">
-            <summary>
-            Gets a value indicating whether this instance has available items.
-            </summary>
-            <value>
-            	<see langword="true"/> if this instance has available item; otherwise, <see langword="false"/>.
-            </value>
-        </member>
-        <member name="P:Apache.NMS.WCF.InputQueue`1.ItemQueue.HasAnyItem">
-            <summary>
-            Gets a value indicating whether this instance has any item.
-            </summary>
-            <value>
-            	<see langword="true"/> if this instance has any item; otherwise, <see langword="false"/>.
-            </value>
         </member>
         <member name="M:Apache.NMS.WCF.NmsAsyncResult.#ctor(Apache.NMS.WCF.NmsOutputChannel,System.ServiceModel.Channels.Message,System.AsyncCallback,System.Object)">
             <summary>
@@ -766,65 +599,19 @@
             <param name="callback">The callback.</param>
             <param name="state">The state.</param>
         </member>
-        <member name="T:Apache.NMS.WCF.NmsChannelBase">
-            <summary>
-            Base class for communication channels.
-            </summary>
-        </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelBase.#ctor(System.ServiceModel.Channels.BufferManager,System.ServiceModel.Channels.MessageEncoderFactory,System.ServiceModel.EndpointAddress,System.ServiceModel.Channels.ChannelManagerBase,System.String,Apache.NMS.DestinationType)">
-            <summary>
-            Initializes a new instance of the <see cref="T:Apache.NMS.WCF.NmsChannelBase"/> class.
-            </summary>
-            <param name="bufferManager">The buffer manager.</param>
-            <param name="encoderFactory">The encoder factory.</param>
-            <param name="address">The address.</param>
-            <param name="parent">The parent.</param>
-            <param name="destination">The destination.</param>
-            <param name="destinationType">Type of the destionation.</param>
-        </member>
-        <member name="P:Apache.NMS.WCF.NmsChannelBase.RemoteAddress">
-            <summary>
-            Gets the remote address.
-            </summary>
-            <value>The remote address.</value>
-        </member>
-        <member name="P:Apache.NMS.WCF.NmsChannelBase.BufferManager">
-            <summary>
-            Gets or sets the buffer manager.
-            </summary>
-            <value>The buffer manager.</value>
-        </member>
-        <member name="P:Apache.NMS.WCF.NmsChannelBase.Encoder">
-            <summary>
-            Gets or sets the encoder.
-            </summary>
-            <value>The encoder.</value>
-        </member>
-        <member name="P:Apache.NMS.WCF.NmsChannelBase.Destination">
-            <summary>
-            Gets the destination.
-            </summary>
-            <value>The destination.</value>
-        </member>
-        <member name="P:Apache.NMS.WCF.NmsChannelBase.DestinationType">
-            <summary>
-            Gets the type of the destination.
-            </summary>
-            <value>The type of the destination.</value>
-        </member>
-        <member name="T:Apache.NMS.WCF.NmsChannelFactory">
+        <member name="T:Apache.NMS.WCF.NmsChannelFactory`1">
             <summary>
             Factory for message channels.
             </summary>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelFactory.#ctor(Apache.NMS.WCF.NmsTransportBindingElement,System.ServiceModel.Channels.BindingContext)">
+        <member name="M:Apache.NMS.WCF.NmsChannelFactory`1.#ctor(Apache.NMS.WCF.NmsTransportBindingElement,System.ServiceModel.Channels.BindingContext)">
             <summary>
-            Initializes a new instance of the <see cref="T:Apache.NMS.WCF.NmsChannelFactory"/> class.
+            Initializes a new instance of the <see cref="T:Apache.NMS.WCF.NmsChannelFactory`1"/> class.
             </summary>
+            <param name="bindingElement">The binding element.</param>
             <param name="context">The context.</param>
-            <param name="transportElement">The binding element.</param>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelFactory.OnOpen(System.TimeSpan)">
+        <member name="M:Apache.NMS.WCF.NmsChannelFactory`1.OnOpen(System.TimeSpan)">
             <summary>
             Inserts processing on a communication object after it transitions into the opening state which must complete within a specified interval of time.
             </summary>
@@ -832,7 +619,7 @@
             <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="timeout" /> is less than zero.</exception>
             <exception cref="T:System.TimeoutException">The interval of time specified by <paramref name="timeout" /> that was allotted for the operation was exceeded before the operation was completed.</exception>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelFactory.OnBeginOpen(System.TimeSpan,System.AsyncCallback,System.Object)">
+        <member name="M:Apache.NMS.WCF.NmsChannelFactory`1.OnBeginOpen(System.TimeSpan,System.AsyncCallback,System.Object)">
             <summary>
             Inserts processing on a communication object after it transitions to the opening state due to the invocation of an asynchronous open operation.
             </summary>
@@ -844,13 +631,13 @@
             <param name="state">An object, specified by the application, that contains state information associated with the asynchronous on open operation.</param>
             <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="timeout" /> is less than zero.</exception>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelFactory.OnEndOpen(System.IAsyncResult)">
+        <member name="M:Apache.NMS.WCF.NmsChannelFactory`1.OnEndOpen(System.IAsyncResult)">
             <summary>
             Completes an asynchronous operation on the open of a communication object.
             </summary>
             <param name="result">The <see cref="T:System.IAsyncResult" /> that is returned by a call to the <see cref="M:System.ServiceModel.Channels.CommunicationObject.OnEndOpen(System.IAsyncResult)" /> method.</param>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelFactory.OnCreateChannel(System.ServiceModel.EndpointAddress,System.Uri)">
+        <member name="M:Apache.NMS.WCF.NmsChannelFactory`1.OnCreateChannel(System.ServiceModel.EndpointAddress,System.Uri)">
             <summary>
             When implemented in a derived class, provides an extensibility point when creating channels.
             </summary>
@@ -860,28 +647,28 @@
             <param name="address">The <see cref="T:System.ServiceModel.EndpointAddress" /> of the remote endpoint to which the channel sends messages.</param>
             <param name="via">The <see cref="T:System.Uri" /> that contains the transport address to which messages are sent on the output channel.</param>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelFactory.OnClosed">
+        <member name="M:Apache.NMS.WCF.NmsChannelFactory`1.OnClosed">
             <summary>
             Invoked during the transition of a communication object into the closing state.
             </summary>
         </member>
-        <member name="P:Apache.NMS.WCF.NmsChannelFactory.BufferManager">
+        <member name="P:Apache.NMS.WCF.NmsChannelFactory`1.BufferManager">
             <summary>
             Gets the buffer manager.
             </summary>
         </member>
-        <member name="P:Apache.NMS.WCF.NmsChannelFactory.MessageEncoderFactory">
+        <member name="P:Apache.NMS.WCF.NmsChannelFactory`1.MessageEncoderFactory">
             <summary>
             Gets the message encoder factory.
             </summary>
         </member>
-        <member name="P:Apache.NMS.WCF.NmsChannelFactory.Destination">
+        <member name="P:Apache.NMS.WCF.NmsChannelFactory`1.Destination">
             <summary>
             Gets the destination.
             </summary>
             <value>The destination.</value>
         </member>
-        <member name="P:Apache.NMS.WCF.NmsChannelFactory.DestinationType">
+        <member name="P:Apache.NMS.WCF.NmsChannelFactory`1.DestinationType">
             <summary>
             Gets the type of the destination.
             </summary>
@@ -899,33 +686,283 @@
             <param name="timeout">The timeout that needs to be validated.</param>
             <exception cref="T:System.ArgumentOutOfRangeException">the timeout value was negative.</exception>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelHelper.GetQueueName(System.Uri)">
+        <member name="M:Apache.NMS.WCF.NmsChannelHelper.CreateUniqueSessionId">
             <summary>
-            Gets the name of the queue from the URI.
-            </summary>
-            <param name="uri">The URI of the message queue.</param>
-        </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelHelper.GetDestination(Apache.NMS.ISession,System.String,Apache.NMS.DestinationType)">
-            <summary>
-            Gets the destination.
-            </summary>
-            <param name="session">The session.</param>
-            <param name="destination">The destination.</param>
-            <param name="destinationType">Type of the destination.</param>
-        </member>
-        <member name="T:Apache.NMS.WCF.NmsChannelListener">
-            <summary>
-            Channel listener for messages.
+            Creates a unique session identifier.
             </summary>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelListener.#ctor(Apache.NMS.WCF.NmsTransportBindingElement,System.ServiceModel.Channels.BindingContext)">
+        <member name="T:Apache.NMS.WCF.NmsInputChannel">
             <summary>
-            Initializes a new instance of the <see cref="T:Apache.NMS.WCF.NmsChannelListener"/> class.
+            Server-side implementation of the sessionless one-way channel.
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.WCF.NmsInputQueueChannelBase`1">
+            <summary>
+            Base class for NMS input channels.
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputQueueChannelBase`1.#ctor(System.ServiceModel.Channels.ChannelListenerBase,System.ServiceModel.EndpointAddress)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Apache.NMS.WCF.NmsInputQueueChannelBase`1"/> class.
+            </summary>
+            <param name="factory">The factory that was used to create the channel.</param>
+            <param name="localAddress">The local address of the channel.</param>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputQueueChannelBase`1.Dispatch(`0)">
+            <summary>
+            Dispatches the specified request.
+            </summary>
+            <param name="request">The request.</param>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputQueueChannelBase`1.BeginDequeue(System.TimeSpan,System.AsyncCallback,System.Object)">
+            <summary>
+            Begins the dequeue operation.
+            </summary>
+            <param name="timeout">The timeout.</param>
+            <param name="callback">The callback.</param>
+            <param name="state">The state.</param>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputQueueChannelBase`1.EndDequeue(System.IAsyncResult)">
+            <summary>
+            Ends the dequeue operation.
+            </summary>
+            <param name="result">The result.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputQueueChannelBase`1.Dequeue(System.TimeSpan)">
+            <summary>
+            Dequeues the next message.
+            </summary>
+            <param name="timeout">The timeout.</param>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputQueueChannelBase`1.TryDequeue(System.IAsyncResult,`0@)">
+            <summary>
+            Tries to dequeue the next message.
+            </summary>
+            <param name="result">The result.</param>
+            <param name="message">The message.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputQueueChannelBase`1.OnAbort">
+            <summary>
+            Inserts processing on a communication object after it transitions to the closing state due to the invocation of a synchronous abort operation.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputQueueChannelBase`1.OnBeginOpen(System.TimeSpan,System.AsyncCallback,System.Object)">
+            <summary>
+            Inserts processing on a communication object after it transitions to the opening state due to the invocation of an asynchronous open operation.
+            </summary>
+            <param name="timeout">The <see cref="T:System.Timespan"/> that specifies how long the on open operation has to complete before timing out.</param>
+            <param name="callback">The <see cref="T:System.AsyncCallback"/> delegate that receives notification of the completion of the asynchronous on open operation.</param>
+            <param name="state">An object, specified by the application, that contains state information associated with the asynchronous on open operation.</param>
+            <returns>
+            The <see cref="T:System.IAsyncResult"/> that references the asynchronous on open operation.
+            </returns>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            	<paramref name="timeout"/> is less than zero.</exception>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputQueueChannelBase`1.OnOpen(System.TimeSpan)">
+            <summary>
+            Inserts processing on a communication object after it transitions into the opening state which must complete within a specified interval of time.
+            </summary>
+            <param name="timeout">The <see cref="T:System.Timespan"/> that specifies how long the on open operation has to complete before timing out.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            	<paramref name="timeout"/> is less than zero.</exception>
+            <exception cref="T:System.TimeoutException">The interval of time specified by <paramref name="timeout"/> that was allotted for the operation was exceeded before the operation was completed.</exception>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputQueueChannelBase`1.OnEndOpen(System.IAsyncResult)">
+            <summary>
+            Completes an asynchronous operation on the open of a communication object.
+            </summary>
+            <param name="result">The <see cref="T:System.IAsyncResult"/> that is returned by a call to the <see cref="M:System.ServiceModel.Channels.CommunicationObject.OnEndOpen(System.IAsyncResult)"/> method.</param>
+            <exception cref="T:System.TimeoutException">The interval of time specified by <paramref name="timeout"/> that was allotted for the operation was exceeded before the operation was completed.</exception>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputQueueChannelBase`1.OnBeginClose(System.TimeSpan,System.AsyncCallback,System.Object)">
+            <summary>
+            Inserts processing after a communication object transitions to the closing state due to the invocation of an asynchronous close operation.
+            </summary>
+            <param name="timeout">The <see cref="T:System.Timespan"/> that specifies how long the on close operation has to complete before timing out.</param>
+            <param name="callback">The <see cref="T:System.AsyncCallback"/> delegate that receives notification of the completion of the asynchronous on close operation.</param>
+            <param name="state">An object, specified by the application, that contains state information associated with the asynchronous on close operation.</param>
+            <returns>
+            The <see cref="T:System.IAsyncResult"/> that references the asynchronous on close operation.
+            </returns>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            	<paramref name="timeout"/> is less than zero.</exception>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputQueueChannelBase`1.OnClose(System.TimeSpan)">
+            <summary>
+            Inserts processing on a communication object after it transitions to the closing state due to the invocation of a synchronous close operation.
+            </summary>
+            <param name="timeout">The <see cref="T:System.Timespan"/> that specifies how long the on close operation has to complete before timing out.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            	<paramref name="timeout"/> is less than zero.</exception>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputQueueChannelBase`1.OnEndClose(System.IAsyncResult)">
+            <summary>
+            Completes an asynchronous operation on the close of a communication object.
+            </summary>
+            <param name="result">The <see cref="T:System.IAsyncResult"/> that is returned by a call to the <see cref="M:System.ServiceModel.Channels.CommunicationObject.OnEndClose(System.IAsyncResult)"/> method.</param>
+            <exception cref="T:System.TimeoutException">The interval of time specified by <paramref name="timeout"/> that was allotted for the operation was exceeded before the operation was completed.</exception>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputQueueChannelBase`1.GetProperty``1">
+            <summary>
+            Gets the property.
+            </summary>
+            <typeparam name="P"></typeparam>
+        </member>
+        <member name="P:Apache.NMS.WCF.NmsInputQueueChannelBase`1.LocalAddress">
+            <summary>
+            Gets the local address.
+            </summary>
+            <value>The local address.</value>
+        </member>
+        <member name="P:Apache.NMS.WCF.NmsInputQueueChannelBase`1.PendingMessageCount">
+            <summary>
+            Gets the pending message count.
+            </summary>
+            <value>The pending message count.</value>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputChannel.#ctor(System.ServiceModel.Channels.ChannelListenerBase,System.ServiceModel.EndpointAddress)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Apache.NMS.WCF.NmsInputChannel"/> class.
+            </summary>
+            <param name="factory">The factory that was used to create the channel.</param>
+            <param name="localAddress">The local address of the channel.</param>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputChannel.BeginReceive(System.AsyncCallback,System.Object)">
+            <summary>
+            Begins an asynchronous operation to receive a message that has a state object associated with it.
+            </summary>
+            <param name="callback">The <see cref="T:System.AsyncCallback"/> delegate that receives the notification of the asynchronous operation completion.</param>
+            <param name="state">An object, specified by the application, that contains state information associated with the asynchronous operation.</param>
+            <returns>
+            The <see cref="T:System.IAsyncResult"/> that references the asynchronous message reception.
+            </returns>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputChannel.BeginReceive(System.TimeSpan,System.AsyncCallback,System.Object)">
+            <summary>
+            Begins an asynchronous operation to receive a message that has a specified time out and state object associated with it.
+            </summary>
+            <param name="timeout">The <see cref="T:System.Timespan"/> that specifies the interval of time to wait for a message to become available.</param>
+            <param name="callback">The <see cref="T:System.AsyncCallback"/> delegate that receives the notification of the asynchronous operation completion.</param>
+            <param name="state">An object, specified by the application, that contains state information associated with the asynchronous operation.</param>
+            <returns>
+            The <see cref="T:System.IAsyncResult"/> that references the asynchronous receive operation.
+            </returns>
+            <exception cref="T:System.TimeoutException">The specified <paramref name="timeout"/> is exceeded before the operation is completed.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">The timeout specified is less than zero.</exception>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputChannel.EndReceive(System.IAsyncResult)">
+            <summary>
+            Completes an asynchronous operation to receive a message.
+            </summary>
+            <param name="result">The <see cref="T:System.IAsyncResult"/> returned by a call to one of the <c>System.ServiceModel.Channels.IInputChannel.BeginReceive</c> methods.</param>
+            <returns>
+            The <see cref="T:System.ServiceModel.Channels.Message"/> received.
+            </returns>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputChannel.Receive">
+            <summary>
+            Returns the message received, if one is available. If a message is not available, blocks for a default interval of time.
+            </summary>
+            <returns>
+            The <see cref="T:System.ServiceModel.Channels.Message"/> received.
+            </returns>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputChannel.Receive(System.TimeSpan)">
+            <summary>
+            Returns the message received, if one is available. If a message is not available, blocks for a specified interval of time.
+            </summary>
+            <param name="timeout">The <see cref="T:System.Timespan"/> that specifies how long the receive operation has to complete before timing out and throwing a <see cref="T:System.TimeoutException"/>.</param>
+            <returns>
+            The <see cref="T:System.ServiceModel.Channels.Message"/> received.
+            </returns>
+            <exception cref="T:System.TimeoutException">The specified <paramref name="timeout"/> is exceeded before the operation is completed.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">The timeout specified is less than zero.</exception>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputChannel.BeginTryReceive(System.TimeSpan,System.AsyncCallback,System.Object)">
+            <summary>
+            Begins an asynchronous operation to receive a message that has a specified time out and state object associated with it.
+            </summary>
+            <param name="timeout">The <see cref="T:System.Timespan"/> that specifies the interval of time to wait for a message to become available.</param>
+            <param name="callback">The <see cref="T:System.AsyncCallback"/> delegate that receives the notification of the asynchronous operation completion.</param>
+            <param name="state">An object, specified by the application, that contains state information associated with the asynchronous operation.</param>
+            <returns>
+            The <see cref="T:System.IAsyncResult"/> that references the asynchronous receive operation.
+            </returns>
+            <exception cref="T:System.TimeoutException">The specified <paramref name="timeout"/> is exceeded before the operation is completed.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">The timeout specified is less than zero.</exception>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputChannel.EndTryReceive(System.IAsyncResult,System.ServiceModel.Channels.Message@)">
+            <summary>
+            Completes the specified asynchronous operation to receive a message.
+            </summary>
+            <param name="result">The <see cref="T:System.IAsyncResult"/> returned by a call to the <see cref="M:System.ServiceModel.Channels.IInputChannel.BeginTryReceive(System.TimeSpan,System.AsyncCallback,System.Object)"/> method.</param>
+            <param name="message">The <see cref="T:System.ServiceModel.Channels.Message"/> received.</param>
+            <returns>
+            true if a message is received before the specified interval of time elapses; otherwise false.
+            </returns>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputChannel.TryReceive(System.TimeSpan,System.ServiceModel.Channels.Message@)">
+            <summary>
+            Tries to receive a message within a specified interval of time.
+            </summary>
+            <param name="timeout">The <see cref="T:System.IAsyncResult"/> returned by a call to one of the <c>System.ServiceModel.Channels.IInputChannel.BeginReceive</c> methods.</param>
+            <param name="message">The <see cref="T:System.ServiceModel.Channels.Message"/> received.</param>
+            <returns>
+            true if a message is received before the <paramref name="timeout"/> has been exceeded; otherwise false.
+            </returns>
+            <exception cref="T:System.TimeoutException">The specified <paramref name="timeout"/> is exceeded before the operation is completed.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">The timeout specified is less than zero.</exception>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputChannel.BeginWaitForMessage(System.TimeSpan,System.AsyncCallback,System.Object)">
+            <summary>
+            Begins an asynchronous wait-for-a-message-to-arrive operation that has a specified time out and state object associated with it.
+            </summary>
+            <param name="timeout">The <see cref="T:System.Timespan"/> that specifies the interval of time to wait for a message to become available.</param>
+            <param name="callback">The <see cref="T:System.AsyncCallback"/> delegate that receives the notification of the asynchronous operation completion.</param>
+            <param name="state">An object, specified by the application, that contains state information associated with the asynchronous operation.</param>
+            <returns>
+            The <see cref="T:System.IAsyncResult"/> that references the asynchronous operation to wait for a message to arrive.
+            </returns>
+            <exception cref="T:System.TimeoutException">The specified <paramref name="timeout"/> is exceeded before the operation is completed.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">The timeout specified is less than zero.</exception>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputChannel.EndWaitForMessage(System.IAsyncResult)">
+            <summary>
+            Completes the specified asynchronous wait-for-a-message operation.
+            </summary>
+            <param name="result">The <see cref="T:System.IAsyncResult"/> that identifies the <see cref="M:System.ServiceModel.Channels.IInputChannel.BeginWaitForMessage(System.TimeSpan,System.AsyncCallback,System.Object)"/> operation to finish, and from which to retrieve an end result.</param>
+            <returns>
+            true if a message has arrived before the <paramref name="timeout"/> has been exceeded; otherwise false.
+            </returns>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputChannel.WaitForMessage(System.TimeSpan)">
+            <summary>
+            Returns a value that indicates whether a message has arrived within a specified interval of time.
+            </summary>
+            <param name="timeout">The <see cref="T:System.Timespan"/> specifies the maximum interval of time to wait for a message to arrive before timing out.</param>
+            <returns>
+            true if a message has arrived before the <paramref name="timeout"/> has been exceeded; otherwise false.
+            </returns>
+            <exception cref="T:System.TimeoutException">The specified <paramref name="timeout"/> is exceeded before the operation is completed.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">The timeout specified is less than zero.</exception>
+        </member>
+        <member name="T:Apache.NMS.WCF.NmsInputChannelListener">
+            <summary>
+            Server-side listener for sessionless input channels.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputChannelListener.#ctor(Apache.NMS.WCF.NmsTransportBindingElement,System.ServiceModel.Channels.BindingContext)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Apache.NMS.WCF.NmsInputChannelListener"/> class.
             </summary>
             <param name="transportElement">The binding element.</param>
             <param name="context">The context.</param>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelListener.OnAbort">
+        <member name="M:Apache.NMS.WCF.NmsInputChannelListener.OnAbort">
             <summary>
             Inserts processing on a communication object after it transitions to the closing state 
             due to the invocation of a synchronous abort operation.
@@ -935,14 +972,14 @@
             (and thus may not have any listen sockets).
             </remarks>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelListener.OnClose(System.TimeSpan)">
+        <member name="M:Apache.NMS.WCF.NmsInputChannelListener.OnClose(System.TimeSpan)">
             <summary>
             Inserts processing on a communication object after it transitions to the closing state due to the invocation of a synchronous close operation.
             </summary>
             <param name="timeout">The <see cref="T:System.TimeSpan" /> that specifies how long the on close operation has to complete before timing out.</param>
             <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="timeout" /> is less than zero.</exception>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelListener.OnBeginClose(System.TimeSpan,System.AsyncCallback,System.Object)">
+        <member name="M:Apache.NMS.WCF.NmsInputChannelListener.OnBeginClose(System.TimeSpan,System.AsyncCallback,System.Object)">
             <summary>
             Inserts processing after a communication object transitions to the closing state due to the invocation of an asynchronous close operation.
             </summary>
@@ -954,13 +991,13 @@
             <param name="state">An object, specified by the application, that contains state information associated with the asynchronous on close operation.</param>
             <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="timeout" /> is less than zero.</exception>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelListener.OnEndClose(System.IAsyncResult)">
+        <member name="M:Apache.NMS.WCF.NmsInputChannelListener.OnEndClose(System.IAsyncResult)">
             <summary>
             Completes an asynchronous operation on the close of a communication object.
             </summary>
             <param name="result">The <see cref="T:System.IAsyncResult" /> that is returned by a call to the <see cref="M:System.ServiceModel.Channels.CommunicationObject.OnEndClose(System.IAsyncResult)" /> method.</param>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelListener.OnOpen(System.TimeSpan)">
+        <member name="M:Apache.NMS.WCF.NmsInputChannelListener.OnOpen(System.TimeSpan)">
             <summary>
             Inserts processing on a communication object after it transitions into the opening state which must complete within a specified interval of time.
             </summary>
@@ -968,7 +1005,7 @@
             <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="timeout" /> is less than zero.</exception>
             <exception cref="T:System.TimeoutException">The interval of time specified by <paramref name="timeout" /> that was allotted for the operation was exceeded before the operation was completed.</exception>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelListener.OnBeginOpen(System.TimeSpan,System.AsyncCallback,System.Object)">
+        <member name="M:Apache.NMS.WCF.NmsInputChannelListener.OnBeginOpen(System.TimeSpan,System.AsyncCallback,System.Object)">
             <summary>
             Inserts processing on a communication object after it transitions to the opening state due to the invocation of an asynchronous open operation.
             </summary>
@@ -980,13 +1017,13 @@
             <param name="state">An object, specified by the application, that contains state information associated with the asynchronous on open operation.</param>
             <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="timeout" /> is less than zero.</exception>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelListener.OnEndOpen(System.IAsyncResult)">
+        <member name="M:Apache.NMS.WCF.NmsInputChannelListener.OnEndOpen(System.IAsyncResult)">
             <summary>
             Completes an asynchronous operation on the open of a communication object.
             </summary>
             <param name="result">The <see cref="T:System.IAsyncResult" /> that is returned by a call to the <see cref="M:System.ServiceModel.Channels.CommunicationObject.OnEndOpen(System.IAsyncResult)" /> method.</param>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelListener.OnWaitForChannel(System.TimeSpan)">
+        <member name="M:Apache.NMS.WCF.NmsInputChannelListener.OnWaitForChannel(System.TimeSpan)">
             <summary>
             When overridden in a derived class, provides a point of extensibility when waiting for a channel to arrive.
             </summary>
@@ -995,7 +1032,7 @@
             </returns>
             <param name="timeout">The <see cref="T:System.TimeSpan" /> that specifies how long the on wait for a channel operation has to complete before timing out.</param>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelListener.OnBeginWaitForChannel(System.TimeSpan,System.AsyncCallback,System.Object)">
+        <member name="M:Apache.NMS.WCF.NmsInputChannelListener.OnBeginWaitForChannel(System.TimeSpan,System.AsyncCallback,System.Object)">
             <summary>
             When implemented in a derived class, provides a point of extensibility when starting to wait for a channel to arrive.
             </summary>
@@ -1006,7 +1043,7 @@
             <param name="callback">The <see cref="T:System.AsyncCallback" /> delegate that receives the notification of the asynchronous operation on begin wait completion.</param>
             <param name="state">An object, specified by the application, that contains state information associated with the asynchronous on begin wait operation.</param>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelListener.OnEndWaitForChannel(System.IAsyncResult)">
+        <member name="M:Apache.NMS.WCF.NmsInputChannelListener.OnEndWaitForChannel(System.IAsyncResult)">
             <summary>
             When implemented in a derived class, provides a point of extensibility when ending the waiting for a channel to arrive.
             </summary>
@@ -1015,7 +1052,7 @@
             </returns>
             <param name="result">The <see cref="T:System.IAsyncResult" /> returned by a call to the <see cref="M:System.ServiceModel.Channels.ChannelListenerBase.OnBeginWaitForChannel(System.TimeSpan,System.AsyncCallback,System.Object)" /> method.</param>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelListener.OnAcceptChannel(System.TimeSpan)">
+        <member name="M:Apache.NMS.WCF.NmsInputChannelListener.OnAcceptChannel(System.TimeSpan)">
             <summary>
             When implemented in a derived class, provides an extensibility point when accepting a channel.
             </summary>
@@ -1024,7 +1061,7 @@
             </returns>
             <param name="timeout">The <see cref="T:System.TimeSpan" /> that specifies how long the accept channel operation has to complete before timing out.</param>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelListener.OnBeginAcceptChannel(System.TimeSpan,System.AsyncCallback,System.Object)">
+        <member name="M:Apache.NMS.WCF.NmsInputChannelListener.OnBeginAcceptChannel(System.TimeSpan,System.AsyncCallback,System.Object)">
             <summary>
             When implemented in a derived class, provides an asynchronous extensibility point when beginning to accept a channel.
             </summary>
@@ -1035,7 +1072,7 @@
             <param name="callback">The <see cref="T:System.AsyncCallback" /> delegate that receives the notification of the asynchronous completion of the accept channel operation.</param>
             <param name="state">An object, specified by the application, that contains state information associated with the asynchronous accept channel operation.</param>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelListener.OnEndAcceptChannel(System.IAsyncResult)">
+        <member name="M:Apache.NMS.WCF.NmsInputChannelListener.OnEndAcceptChannel(System.IAsyncResult)">
             <summary>
             When implemented in a derived class, provides an asynchronous extensibility point when completing the acceptance a channel.
             </summary>
@@ -1044,40 +1081,40 @@
             </returns>
             <param name="result">The <see cref="T:System.IAsyncResult" /> returned by a call to the <see cref="M:System.ServiceModel.Channels.ChannelListenerBase`1.OnBeginAcceptChannel(System.TimeSpan,System.AsyncCallback,System.Object)" /> method.</param>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelListener.DispatchCallback(System.Object)">
+        <member name="M:Apache.NMS.WCF.NmsInputChannelListener.DispatchCallback(System.Object)">
             <summary>
             Dispatches the callback.
             </summary>
             <param name="state">The state.</param>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelListener.Dispatch(System.ServiceModel.Channels.Message)">
+        <member name="M:Apache.NMS.WCF.NmsInputChannelListener.Dispatch(System.ServiceModel.Channels.Message)">
             <summary>
             Matches an incoming message to its waiting listener,
-            using the FilterTable to dispatch the message to the correc
+            using the FilterTable to dispatch the message to the correct
             listener. If no listener is waiting for the message, it is silently
             discarded.
             </summary>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelListener.CreateOrRetrieveChannel(Apache.NMS.WCF.NmsInputChannel@)">
+        <member name="M:Apache.NMS.WCF.NmsInputChannelListener.CreateOrRetrieveChannel(Apache.NMS.WCF.NmsInputChannel@)">
             <summary>
-            Creates the or retrieve channel.
+            Creates or retrieves the channel.
             </summary>
-            <param name="newChannel">The new channel.</param>
+            <param name="newChannel">The channel.</param>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelListener.OnChannelClosed(System.Object,System.EventArgs)">
+        <member name="M:Apache.NMS.WCF.NmsInputChannelListener.OnChannelClosed(System.Object,System.EventArgs)">
             <summary>
             Called when the channel is closed.
             </summary>
             <param name="sender">The sender.</param>
             <param name="args">The <see cref="T:System.EventArgs"/> instance containing the event data.</param>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelListener.CreateNmsChannel(System.Uri)">
+        <member name="M:Apache.NMS.WCF.NmsInputChannelListener.CreateNmsChannel(System.Uri)">
             <summary>
             Creates the <see cref="T:Apache.NMS.WCF.NmsInputChannel"/> that will wait for inbound messages.
             </summary>
             <param name="uri">The URI for the message queue.</param>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelListener.OpenConnection(System.Uri)">
+        <member name="M:Apache.NMS.WCF.NmsInputChannelListener.OpenConnection(System.Uri)">
             <summary>
             Opens the connection to the message broker.
             </summary>
@@ -1085,23 +1122,16 @@
             <returns>An active connection to the ActiveMQ message broker specified by the URI;
             exceptions will be caught by the attached ExceptionListener.</returns>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelListener.OpenSession(Apache.NMS.IConnection)">
+        <member name="M:Apache.NMS.WCF.NmsInputChannelListener.OpenSession(Apache.NMS.IConnection)">
             <summary>
             Opens a session to communicate with a message queue.
             </summary>
             <param name="connection">The connection to the ActiveMQ message broker.</param>
-            <returns>A sessio </returns>
+            <returns>A session.</returns>
             <exception cref="T:System.InvalidOperationException">the <paramref name="connection"/> has not yet
             been started.</exception>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelListener.OpenDestination(Apache.NMS.ISession,System.Uri)">
-            <summary>
-            Opens the destination (which can be either a queue or a topic, for publish-subscribe).
-            </summary>
-            <param name="session">The session that will be used for communicating with the destination.</param>
-            <param name="uri">The URI of the destination.</param>
-        </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelListener.CreateConsumer(Apache.NMS.ISession,Apache.NMS.IDestination)">
+        <member name="M:Apache.NMS.WCF.NmsInputChannelListener.CreateConsumer(Apache.NMS.ISession,Apache.NMS.IDestination)">
             <summary>
             Creates the consumer of messages received on the <paramref name="session"/>.
             </summary>
@@ -1110,42 +1140,46 @@
             <returns>A consumer for any messages received during the session;
             messages will be consumed by the attached Listener.</returns>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelListener.OnReceiveMessage(Apache.NMS.IMessage)">
+        <member name="M:Apache.NMS.WCF.NmsInputChannelListener.OnReceiveMessage(Apache.NMS.IMessage)">
             <summary>
             Event handler that processes a received message.
             </summary>
             <param name="message">The message.</param>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelListener.OnExceptionThrown(System.Exception)">
+        <member name="M:Apache.NMS.WCF.NmsInputChannelListener.OnExceptionThrown(System.Exception)">
             <summary>
             Called when an exception is thrown by the ActiveMQ listener.
             </summary>
+            <remarks>
+            <see cref="T:Apache.NMS.NMSException"/>s will be caught and logged; all other exceptions will
+            be thrown back up to the WCF service.
+            </remarks>
             <param name="exception">The exception that was thrown.</param>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsChannelListener.EnsureChannelAvailable">
+        <member name="M:Apache.NMS.WCF.NmsInputChannelListener.EnsureChannelAvailable">
             <summary>
             Guarantees that a channel is attached to this listener.
             </summary>
         </member>
-        <member name="P:Apache.NMS.WCF.NmsChannelListener.MessageEncoderFactory">
+        <member name="P:Apache.NMS.WCF.NmsInputChannelListener.MessageEncoderFactory">
             <summary>
             Gets the message encoder factory.
             </summary>
             <value>The message encoder factory.</value>
         </member>
-        <member name="P:Apache.NMS.WCF.NmsChannelListener.Destination">
+        <member name="P:Apache.NMS.WCF.NmsInputChannelListener.Destination">
             <summary>
             Gets or sets the destination.
             </summary>
             <value>The destination.</value>
         </member>
-        <member name="P:Apache.NMS.WCF.NmsChannelListener.DestinationType">
+        <member name="P:Apache.NMS.WCF.NmsInputChannelListener.DestinationType">
             <summary>
             Gets or sets the type of the destination.
             </summary>
             <value>The type of the destination.</value>
         </member>
-        <member name="P:Apache.NMS.WCF.NmsChannelListener.Uri">
+        <member name="P:Apache.NMS.WCF.NmsInputChannelListener.Uri">
             <summary>
             When implemented in derived class, gets the URI on which the channel listener listens for an incoming channel.
             </summary>
@@ -1153,166 +1187,67 @@
             The <see cref="T:System.Uri" /> on which the channel listener listens for incoming channels.
             </returns>
         </member>
-        <member name="T:Apache.NMS.WCF.NmsInputChannel">
+        <member name="T:Apache.NMS.WCF.NmsInputSessionChannel">
             <summary>
-            Channel for receiving messages.
+            Server-side implementation of the sessioned one-way channel.
             </summary>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsInputChannel.#ctor(System.ServiceModel.Channels.BufferManager,System.ServiceModel.Channels.MessageEncoderFactory,System.ServiceModel.EndpointAddress,Apache.NMS.WCF.NmsChannelListener)">
+        <member name="M:Apache.NMS.WCF.NmsInputSessionChannel.#ctor(System.ServiceModel.Channels.ChannelListenerBase,System.ServiceModel.EndpointAddress)">
             <summary>
-            Initializes a new instance of the <see cref="T:Apache.NMS.WCF.NmsInputChannel"/> class.
+            Initializes a new instance of the <see cref="T:Apache.NMS.WCF.NmsInputSessionChannel"/> class.
             </summary>
-            <param name="bufferManager">The buffer manager.</param>
-            <param name="encoderFactory">The encoder factory.</param>
-            <param name="address">The address.</param>
-            <param name="parent">The parent.</param>
-            <exception cref="T:System.ArgumentNullException">
-            	<paramref name="channelManager"/> is null.</exception>
+            <param name="factory">The factory that was used to create the channel.</param>
+            <param name="localAddress">The local address of the channel.</param>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsInputChannel.GetProperty``1">
+        <member name="P:Apache.NMS.WCF.NmsInputSessionChannel.Session">
             <summary>
-            Gets the property.
+            Gets the type of session associated with this channel.
             </summary>
-            <typeparam name="T">The type of the property to attempt to retrieve.</typeparam>
+            <value></value>
+            <returns>The type of <see cref="T:System.ServiceModel.Channels.ISession"/> associated with this channel. </returns>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsInputChannel.Receive">
+        <member name="T:Apache.NMS.WCF.NmsInputSessionChannel.InputSession">
             <summary>
-            Returns the message received, if one is available. If a message is not available, blocks for a default interval of time.
-            </summary>
-            <returns>
-            The <see cref="T:System.ServiceModel.Channels.Message" /> received. 
-            </returns>
-        </member>
-        <member name="M:Apache.NMS.WCF.NmsInputChannel.Receive(System.TimeSpan)">
-            <summary>
-            Returns the message received, if one is available. If a message is not available, blocks for a specified interval of time.
-            </summary>
-            <returns>
-            The <see cref="T:System.ServiceModel.Channels.Message" /> received. 
-            </returns>
-            <param name="timeout">The <see cref="T:System.TimeSpan" /> that specifies how long the receive operation has to complete before timing out and throwing a <see cref="T:System.TimeoutException" />.</param>
-            <exception cref="T:System.TimeoutException">The specified <paramref name="timeout" /> is exceeded before the operation is completed.</exception>
-            <exception cref="T:System.ArgumentOutOfRangeException">The timeout specified is less than zero.</exception>
-        </member>
-        <member name="M:Apache.NMS.WCF.NmsInputChannel.TryReceive(System.TimeSpan,System.ServiceModel.Channels.Message@)">
-            <summary>
-            Tries to receive a message within a specified interval of time. 
-            </summary>
-            <returns>
-            true if a message is received before the <paramref name="timeout"/> has been exceeded; otherwise false.
-            </returns>
-            <param name="timeout">The <see cref="T:System.IAsyncResult"/> returned by a call to one of the <see cref="M:System.ServiceModel.Channels.IInputChannel.BeginReceive(System.AsyncCallback,System.Object)"/> methods.</param>
-            <param name="message">The <see cref="T:System.ServiceModel.Channels.Message"/> received. </param>
-            <exception cref="T:System.TimeoutException">The specified <paramref name="timeout"/> is exceeded before the operation is completed.</exception>
-            <exception cref="T:System.ArgumentOutOfRangeException">The timeout specified is less than zero.</exception>
-        </member>
-        <member name="M:Apache.NMS.WCF.NmsInputChannel.BeginReceive(System.AsyncCallback,System.Object)">
-            <summary>
-            Begins an asynchronous operation to receive a message that has a state object associated with it. 
-            </summary>
-            <returns>
-            The <see cref="T:System.IAsyncResult" /> that references the asynchronous message reception. 
-            </returns>
-            <param name="callback">The <see cref="T:System.AsyncCallback" /> delegate that receives the notification of the asynchronous operation completion.</param>
-            <param name="state">An object, specified by the application, that contains state information associated with the asynchronous operation.</param>
-        </member>
-        <member name="M:Apache.NMS.WCF.NmsInputChannel.BeginReceive(System.TimeSpan,System.AsyncCallback,System.Object)">
-            <summary>
-            Begins an asynchronous operation to receive a message that has a specified time out and state object associated with it. 
-            </summary>
-            <returns>
-            The <see cref="T:System.IAsyncResult" /> that references the asynchronous receive operation.
-            </returns>
-            <param name="timeout">The <see cref="T:System.TimeSpan" /> that specifies the interval of time to wait for a message to become available.</param>
-            <param name="callback">The <see cref="T:System.AsyncCallback" /> delegate that receives the notification of the asynchronous operation completion.</param>
-            <param name="state">An object, specified by the application, that contains state information associated with the asynchronous operation.</param>
-            <exception cref="T:System.TimeoutException">The specified <paramref name="timeout" /> is exceeded before the operation is completed.</exception>
-            <exception cref="T:System.ArgumentOutOfRangeException">The timeout specified is less than zero.</exception>
-        </member>
-        <member name="M:Apache.NMS.WCF.NmsInputChannel.EndReceive(System.IAsyncResult)">
-            <summary>
-            Completes an asynchronous operation to receive a message. 
-            </summary>
-            <returns>
-            The <see cref="T:System.ServiceModel.Channels.Message"/> received. 
-            </returns>
-            <param name="result">The <see cref="T:System.IAsyncResult"/> returned by a call to one of the <see cref="M:System.ServiceModel.Channels.IInputChannel.BeginReceive(System.AsyncCallback,System.Object)"/> methods.</param>
-        </member>
-        <member name="M:Apache.NMS.WCF.NmsInputChannel.BeginTryReceive(System.TimeSpan,System.AsyncCallback,System.Object)">
-            <summary>
-            Begins an asynchronous operation to receive a message that has a specified time out and state object associated with it. 
-            </summary>
-            <returns>
-            The <see cref="T:System.IAsyncResult" /> that references the asynchronous receive operation.
-            </returns>
-            <param name="timeout">The <see cref="T:System.TimeSpan" /> that specifies the interval of time to wait for a message to become available.</param>
-            <param name="callback">The <see cref="T:System.AsyncCallback" /> delegate that receives the notification of the asynchronous operation completion.</param>
-            <param name="state">An object, specified by the application, that contains state information associated with the asynchronous operation.</param>
-            <exception cref="T:System.TimeoutException">The specified <paramref name="timeout" /> is exceeded before the operation is completed.</exception>
-            <exception cref="T:System.ArgumentOutOfRangeException">The timeout specified is less than zero.</exception>
-        </member>
-        <member name="M:Apache.NMS.WCF.NmsInputChannel.EndTryReceive(System.IAsyncResult,System.ServiceModel.Channels.Message@)">
-            <summary>
-            Completes the specified asynchronous operation to receive a message.
-            </summary>
-            <returns>
-            true if a message is received before the specified interval of time elapses; otherwise false.
-            </returns>
-            <param name="result">The <see cref="T:System.IAsyncResult" /> returned by a call to the <see cref="M:System.ServiceModel.Channels.IInputChannel.BeginTryReceive(System.TimeSpan,System.AsyncCallback,System.Object)" /> method.</param>
-            <param name="message">The <see cref="T:System.ServiceModel.Channels.Message" /> received. </param>
-        </member>
-        <member name="M:Apache.NMS.WCF.NmsInputChannel.WaitForMessage(System.TimeSpan)">
-            <summary>
-            Returns a value that indicates whether a message has arrived within a specified interval of time.
-            </summary>
-            <returns>
-            true if a message has arrived before the <paramref name="timeout" /> has been exceeded; otherwise false.
-            </returns>
-            <param name="timeout">The <see cref="T:System.TimeSpan" /> specifies the maximum interval of time to wait for a message to arrive before timing out.</param>
-            <exception cref="T:System.TimeoutException">The specified <paramref name="timeout" /> is exceeded before the operation is completed.</exception>
-            <exception cref="T:System.ArgumentOutOfRangeException">The timeout specified is less than zero.</exception>
-        </member>
-        <member name="M:Apache.NMS.WCF.NmsInputChannel.BeginWaitForMessage(System.TimeSpan,System.AsyncCallback,System.Object)">
-            <summary>
-            Begins an asynchronous wait-for-a-message-to-arrive operation that has a specified time out and state object associated with it. 
-            </summary>
-            <returns>
-            The <see cref="T:System.IAsyncResult" /> that references the asynchronous operation to wait for a message to arrive.
-            </returns>
-            <param name="timeout">The <see cref="T:System.TimeSpan" /> that specifies the interval of time to wait for a message to become available.</param>
-            <param name="callback">The <see cref="T:System.AsyncCallback" /> delegate that receives the notification of the asynchronous operation completion.</param>
-            <param name="state">An object, specified by the application, that contains state information associated with the asynchronous operation.</param>
-            <exception cref="T:System.TimeoutException">The specified <paramref name="timeout" /> is exceeded before the operation is completed.</exception>
-            <exception cref="T:System.ArgumentOutOfRangeException">The timeout specified is less than zero.</exception>
-        </member>
-        <member name="M:Apache.NMS.WCF.NmsInputChannel.EndWaitForMessage(System.IAsyncResult)">
-            <summary>
-            Completes the specified asynchronous wait-for-a-message operation.
-            </summary>
-            <returns>
-            true if a message has arrived before the timeout has been exceeded; otherwise false.
-            </returns>
-            <param name="result">The <see cref="T:System.IAsyncResult" /> that identifies the <see cref="M:System.ServiceModel.Channels.IInputChannel.BeginWaitForMessage(System.TimeSpan,System.AsyncCallback,System.Object)" /> operation to finish, and from which to retrieve an end result.</param>
-        </member>
-        <member name="M:Apache.NMS.WCF.NmsInputChannel.OnAbort">
-            <summary>
-            Inserts processing on a communication object after it transitions to the closing state due to the invocation of a synchronous abort operation.
+            Internal implementation of a session, with tracking ID.
             </summary>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsInputChannel.OnClose(System.TimeSpan)">
+        <member name="P:Apache.NMS.WCF.NmsInputSessionChannel.InputSession.Id">
+            <summary>
+            Gets the ID that uniquely identifies the session.
+            </summary>
+            <value></value>
+            <returns>The ID that uniquely identifies the session. </returns>
+        </member>
+        <member name="T:Apache.NMS.WCF.NmsInputSessionChannelListener">
+            <summary>
+            Server-side listener for sessioned input channels.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputSessionChannelListener.#ctor(Apache.NMS.WCF.NmsTransportBindingElement,System.ServiceModel.Channels.BindingContext)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Apache.NMS.WCF.NmsInputSessionChannelListener"/> class.
+            </summary>
+            <param name="transportElement">The binding element.</param>
+            <param name="context">The context.</param>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputSessionChannelListener.OnAbort">
+            <summary>
+            Inserts processing on a communication object after it transitions to the closing state 
+            due to the invocation of a synchronous abort operation.
+            </summary>
+            <remarks>
+            Abort can be called at any time, so we can't assume that we've been Opened successfully 
+            (and thus may not have any listen sockets).
+            </remarks>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputSessionChannelListener.OnClose(System.TimeSpan)">
             <summary>
             Inserts processing on a communication object after it transitions to the closing state due to the invocation of a synchronous close operation.
             </summary>
             <param name="timeout">The <see cref="T:System.TimeSpan" /> that specifies how long the on close operation has to complete before timing out.</param>
             <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="timeout" /> is less than zero.</exception>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsInputChannel.OnEndClose(System.IAsyncResult)">
-            <summary>
-            Completes an asynchronous operation on the close of a communication object.
-            </summary>
-            <param name="result">The <see cref="T:System.IAsyncResult" /> that is returned by a call to the <see cref="M:System.ServiceModel.Channels.CommunicationObject.OnEndClose(System.IAsyncResult)" /> method.</param>
-        </member>
-        <member name="M:Apache.NMS.WCF.NmsInputChannel.OnBeginClose(System.TimeSpan,System.AsyncCallback,System.Object)">
+        <member name="M:Apache.NMS.WCF.NmsInputSessionChannelListener.OnBeginClose(System.TimeSpan,System.AsyncCallback,System.Object)">
             <summary>
             Inserts processing after a communication object transitions to the closing state due to the invocation of an asynchronous close operation.
             </summary>
@@ -1324,7 +1259,13 @@
             <param name="state">An object, specified by the application, that contains state information associated with the asynchronous on close operation.</param>
             <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="timeout" /> is less than zero.</exception>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsInputChannel.OnOpen(System.TimeSpan)">
+        <member name="M:Apache.NMS.WCF.NmsInputSessionChannelListener.OnEndClose(System.IAsyncResult)">
+            <summary>
+            Completes an asynchronous operation on the close of a communication object.
+            </summary>
+            <param name="result">The <see cref="T:System.IAsyncResult" /> that is returned by a call to the <see cref="M:System.ServiceModel.Channels.CommunicationObject.OnEndClose(System.IAsyncResult)" /> method.</param>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputSessionChannelListener.OnOpen(System.TimeSpan)">
             <summary>
             Inserts processing on a communication object after it transitions into the opening state which must complete within a specified interval of time.
             </summary>
@@ -1332,7 +1273,7 @@
             <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="timeout" /> is less than zero.</exception>
             <exception cref="T:System.TimeoutException">The interval of time specified by <paramref name="timeout" /> that was allotted for the operation was exceeded before the operation was completed.</exception>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsInputChannel.OnBeginOpen(System.TimeSpan,System.AsyncCallback,System.Object)">
+        <member name="M:Apache.NMS.WCF.NmsInputSessionChannelListener.OnBeginOpen(System.TimeSpan,System.AsyncCallback,System.Object)">
             <summary>
             Inserts processing on a communication object after it transitions to the opening state due to the invocation of an asynchronous open operation.
             </summary>
@@ -1344,35 +1285,314 @@
             <param name="state">An object, specified by the application, that contains state information associated with the asynchronous on open operation.</param>
             <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="timeout" /> is less than zero.</exception>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsInputChannel.OnEndOpen(System.IAsyncResult)">
+        <member name="M:Apache.NMS.WCF.NmsInputSessionChannelListener.OnEndOpen(System.IAsyncResult)">
             <summary>
             Completes an asynchronous operation on the open of a communication object.
             </summary>
             <param name="result">The <see cref="T:System.IAsyncResult" /> that is returned by a call to the <see cref="M:System.ServiceModel.Channels.CommunicationObject.OnEndOpen(System.IAsyncResult)" /> method.</param>
-            <exception cref="T:System.TimeoutException">The interval of time specified by the timeout that was allotted for the operation was exceeded before the operation was completed.</exception>
         </member>
-        <member name="P:Apache.NMS.WCF.NmsInputChannel.LocalAddress">
+        <member name="M:Apache.NMS.WCF.NmsInputSessionChannelListener.OnWaitForChannel(System.TimeSpan)">
             <summary>
-            Gets the address on which the input channel receives messages. 
+            When overridden in a derived class, provides a point of extensibility when waiting for a channel to arrive.
             </summary>
             <returns>
-            The <see cref="T:System.ServiceModel.EndpointAddress" /> on which the input channel receives messages. 
+            true if the method completed before the interval of time specified by the <paramref name="timeout" /> expired; otherwise false.
+            </returns>
+            <param name="timeout">The <see cref="T:System.TimeSpan" /> that specifies how long the on wait for a channel operation has to complete before timing out.</param>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputSessionChannelListener.OnBeginWaitForChannel(System.TimeSpan,System.AsyncCallback,System.Object)">
+            <summary>
+            When implemented in a derived class, provides a point of extensibility when starting to wait for a channel to arrive.
+            </summary>
+            <returns>
+            The <see cref="T:System.IAsyncResult" /> that references the asynchronous on begin wait operation. 
+            </returns>
+            <param name="timeout">The <see cref="T:System.TimeSpan" /> that specifies how long the on begin wait operation has to complete before timing out.</param>
+            <param name="callback">The <see cref="T:System.AsyncCallback" /> delegate that receives the notification of the asynchronous operation on begin wait completion.</param>
+            <param name="state">An object, specified by the application, that contains state information associated with the asynchronous on begin wait operation.</param>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputSessionChannelListener.OnEndWaitForChannel(System.IAsyncResult)">
+            <summary>
+            When implemented in a derived class, provides a point of extensibility when ending the waiting for a channel to arrive.
+            </summary>
+            <returns>
+            true if the method completed before the timeout expired; otherwise false.
+            </returns>
+            <param name="result">The <see cref="T:System.IAsyncResult" /> returned by a call to the <see cref="M:System.ServiceModel.Channels.ChannelListenerBase.OnBeginWaitForChannel(System.TimeSpan,System.AsyncCallback,System.Object)" /> method.</param>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputSessionChannelListener.OnAcceptChannel(System.TimeSpan)">
+            <summary>
+            When implemented in a derived class, provides an extensibility point when accepting a channel.
+            </summary>
+            <returns>
+            The <see cref="T:System.ServiceModel.Channels.IChannel" /> accepted.
+            </returns>
+            <param name="timeout">The <see cref="T:System.TimeSpan" /> that specifies how long the accept channel operation has to complete before timing out.</param>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputSessionChannelListener.OnBeginAcceptChannel(System.TimeSpan,System.AsyncCallback,System.Object)">
+            <summary>
+            When implemented in a derived class, provides an asynchronous extensibility point when beginning to accept a channel.
+            </summary>
+            <returns>
+            The <see cref="T:System.IAsyncResult" /> that references the asynchronous accept channel operation. 
+            </returns>
+            <param name="timeout">The <see cref="T:System.TimeSpan" /> that specifies how long the accept channel operation has to complete before timing out.</param>
+            <param name="callback">The <see cref="T:System.AsyncCallback" /> delegate that receives the notification of the asynchronous completion of the accept channel operation.</param>
+            <param name="state">An object, specified by the application, that contains state information associated with the asynchronous accept channel operation.</param>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputSessionChannelListener.OnEndAcceptChannel(System.IAsyncResult)">
+            <summary>
+            When implemented in a derived class, provides an asynchronous extensibility point when completing the acceptance a channel.
+            </summary>
+            <returns>
+            The <see cref="T:System.ServiceModel.Channels.IChannel" /> accepted by the listener.
+            </returns>
+            <param name="result">The <see cref="T:System.IAsyncResult" /> returned by a call to the <see cref="M:System.ServiceModel.Channels.ChannelListenerBase`1.OnBeginAcceptChannel(System.TimeSpan,System.AsyncCallback,System.Object)" /> method.</param>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputSessionChannelListener.DispatchCallback(System.Object)">
+            <summary>
+            Dispatches the callback.
+            </summary>
+            <param name="state">The state.</param>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputSessionChannelListener.Dispatch(System.ServiceModel.Channels.Message)">
+            <summary>
+            Matches an incoming message to its waiting listener,
+            using the FilterTable to dispatch the message to the correct
+            listener. If no listener is waiting for the message, it is silently
+            discarded.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputSessionChannelListener.CreateOrRetrieveChannel(Apache.NMS.WCF.NmsInputSessionChannel@)">
+            <summary>
+            Creates or retrieves the channel.
+            </summary>
+            <param name="newChannel">The channel.</param>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputSessionChannelListener.OnChannelClosed(System.Object,System.EventArgs)">
+            <summary>
+            Called when the channel is closed.
+            </summary>
+            <param name="sender">The sender.</param>
+            <param name="args">The <see cref="T:System.EventArgs"/> instance containing the event data.</param>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputSessionChannelListener.CreateNmsChannel(System.Uri)">
+            <summary>
+            Creates the <see cref="T:Apache.NMS.WCF.NmsInputChannel"/> that will wait for inbound messages.
+            </summary>
+            <param name="uri">The URI for the message queue.</param>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputSessionChannelListener.OpenConnection(System.Uri)">
+            <summary>
+            Opens the connection to the message broker.
+            </summary>
+            <param name="uri">The URI.</param>
+            <returns>An active connection to the ActiveMQ message broker specified by the URI;
+            exceptions will be caught by the attached ExceptionListener.</returns>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputSessionChannelListener.OpenSession(Apache.NMS.IConnection)">
+            <summary>
+            Opens a session to communicate with a message queue.
+            </summary>
+            <param name="connection">The connection to the ActiveMQ message broker.</param>
+            <returns>A session.</returns>
+            <exception cref="T:System.InvalidOperationException">the <paramref name="connection"/> has not yet
+            been started.</exception>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputSessionChannelListener.CreateConsumer(Apache.NMS.ISession,Apache.NMS.IDestination)">
+            <summary>
+            Creates the consumer of messages received on the <paramref name="session"/>.
+            </summary>
+            <param name="session">The session.</param>
+            <param name="destination">The destination.</param>
+            <returns>A consumer for any messages received during the session;
+            messages will be consumed by the attached Listener.</returns>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputSessionChannelListener.OnReceiveMessage(Apache.NMS.IMessage)">
+            <summary>
+            Event handler that processes a received message.
+            </summary>
+            <param name="message">The message.</param>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputSessionChannelListener.OnExceptionThrown(System.Exception)">
+            <summary>
+            Called when an exception is thrown by the ActiveMQ listener.
+            </summary>
+            <remarks>
+            <see cref="T:Apache.NMS.NMSException"/>s will be caught and logged; all other exceptions will
+            be thrown back up to the WCF service.
+            </remarks>
+            <param name="exception">The exception that was thrown.</param>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsInputSessionChannelListener.EnsureChannelAvailable">
+            <summary>
+            Guarantees that a channel is attached to this listener.
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.WCF.NmsInputSessionChannelListener.MessageEncoderFactory">
+            <summary>
+            Gets the message encoder factory.
+            </summary>
+            <value>The message encoder factory.</value>
+        </member>
+        <member name="P:Apache.NMS.WCF.NmsInputSessionChannelListener.Destination">
+            <summary>
+            Gets or sets the destination.
+            </summary>
+            <value>The destination.</value>
+        </member>
+        <member name="P:Apache.NMS.WCF.NmsInputSessionChannelListener.DestinationType">
+            <summary>
+            Gets or sets the type of the destination.
+            </summary>
+            <value>The type of the destination.</value>
+        </member>
+        <member name="P:Apache.NMS.WCF.NmsInputSessionChannelListener.Uri">
+            <summary>
+            When implemented in derived class, gets the URI on which the channel listener listens for an incoming channel.
+            </summary>
+            <returns>
+            The <see cref="T:System.Uri" /> on which the channel listener listens for incoming channels.
             </returns>
         </member>
         <member name="T:Apache.NMS.WCF.NmsOutputChannel">
             <summary>
-            Channel for sending messages.
+            Client-side implementation of the sessionless one-way channel.
             </summary>
         </member>
-        <member name="M:Apache.NMS.WCF.NmsOutputChannel.#ctor(System.ServiceModel.Channels.BufferManager,System.ServiceModel.Channels.MessageEncoderFactory,System.ServiceModel.EndpointAddress,Apache.NMS.WCF.NmsChannelFactory,System.Uri)">
+        <member name="T:Apache.NMS.WCF.NmsOutputChannelBase">
+            <summary>
+            Base class for NMS output channels.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsOutputChannelBase.#ctor(System.ServiceModel.Channels.ChannelManagerBase,System.ServiceModel.EndpointAddress,System.Uri,System.ServiceModel.Channels.BufferManager,System.ServiceModel.Channels.MessageEncoderFactory,System.String,Apache.NMS.DestinationType)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Apache.NMS.WCF.NmsOutputChannelBase"/> class.
+            </summary>
+            <param name="factory">The factory that created the channel.</param>
+            <param name="remoteAddress">The remote address for the channel.</param>
+            <param name="via">The URI that contains the transport address to which messages are sent on the output channel.</param>
+            <param name="bufferManager">The buffer manager.</param>
+            <param name="encoderFactory">The encoder factory.</param>
+            <param name="destination">The name of the ActiveMQ destination.</param>
+            <param name="destinationType">The type of the ActiveMQ destination (either a queue or a topic, permanent or temporary).</param>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsOutputChannelBase.OnAbort">
+            <summary>
+            Inserts processing on a communication object after it transitions to the closing state due to the invocation of a synchronous abort operation.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsOutputChannelBase.OnBeginClose(System.TimeSpan,System.AsyncCallback,System.Object)">
+            <summary>
+            Inserts processing after a communication object transitions to the closing state due to the invocation of an asynchronous close operation.
+            </summary>
+            <param name="timeout">The <see cref="T:System.Timespan"/> that specifies how long the on close operation has to complete before timing out.</param>
+            <param name="callback">The <see cref="T:System.AsyncCallback"/> delegate that receives notification of the completion of the asynchronous on close operation.</param>
+            <param name="state">An object, specified by the application, that contains state information associated with the asynchronous on close operation.</param>
+            <returns>
+            The <see cref="T:System.IAsyncResult"/> that references the asynchronous on close operation.
+            </returns>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            	<paramref name="timeout"/> is less than zero.</exception>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsOutputChannelBase.OnClose(System.TimeSpan)">
+            <summary>
+            Inserts processing on a communication object after it transitions to the closing state due to the invocation of a synchronous close operation.
+            </summary>
+            <param name="timeout">The <see cref="T:System.Timespan"/> that specifies how long the on close operation has to complete before timing out.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            	<paramref name="timeout"/> is less than zero.</exception>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsOutputChannelBase.OnEndClose(System.IAsyncResult)">
+            <summary>
+            Completes an asynchronous operation on the close of a communication object.
+            </summary>
+            <param name="result">The <see cref="T:System.IAsyncResult"/> that is returned by a call to the <see cref="M:System.ServiceModel.Channels.CommunicationObject.OnEndClose(System.IAsyncResult)"/> method.</param>
+            <exception cref="T:System.TimeoutException">The interval of time specified by <paramref name="timeout"/> that was allotted for the operation was exceeded before the operation was completed.</exception>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsOutputChannelBase.OnBeginOpen(System.TimeSpan,System.AsyncCallback,System.Object)">
+            <summary>
+            Inserts processing on a communication object after it transitions to the opening state due to the invocation of an asynchronous open operation.
+            </summary>
+            <param name="timeout">The <see cref="T:System.Timespan"/> that specifies how long the on open operation has to complete before timing out.</param>
+            <param name="callback">The <see cref="T:System.AsyncCallback"/> delegate that receives notification of the completion of the asynchronous on open operation.</param>
+            <param name="state">An object, specified by the application, that contains state information associated with the asynchronous on open operation.</param>
+            <returns>
+            The <see cref="T:System.IAsyncResult"/> that references the asynchronous on open operation.
+            </returns>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            	<paramref name="timeout"/> is less than zero.</exception>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsOutputChannelBase.OnOpen(System.TimeSpan)">
+            <summary>
+            Inserts processing on a communication object after it transitions into the opening state which must complete within a specified interval of time.
+            </summary>
+            <param name="timeout">The <see cref="T:System.Timespan"/> that specifies how long the on open operation has to complete before timing out.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            	<paramref name="timeout"/> is less than zero.</exception>
+            <exception cref="T:System.TimeoutException">The interval of time specified by <paramref name="timeout"/> that was allotted for the operation was exceeded before the operation was completed.</exception>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsOutputChannelBase.OnEndOpen(System.IAsyncResult)">
+            <summary>
+            Completes an asynchronous operation on the open of a communication object.
+            </summary>
+            <param name="result">The <see cref="T:System.IAsyncResult"/> that is returned by a call to the <see cref="M:System.ServiceModel.Channels.CommunicationObject.OnEndOpen(System.IAsyncResult)"/> method.</param>
+            <exception cref="T:System.TimeoutException">The interval of time specified by <paramref name="timeout"/> that was allotted for the operation was exceeded before the operation was completed.</exception>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsOutputChannelBase.GetProperty``1">
+            <summary>
+            Gets the property.
+            </summary>
+            <typeparam name="T"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="P:Apache.NMS.WCF.NmsOutputChannelBase.RemoteAddress">
+            <summary>
+            Gets the remote address.
+            </summary>
+            <value>The remote address.</value>
+        </member>
+        <member name="P:Apache.NMS.WCF.NmsOutputChannelBase.Via">
+            <summary>
+            Gets the routing address.
+            </summary>
+            <value>The routing address.</value>
+        </member>
+        <member name="P:Apache.NMS.WCF.NmsOutputChannelBase.BufferManager">
+            <summary>
+            Gets the buffer manager.
+            </summary>
+            <value>The buffer manager.</value>
+        </member>
+        <member name="P:Apache.NMS.WCF.NmsOutputChannelBase.Encoder">
+            <summary>
+            Gets the encoder.
+            </summary>
+            <value>The encoder.</value>
+        </member>
+        <member name="P:Apache.NMS.WCF.NmsOutputChannelBase.Destination">
+            <summary>
+            Gets the name of the destination (either a queue or a topic).
+            </summary>
+            <value>The name of the destination.</value>
+        </member>
+        <member name="P:Apache.NMS.WCF.NmsOutputChannelBase.DestinationType">
+            <summary>
+            Gets the type of the destination.
+            </summary>
+            <value>The type of the destination.</value>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsOutputChannel.#ctor(System.ServiceModel.Channels.ChannelManagerBase,System.ServiceModel.EndpointAddress,System.Uri,System.ServiceModel.Channels.BufferManager,System.ServiceModel.Channels.MessageEncoderFactory,System.String,Apache.NMS.DestinationType)">
             <summary>
             Initializes a new instance of the <see cref="T:Apache.NMS.WCF.NmsOutputChannel"/> class.
             </summary>
+            <param name="factory">The factory that created the channel.</param>
+            <param name="remoteAddress">The remote address of the channel.</param>
+            <param name="via">The URI that contains the transport address to which messages are sent on the output channel.</param>
             <param name="bufferManager">The buffer manager.</param>
             <param name="encoderFactory">The encoder factory.</param>
-            <param name="address">The address.</param>
-            <param name="parent">The parent.</param>
-            <param name="via">The via.</param>
+            <param name="destination">The name of the ActiveMQ destination.</param>
+            <param name="destinationType">The type of the ActiveMQ destination (either a queue or a topic, permanent or temporary).</param>
         </member>
         <member name="M:Apache.NMS.WCF.NmsOutputChannel.Send(System.ServiceModel.Channels.Message)">
             <summary>
@@ -1503,13 +1723,41 @@
             </summary>
             <param name="message">The message.</param>
         </member>
-        <member name="P:Apache.NMS.WCF.NmsOutputChannel.Via">
+        <member name="T:Apache.NMS.WCF.NmsOutputSessionChannel">
             <summary>
-            Gets the URI that contains the transport address to which messages are sent on the output channel.
+            Client-side implementation of the sessioned one-way channel.
             </summary>
-            <returns>
-            The <see cref="T:System.Uri" /> that contains the transport address to which messages are sent on the output channel.
-            </returns>
+        </member>
+        <member name="M:Apache.NMS.WCF.NmsOutputSessionChannel.#ctor(System.ServiceModel.Channels.ChannelManagerBase,System.Uri,System.ServiceModel.EndpointAddress,System.ServiceModel.Channels.BufferManager,System.ServiceModel.Channels.MessageEncoderFactory,System.String,Apache.NMS.DestinationType)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Apache.NMS.WCF.NmsOutputSessionChannel"/> class.
+            </summary>
+            <param name="factory">The factory that created this channel.</param>
+            <param name="address">The address of this channel.</param>
+            <param name="via">The URI that contains the transport address to which messages are sent on the output channel.</param>
+            <param name="bufferManager">The buffer manager.</param>
+            <param name="encoderFactory">The encoder factory.</param>
+            <param name="destination">The name of the ActiveMQ destination.</param>
+            <param name="destinationType">The type of the ActiveMQ destination (either a queue or a topic, permanent or temporary).</param>
+        </member>
+        <member name="P:Apache.NMS.WCF.NmsOutputSessionChannel.Session">
+            <summary>
+            Gets the type of session associated with this channel.
+            </summary>
+            <value></value>
+            <returns>The type of <see cref="T:System.ServiceModel.Channels.ISession"/> associated with this channel. </returns>
+        </member>
+        <member name="T:Apache.NMS.WCF.NmsOutputSessionChannel.OutputSession">
+            <summary>
+            Internal implementation of a session, with tracking ID.
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.WCF.NmsOutputSessionChannel.OutputSession.Id">
+            <summary>
+            Gets the ID that uniquely identifies the session.
+            </summary>
+            <value></value>
+            <returns>The ID that uniquely identifies the session. </returns>
         </member>
     </members>
 </doc>
