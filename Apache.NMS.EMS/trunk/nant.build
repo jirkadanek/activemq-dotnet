@@ -80,17 +80,17 @@
     </if>
 
   	<assemblyfileset failonempty="true" id="dependencies">
-      <include name="mscorlib.dll" asis="true"/>
-      <include name="System.dll" asis="true"/>
-      <include name="System.Xml.dll" asis="true"/>
+      <include name="${current.build.framework.assembly.dir}/mscorlib.dll"/>
+      <include name="${current.build.framework.assembly.dir}/System.dll"/>
+      <include name="${current.build.framework.assembly.dir}/System.Xml.dll"/>
       <include name="${TIBCO.EMS.dll}"/>
       <include name="${Apache.NMS.dll}"/>
   	</assemblyfileset>
 
   	<assemblyfileset failonempty="true" id="test.dependencies">
-      <include name="mscorlib.dll" asis="true"/>
-      <include name="System.dll" asis="true"/>
-      <include name="System.Xml.dll" asis="true"/>
+      <include name="${current.build.framework.assembly.dir}/mscorlib.dll"/>
+      <include name="${current.build.framework.assembly.dir}/System.dll"/>
+      <include name="${current.build.framework.assembly.dir}/System.Xml.dll"/>
       <include name="${TIBCO.EMS.dll}"/>
       <include name="${Apache.NMS.dll}"/>
       <include name="${Apache.NMS.Test.dll}"/>

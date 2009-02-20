@@ -35,7 +35,7 @@
 	<property name="Apache.NMS.Test.dll" value="${basedir}/lib/Apache.NMS/${current.build.framework}//Apache.NMS.Test.dll" dynamic="true"/>
 	<property name="Apache.NMS.Test.pdb" value="${basedir}/lib/Apache.NMS/${current.build.framework}/Apache.NMS.Test.pdb" dynamic="true"/>
 
-	<!-- Skip certain frameworks, since ActiveMQ.NET Client is not supported on those platforms. -->
+	<!-- Skip certain frameworks, since WCF Client is not supported on those platforms. -->
 	<property name="build.net-1.1.skip" value="true"/>
 	<property name="build.net-2.0.skip" value="true"/>
 	<property name="build.mono-2.0.skip" value="true"/>
@@ -68,28 +68,25 @@
 			<property name="build.skip" value="true"/>
 		</if>
 
-		<property name="net-3.0-referencepath" value="${environment::get-folder-path('ProgramFiles')}\Reference Assemblies\Microsoft\Framework\v3.0\" />
-		<property name="net-3.0-installed" value="${directory::exists(net-3.0-referencepath)}" />
-
 		<assemblyfileset failonempty="true" id="dependencies">
-			<include name="mscorlib.dll" asis="true"/>
-			<include name="System.dll" asis="true"/>
-			<include name="System.configuration.dll" asis="true"/>
-			<include if="${net-3.0-installed}" name="${net-3.0-referencepath}\System.Runtime.Serialization.dll" />
-			<include if="${net-3.0-installed}" name="${net-3.0-referencepath}\System.ServiceModel.dll" />
-			<include name="System.Web.Services.dll" asis="true"/>
-			<include name="System.Xml.dll" asis="true"/>
+			<include name="${current.build.framework.assembly.dir}/mscorlib.dll"/>
+			<include name="${current.build.framework.assembly.dir}/System.dll"/>
+			<include name="${current.build.framework.assembly.dir}/System.configuration.dll"/>
+			<include name="${current.build.framework.assembly.dir}/System.Runtime.Serialization.dll" />
+			<include name="${current.build.framework.assembly.dir}/System.ServiceModel.dll" />
+			<include name="${current.build.framework.assembly.dir}/System.Web.Services.dll"/>
+			<include name="${current.build.framework.assembly.dir}/System.Xml.dll"/>
 			<include name="${Apache.NMS.dll}" asis="true"/>
 		</assemblyfileset>
 
 		<assemblyfileset failonempty="true" id="test.dependencies">
-			<include name="mscorlib.dll" asis="true"/>
-			<include name="System.dll" asis="true"/>
-			<include name="System.configuration.dll" asis="true"/>
-			<include if="${net-3.0-installed}" name="${net-3.0-referencepath}\System.Runtime.Serialization.dll" />
-			<include if="${net-3.0-installed}" name="${net-3.0-referencepath}\System.ServiceModel.dll" />
-			<include name="System.Web.Services.dll" asis="true"/>
-			<include name="System.Xml.dll" asis="true"/>
+			<include name="${current.build.framework.assembly.dir}/mscorlib.dll"/>
+			<include name="${current.build.framework.assembly.dir}/System.dll"/>
+			<include name="${current.build.framework.assembly.dir}/System.configuration.dll"/>
+			<include name="${current.build.framework.assembly.dir}/System.Runtime.Serialization.dll" />
+			<include name="${current.build.framework.assembly.dir}/System.ServiceModel.dll" />
+			<include name="${current.build.framework.assembly.dir}/System.Web.Services.dll"/>
+			<include name="${current.build.framework.assembly.dir}/System.Xml.dll"/>
 			<include name="${Apache.NMS.dll}"/>
 			<include name="${Apache.NMS.Test.dll}"/>
 			<include name="${build.bin.dir}/${project.name}.dll"/>
