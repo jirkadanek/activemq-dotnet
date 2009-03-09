@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-$pkgname = "Apache.NMS"
+$pkgname = "Apache.NMS.EMS"
 $pkgver = "1.1.0"
 $configurations = "release", "debug"
-$frameworks = "mono-2.0", "net-1.1", "net-2.0", "net-3.5", "netcf-2.0"
+$frameworks = "net-2.0", "net-3.5"
 
 function package-legalfiles($zipfile)
 {
@@ -88,7 +88,7 @@ write-progress "Packaging Source code files." "Scanning..."
 $pkgdir = "package"
 $zipfile = "$pkgdir\$pkgname-$pkgver-src.zip"
 
-zip -9 -u "$zipfile" LICENSE.txt NOTICE.txt nant-common.xml nant.build package.ps1 vs2008-nms-test.csproj vs2008-nms.csproj vs2008-nms.sln
+zip -9 -u "$zipfile" LICENSE.txt NOTICE.txt nant-common.xml nant.build package.ps1 vs2008-ems-test.csproj vs2008-ems.csproj vs2008-ems.sln
 zip -9 -u -r "$zipfile" keyfile src
 
 write-progress "Packaging" "Complete."

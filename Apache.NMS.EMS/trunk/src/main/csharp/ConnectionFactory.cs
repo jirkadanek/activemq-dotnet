@@ -51,8 +51,17 @@ namespace Apache.NMS.EMS
 		}
 
 		public ConnectionFactory(string serverUrl)
-			: this(serverUrl, Guid.NewGuid().ToString())
 		{
+			try
+			{
+				this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(serverUrl);
+			}
+			catch(Exception ex)
+			{
+				Apache.NMS.Tracer.DebugFormat("Exception instantiating TIBCO.EMS.ConnectionFactory: {0}", ex.Message);
+			}
+
+			VerifyConnectionFactory();
 		}
 
 		public ConnectionFactory(string serverUrl, string clientId)
