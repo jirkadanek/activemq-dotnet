@@ -88,7 +88,7 @@ write-progress "Packaging Source code files." "Scanning..."
 $pkgdir = "package"
 $zipfile = "$pkgdir\$pkgname-$pkgver-src.zip"
 
-zip -9 -u "$zipfile" LICENSE.txt NOTICE.txt nant-common.xml nant.build package.ps1 vs2008-wcf.csproj vs2008-wcf.sln
+zip -9 -u "$zipfile" LICENSE.txt NOTICE.txt nant-common.xml nant.build package.ps1 vs2008-nms-wcf.csproj vs2008-nms-wcf.sln
 zip -9 -u -r "$zipfile" keyfile src
 
 write-progress "Packaging" "Complete."
