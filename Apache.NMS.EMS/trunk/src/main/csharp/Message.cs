@@ -75,28 +75,6 @@ namespace Apache.NMS.EMS
 			get { return this.timeToLive; }
 			set { this.timeToLive = value; }
 		}
-#if false
-		{
-			get
-			{
-				if(this.tibcoMessage.Expiration > 0)
-				{
-					return Apache.ActiveMQ.Util.DateUtils.ToDateTime(this.tibcoMessage.Expiration)
-					       - DateTime.Now;
-				}
-				else
-				{
-					return new TimeSpan();
-				}
-			}
-
-			set
-			{
-				this.tibcoMessage.Expiration =
-						Apache.ActiveMQ.Util.DateUtils.ToJavaTime(DateTime.Now + value);
-			}
-		}
-#endif
 
 		/// <summary>
 		/// The message ID which is set by the provider
@@ -109,19 +87,19 @@ namespace Apache.NMS.EMS
 		/// <summary>
 		/// Whether or not this message is persistent
 		/// </summary>
-		public bool NMSPersistent
+		public MsgDeliveryMode NMSDeliveryMode
 		{
-			get { return EMSConvert.ToPersistent(this.tibcoMessage.MsgDeliveryMode); }
+			get { return EMSConvert.ToNMSMsgDeliveryMode(this.tibcoMessage.MsgDeliveryMode); }
 			set { this.tibcoMessage.MsgDeliveryMode = EMSConvert.ToMessageDeliveryMode(value); }
 		}
 
 		/// <summary>
 		/// The Priority on this message
 		/// </summary>
-		public byte NMSPriority
+		public MsgPriority NMSPriority
 		{
-			get { return (byte) this.tibcoMessage.Priority; }
-			set { this.tibcoMessage.Priority = value; }
+			get { return (MsgPriority) this.tibcoMessage.Priority; }
+			set { this.tibcoMessage.Priority = (int) value; }
 		}
 
 		/// <summary>

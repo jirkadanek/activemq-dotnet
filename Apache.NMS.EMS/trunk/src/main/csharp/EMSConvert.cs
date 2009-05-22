@@ -224,16 +224,36 @@ namespace Apache.NMS.EMS
 							: null);
 		}
 
-		public static TIBCO.EMS.MessageDeliveryMode ToMessageDeliveryMode(bool persistent)
+		public static TIBCO.EMS.MessageDeliveryMode ToMessageDeliveryMode(MsgDeliveryMode deliveryMode)
 		{
-			return (persistent
-						? TIBCO.EMS.MessageDeliveryMode.Persistent
-						: TIBCO.EMS.MessageDeliveryMode.NonPersistent);
+			if(MsgDeliveryMode.Persistent == deliveryMode)
+			{
+				return TIBCO.EMS.MessageDeliveryMode.Persistent;
+			}
+			
+			if(MsgDeliveryMode.NonPersistent == deliveryMode)
+			{
+				return TIBCO.EMS.MessageDeliveryMode.NonPersistent;
+			}
+
+			// Hard cast it to the enumeration.
+			return (TIBCO.EMS.MessageDeliveryMode) deliveryMode;
 		}
 
-		public static bool ToPersistent(TIBCO.EMS.MessageDeliveryMode deliveryMode)
+		public static MsgDeliveryMode ToNMSMsgDeliveryMode(TIBCO.EMS.MessageDeliveryMode deliveryMode)
 		{
-			return (TIBCO.EMS.MessageDeliveryMode.NonPersistent != deliveryMode);
+			if(TIBCO.EMS.MessageDeliveryMode.Persistent == deliveryMode)
+			{
+				return MsgDeliveryMode.Persistent;
+			}
+
+			if(TIBCO.EMS.MessageDeliveryMode.NonPersistent == deliveryMode)
+			{
+				return MsgDeliveryMode.NonPersistent;
+			}
+
+			// Hard cast it to the enumeration.
+			return (MsgDeliveryMode) deliveryMode;
 		}
 
 

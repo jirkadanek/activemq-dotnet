@@ -76,7 +76,7 @@ namespace Apache.NMS.WCF
 				IDestination destination = SessionUtil.GetDestination(session, Destination, DestinationType);
 				using(IMessageProducer producer = session.CreateProducer(destination))
 				{
-					producer.Persistent = true;
+					producer.DeliveryMode = MsgDeliveryMode.Persistent;
 
 					ITextMessage request = session.CreateTextMessage(TranslateMessage(message));
 					producer.Send(request);

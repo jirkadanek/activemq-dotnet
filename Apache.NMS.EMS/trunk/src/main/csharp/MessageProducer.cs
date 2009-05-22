@@ -65,14 +65,14 @@ namespace Apache.NMS.EMS
 		/// <summary>
 		/// Sends the message to the default destination with the explicit QoS configuration
 		/// </summary>
-		public void Send(Apache.NMS.IMessage message, bool persistent, byte priority, TimeSpan timeToLive)
+		public void Send(Apache.NMS.IMessage message, MsgDeliveryMode deliveryMode, MsgPriority priority, TimeSpan timeToLive)
 		{
 			Apache.NMS.EMS.Message msg = (Apache.NMS.EMS.Message) message;
 
 			this.tibcoMessageProducer.Send(
 						msg.tibcoMessage,
-						EMSConvert.ToMessageDeliveryMode(persistent),
-						priority,
+						EMSConvert.ToMessageDeliveryMode(deliveryMode),
+						(int) priority,
 						(long) timeToLive.TotalMilliseconds);
 		}
 
@@ -102,7 +102,7 @@ namespace Apache.NMS.EMS
 		/// Sends the message to the given destination with the explicit QoS configuration
 		/// </summary>
 		public void Send(Apache.NMS.IDestination destination, Apache.NMS.IMessage message,
-						bool persistent, byte priority, TimeSpan timeToLive)
+						MsgDeliveryMode deliveryMode, MsgPriority priority, TimeSpan timeToLive)
 		{
 			Apache.NMS.EMS.Destination dest = (Apache.NMS.EMS.Destination) destination;
 			Apache.NMS.EMS.Message msg = (Apache.NMS.EMS.Message) message;
@@ -110,14 +110,14 @@ namespace Apache.NMS.EMS
 			this.tibcoMessageProducer.Send(
 						dest.tibcoDestination,
 						msg.tibcoMessage,
-						EMSConvert.ToMessageDeliveryMode(persistent),
-						priority,
+						EMSConvert.ToMessageDeliveryMode(deliveryMode),
+						(int) priority,
 						(long) timeToLive.TotalMilliseconds);
 		}
 
-		public bool Persistent
+		public MsgDeliveryMode DeliveryMode
 		{
-			get { return EMSConvert.ToPersistent(this.tibcoMessageProducer.MsgDeliveryMode); }
+			get { return EMSConvert.ToNMSMsgDeliveryMode(this.tibcoMessageProducer.MsgDeliveryMode); }
 			set { this.tibcoMessageProducer.MsgDeliveryMode = EMSConvert.ToMessageDeliveryMode(value); }
 		}
 
@@ -136,10 +136,10 @@ namespace Apache.NMS.EMS
 			set { this.requestTimeout = value; }
 		}
 
-		public byte Priority
+		public MsgPriority Priority
 		{
-			get { return (byte) this.tibcoMessageProducer.Priority; }
-			set { this.tibcoMessageProducer.Priority = value; }
+			get { return (MsgPriority) this.tibcoMessageProducer.Priority; }
+			set { this.tibcoMessageProducer.Priority = (int) value; }
 		}
 
 		public bool DisableMessageID
