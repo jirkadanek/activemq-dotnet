@@ -38,7 +38,7 @@
   <property name="Apache.NMS.Test.pdb" value="${basedir}/lib/Apache.NMS/${current.build.framework}/Apache.NMS.Test.pdb" dynamic="true"/>
   <property name="TIBCO.EMS.dll" value="${basedir}/lib/TIBCO.EMS/${current.build.framework}/TIBCO.EMS.dll" dynamic="true"/>
 
-  <property name="NUnit.Projectfile" value="${basedir}/Apache.NMS.EMS.Test.nunit"/>
+  <property name="NUnit.Projectfile" value="Apache.NMS.EMS.Test.nunit"/>
 
   <!-- Skip certain frameworks, since TIBCO client is not supported on those platforms. -->
   <property name="build.net-1.1.skip" value="true"/>
