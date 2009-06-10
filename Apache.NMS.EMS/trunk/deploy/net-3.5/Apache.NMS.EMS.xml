@@ -36,7 +36,7 @@
             The message ID which is set by the provider
             </summary>
         </member>
-        <member name="P:Apache.NMS.EMS.Message.NMSPersistent">
+        <member name="P:Apache.NMS.EMS.Message.NMSDeliveryMode">
             <summary>
             Whether or not this message is persistent
             </summary>
@@ -189,7 +189,7 @@
             Sends the message to the default destination for this producer
             </summary>
         </member>
-        <member name="M:Apache.NMS.EMS.MessageProducer.Send(Apache.NMS.IMessage,System.Boolean,System.Byte,System.TimeSpan)">
+        <member name="M:Apache.NMS.EMS.MessageProducer.Send(Apache.NMS.IMessage,Apache.NMS.MsgDeliveryMode,Apache.NMS.MsgPriority,System.TimeSpan)">
             <summary>
             Sends the message to the default destination with the explicit QoS configuration
             </summary>
@@ -199,7 +199,7 @@
             Sends the message to the given destination
             </summary>
         </member>
-        <member name="M:Apache.NMS.EMS.MessageProducer.Send(Apache.NMS.IDestination,Apache.NMS.IMessage,System.Boolean,System.Byte,System.TimeSpan)">
+        <member name="M:Apache.NMS.EMS.MessageProducer.Send(Apache.NMS.IDestination,Apache.NMS.IMessage,Apache.NMS.MsgDeliveryMode,Apache.NMS.MsgPriority,System.TimeSpan)">
             <summary>
             Sends the message to the given destination with the explicit QoS configuration
             </summary>
