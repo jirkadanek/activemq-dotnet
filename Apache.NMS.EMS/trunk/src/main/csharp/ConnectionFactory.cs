@@ -14,17 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using System;
 using System.Collections;
 
 namespace Apache.NMS.EMS
 {
-    /// <summary>
-    /// A Factory that can estbalish NMS connections to TIBCO
-    /// </summary>
-    public class ConnectionFactory : Apache.NMS.IConnectionFactory
-    {
-    	public TIBCO.EMS.ConnectionFactory tibcoConnectionFactory;
+	/// <summary>
+	/// A Factory that can estbalish NMS connections to TIBCO
+	/// </summary>
+	public class ConnectionFactory : Apache.NMS.IConnectionFactory
+	{
+		public TIBCO.EMS.ConnectionFactory tibcoConnectionFactory;
+		private Uri brokerUri;
+		private string clientId;
+		private Hashtable properties;
 
 		public ConnectionFactory()
 		{
@@ -55,6 +59,7 @@ namespace Apache.NMS.EMS
 			try
 			{
 				this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(serverUrl);
+				this.brokerUri = new Uri(serverUrl);
 			}
 			catch(Exception ex)
 			{
@@ -69,6 +74,8 @@ namespace Apache.NMS.EMS
 			try
 			{
 				this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(serverUrl, clientId);
+				this.brokerUri = new Uri(serverUrl);
+				this.clientId = clientId;
 			}
 			catch(Exception ex)
 			{
@@ -83,6 +90,9 @@ namespace Apache.NMS.EMS
 			try
 			{
 				this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(serverUrl, clientId, properties);
+				this.brokerUri = new Uri(serverUrl);
+				this.clientId = clientId;
+				this.properties = properties;
 			}
 			catch(Exception ex)
 			{
@@ -106,16 +116,54 @@ namespace Apache.NMS.EMS
 		/// Creates a new connection to TIBCO.
 		/// </summary>
 		public Apache.NMS.IConnection CreateConnection()
-        {
+		{
 			return EMSConvert.ToNMSConnection(this.tibcoConnectionFactory.CreateConnection());
-        }
+		}
 
 		/// <summary>
 		/// Creates a new connection to TIBCO.
 		/// </summary>
 		public Apache.NMS.IConnection CreateConnection(string userName, string password)
-        {
+		{
 			return EMSConvert.ToNMSConnection(this.tibcoConnectionFactory.CreateConnection(userName, password));
+		}
+
+		/// <summary>
+		/// Get/or set the broker Uri.
+		/// </summary>
+		public Uri BrokerUri
+		{
+			get { return this.brokerUri; }
+			set
+			{
+				if(null == this.brokerUri || !this.brokerUri.Equals(value))
+				{
+					// Re-create the TIBCO connection factory.
+					this.brokerUri = value;
+					if(null == this.brokerUri)
+					{
+						this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory();
+					}
+					else
+					{
+						if(null == this.clientId)
+						{
+							this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(this.brokerUri.OriginalString);
+						}
+						else
+						{
+							if(null == this.properties)
+							{
+								this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(this.brokerUri.OriginalString, this.clientId);
+							}
+							else
+							{
+								this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(this.brokerUri.OriginalString, this.clientId, this.properties);
+							}
+						}
+					}
+				}
+			}
 		}
 
 		#endregion
