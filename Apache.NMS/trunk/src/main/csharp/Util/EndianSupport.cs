@@ -17,7 +17,7 @@
 using System.IO;
 using System;
 
-namespace Apache.NMS.ActiveMQ.OpenWire
+namespace Apache.NMS.Util
 {
 	/// <summary>
 	/// Support class that switches from one endian to the other.

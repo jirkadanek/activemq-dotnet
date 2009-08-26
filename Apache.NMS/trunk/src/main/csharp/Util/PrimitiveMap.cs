@@ -14,32 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-using Apache.NMS;
+
 using System;
 using System.Collections;
 using System.IO;
 
-namespace Apache.NMS.ActiveMQ.OpenWire
+namespace Apache.NMS.Util
 {
 	/// <summary>
 	/// A default implementation of IPrimitiveMap
 	/// </summary>
 	public class PrimitiveMap : IPrimitiveMap
 	{
-		public const byte NULL                    = 0;
-		public const byte BOOLEAN_TYPE            = 1;
-		public const byte BYTE_TYPE               = 2;
-		public const byte CHAR_TYPE               = 3;
-		public const byte SHORT_TYPE              = 4;
-		public const byte INTEGER_TYPE            = 5;
-		public const byte LONG_TYPE               = 6;
-		public const byte DOUBLE_TYPE             = 7;
-		public const byte FLOAT_TYPE              = 8;
-		public const byte STRING_TYPE             = 9;
-		public const byte BYTE_ARRAY_TYPE         = 10;
-		public const byte MAP_TYPE                = 11;
-		public const byte LIST_TYPE               = 12;
-		public const byte BIG_STRING_TYPE         = 13;
+		public const byte NULL = 0;
+		public const byte BOOLEAN_TYPE = 1;
+		public const byte BYTE_TYPE = 2;
+		public const byte CHAR_TYPE = 3;
+		public const byte SHORT_TYPE = 4;
+		public const byte INTEGER_TYPE = 5;
+		public const byte LONG_TYPE = 6;
+		public const byte DOUBLE_TYPE = 7;
+		public const byte FLOAT_TYPE = 8;
+		public const byte STRING_TYPE = 9;
+		public const byte BYTE_ARRAY_TYPE = 10;
+		public const byte MAP_TYPE = 11;
+		public const byte LIST_TYPE = 12;
+		public const byte BIG_STRING_TYPE = 13;
 
 		private IDictionary dictionary = Hashtable.Synchronized(new Hashtable());
 
@@ -86,7 +86,7 @@ namespace Apache.NMS.ActiveMQ.OpenWire
 		public string GetString(string key)
 		{
 			Object value = GetValue(key);
-			if( value == null )
+			if(value == null)
 			{
 				return null;
 			}
@@ -198,7 +198,7 @@ namespace Apache.NMS.ActiveMQ.OpenWire
 		public IList GetList(String key)
 		{
 			Object value = GetValue(key);
-			if (value != null && !(value is IList))
+			if(value != null && !(value is IList))
 			{
 				throw new NMSException("Property: " + key + " is not an IList but is: " + value);
 			}
@@ -213,7 +213,7 @@ namespace Apache.NMS.ActiveMQ.OpenWire
 		public IDictionary GetDictionary(String key)
 		{
 			Object value = GetValue(key);
-			if (value != null && !(value is IDictionary))
+			if(value != null && !(value is IDictionary))
 			{
 				throw new NMSException("Property: " + key + " is not an IDictionary but is: " + value);
 			}
@@ -237,7 +237,7 @@ namespace Apache.NMS.ActiveMQ.OpenWire
 
 		protected virtual void CheckValueType(Object value, Type type)
 		{
-			if (! type.IsInstanceOfType(value))
+			if(!type.IsInstanceOfType(value))
 			{
 				throw new NMSException("Expected type: " + type.Name + " but was: " + value);
 			}
@@ -245,10 +245,10 @@ namespace Apache.NMS.ActiveMQ.OpenWire
 
 		protected virtual void CheckValidType(Object value)
 		{
-			if (value != null && !(value is IList) && !(value is IDictionary))
+			if(value != null && !(value is IList) && !(value is IDictionary))
 			{
 				Type type = value.GetType();
-				if (! type.IsPrimitive && !type.IsValueType && !type.IsAssignableFrom(typeof(string)))
+				if(!type.IsPrimitive && !type.IsValueType && !type.IsAssignableFrom(typeof(string)))
 				{
 					throw new NMSException("Invalid type: " + type.Name + " for value: " + value);
 				}
@@ -261,17 +261,17 @@ namespace Apache.NMS.ActiveMQ.OpenWire
 		/// <returns>A string</returns>
 		public override String ToString()
 		{
-			String s="{";
-			bool first=true;
+			String s = "{";
+			bool first = true;
 			lock(dictionary.SyncRoot)
 			{
 				foreach(DictionaryEntry entry in dictionary)
 				{
 					if(!first)
 					{
-						s+=", ";
+						s += ", ";
 					}
-					first=false;
+					first = false;
 					String name = (String) entry.Key;
 					Object value = entry.Value;
 					s += name + "=" + value;
@@ -313,7 +313,7 @@ namespace Apache.NMS.ActiveMQ.OpenWire
 			MemoryStream memoryStream = new MemoryStream();
 			lock(map.SyncRoot)
 			{
-				MarshalPrimitiveMap(map, new OpenWireBinaryWriter(memoryStream));
+				MarshalPrimitiveMap(map, new EndianBinaryWriter(memoryStream));
 			}
 
 			return memoryStream.GetBuffer();
@@ -323,7 +323,7 @@ namespace Apache.NMS.ActiveMQ.OpenWire
 		{
 			if(map == null)
 			{
-				dataOut.Write((int)-1);
+				dataOut.Write((int) -1);
 			}
 			else
 			{
@@ -344,7 +344,7 @@ namespace Apache.NMS.ActiveMQ.OpenWire
 		/// <summary>
 		/// Unmarshals the primitive type map from the given byte array
 		/// </summary>
-		public static  IDictionary UnmarshalPrimitiveMap(byte[] data)
+		public static IDictionary UnmarshalPrimitiveMap(byte[] data)
 		{
 			if(data == null)
 			{
@@ -352,14 +352,14 @@ namespace Apache.NMS.ActiveMQ.OpenWire
 			}
 			else
 			{
-				return UnmarshalPrimitiveMap(new OpenWireBinaryReader(new MemoryStream(data)));
+				return UnmarshalPrimitiveMap(new EndianBinaryReader(new MemoryStream(data)));
 			}
 		}
 
-		public static  IDictionary UnmarshalPrimitiveMap(BinaryReader dataIn)
+		public static IDictionary UnmarshalPrimitiveMap(BinaryReader dataIn)
 		{
 			int size = dataIn.ReadInt32();
-			if (size < 0)
+			if(size < 0)
 			{
 				return null;
 			}
@@ -377,7 +377,7 @@ namespace Apache.NMS.ActiveMQ.OpenWire
 		public static void MarshalPrimitiveList(IList list, BinaryWriter dataOut)
 		{
 			dataOut.Write((int) list.Count);
-			foreach (Object element in list)
+			foreach(Object element in list)
 			{
 				MarshalPrimitive(dataOut, element);
 			}
@@ -387,7 +387,7 @@ namespace Apache.NMS.ActiveMQ.OpenWire
 		{
 			int size = dataIn.ReadInt32();
 			IList answer = new ArrayList(size);
-			while (size-- > 0)
+			while(size-- > 0)
 			{
 				answer.Add(UnmarshalPrimitive(dataIn));
 			}
@@ -397,78 +397,78 @@ namespace Apache.NMS.ActiveMQ.OpenWire
 
 		public static void MarshalPrimitive(BinaryWriter dataOut, Object value)
 		{
-			if (value == null)
+			if(value == null)
 			{
 				dataOut.Write(NULL);
 			}
-			else if (value is bool)
+			else if(value is bool)
 			{
 				dataOut.Write(BOOLEAN_TYPE);
 				dataOut.Write((bool) value);
 			}
-			else if (value is byte)
+			else if(value is byte)
 			{
 				dataOut.Write(BYTE_TYPE);
-				dataOut.Write(((byte)value));
+				dataOut.Write(((byte) value));
 			}
-			else if (value is char)
+			else if(value is char)
 			{
 				dataOut.Write(CHAR_TYPE);
 				dataOut.Write((char) value);
 			}
-			else if (value is short)
+			else if(value is short)
 			{
 				dataOut.Write(SHORT_TYPE);
 				dataOut.Write((short) value);
 			}
-			else if (value is int)
+			else if(value is int)
 			{
 				dataOut.Write(INTEGER_TYPE);
 				dataOut.Write((int) value);
 			}
-			else if (value is long)
+			else if(value is long)
 			{
 				dataOut.Write(LONG_TYPE);
 				dataOut.Write((long) value);
 			}
-			else if (value is float)
+			else if(value is float)
 			{
 				dataOut.Write(FLOAT_TYPE);
 				dataOut.Write((float) value);
 			}
-			else if (value is double)
+			else if(value is double)
 			{
 				dataOut.Write(DOUBLE_TYPE);
 				dataOut.Write((double) value);
 			}
-			else if (value is byte[])
+			else if(value is byte[])
 			{
 				byte[] data = (byte[]) value;
 				dataOut.Write(BYTE_ARRAY_TYPE);
 				dataOut.Write(data.Length);
 				dataOut.Write(data);
 			}
-			else if (value is string)
+			else if(value is string)
 			{
 				string s = (string) value;
 				// is the string big??
-				if (s.Length > 8191)
+				if(s.Length > 8191)
 				{
 					dataOut.Write(BIG_STRING_TYPE);
-					((OpenWireBinaryWriter)dataOut).WriteString32(s);
+					((EndianBinaryWriter) dataOut).WriteString32(s);
 				}
 				else
 				{
 					dataOut.Write(STRING_TYPE);
-					((OpenWireBinaryWriter)dataOut).WriteString16(s);
+					((EndianBinaryWriter) dataOut).WriteString16(s);
 				}
 			}
-			else if (value is IDictionary)
+			else if(value is IDictionary)
 			{
 				dataOut.Write(MAP_TYPE);
 				MarshalPrimitiveMap((IDictionary) value, dataOut);
 			}
-			else if (value is IList)
+			else if(value is IList)
 			{
 				dataOut.Write(LIST_TYPE);
 				MarshalPrimitiveList((IList) value, dataOut);
@@ -481,58 +481,58 @@ namespace Apache.NMS.ActiveMQ.OpenWire
 
 		public static Object UnmarshalPrimitive(BinaryReader dataIn)
 		{
-			Object value=null;
+			Object value = null;
 			byte type = dataIn.ReadByte();
-			switch (type)
+			switch(type)
 			{
-				case NULL:
-					value = null;
-					break;
-				case BYTE_TYPE:
-					value = dataIn.ReadByte();
-					break;
-				case BOOLEAN_TYPE:
-					value = dataIn.ReadBoolean();
-					break;
-				case CHAR_TYPE:
-					value = dataIn.ReadChar();
-					break;
-				case SHORT_TYPE:
-					value = dataIn.ReadInt16();
-					break;
-				case INTEGER_TYPE:
-					value = dataIn.ReadInt32();
-					break;
-				case LONG_TYPE:
-					value = dataIn.ReadInt64();
-					break;
-				case FLOAT_TYPE:
-					value = dataIn.ReadSingle();
-					break;
-				case DOUBLE_TYPE:
-					value = dataIn.ReadDouble();
-					break;
-				case BYTE_ARRAY_TYPE:
-					int size = dataIn.ReadInt32();
-					byte[] data = new byte[size];
-					dataIn.Read(data, 0, size);
-					value = data;
-					break;
-				case STRING_TYPE:
-					value = ((OpenWireBinaryReader)dataIn).ReadString16();
-					break;
-				case BIG_STRING_TYPE:
-					value = ((OpenWireBinaryReader)dataIn).ReadString32();
-					break;
-				case MAP_TYPE:
-					value = UnmarshalPrimitiveMap(dataIn);
-					break;
-				case LIST_TYPE:
-					value = UnmarshalPrimitiveList(dataIn);
-					break;
+			case NULL:
+				value = null;
+				break;
+			case BYTE_TYPE:
+				value = dataIn.ReadByte();
+				break;
+			case BOOLEAN_TYPE:
+				value = dataIn.ReadBoolean();
+				break;
+			case CHAR_TYPE:
+				value = dataIn.ReadChar();
+				break;
+			case SHORT_TYPE:
+				value = dataIn.ReadInt16();
+				break;
+			case INTEGER_TYPE:
+				value = dataIn.ReadInt32();
+				break;
+			case LONG_TYPE:
+				value = dataIn.ReadInt64();
+				break;
+			case FLOAT_TYPE:
+				value = dataIn.ReadSingle();
+				break;
+			case DOUBLE_TYPE:
+				value = dataIn.ReadDouble();
+				break;
+			case BYTE_ARRAY_TYPE:
+				int size = dataIn.ReadInt32();
+				byte[] data = new byte[size];
+				dataIn.Read(data, 0, size);
+				value = data;
+				break;
+			case STRING_TYPE:
+				value = ((EndianBinaryReader) dataIn).ReadString16();
+				break;
+			case BIG_STRING_TYPE:
+				value = ((EndianBinaryReader) dataIn).ReadString32();
+				break;
+			case MAP_TYPE:
+				value = UnmarshalPrimitiveMap(dataIn);
+				break;
+			case LIST_TYPE:
+				value = UnmarshalPrimitiveList(dataIn);
+				break;
 
-				default:
-					throw new Exception("Unsupported data type: " + type);
+			default:
+				throw new Exception("Unsupported data type: " + type);
 			}
 			return value;
 		}

@@ -16,15 +16,14 @@
  */
 
 using System.IO;
-using Apache.NMS.ActiveMQ.OpenWire;
+using Apache.NMS.Util;
 using NUnit.Framework;
 
-namespace Apache.NMS.ActiveMQ.Test.OpenWire
+namespace Apache.NMS.Test
 {
 	[TestFixture]
 	public class EndianTest
 	{
-
 		[Test]
 		public void TestLongEndian()
 		{

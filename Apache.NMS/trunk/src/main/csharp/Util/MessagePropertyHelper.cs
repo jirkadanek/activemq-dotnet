@@ -1,5 +1,3 @@
-using System;
-using System.Reflection;
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,19 +14,21 @@ using System.Reflection;
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-using Apache.NMS.ActiveMQ.Commands;
 
-namespace Apache.NMS.ActiveMQ.OpenWire
+using System;
+using System.Reflection;
+
+namespace Apache.NMS.Util
 {
 	// Set NMS properties via introspection
 	public class MessagePropertyHelper : IPrimitiveMap
 	{
 		private static BindingFlags publicBinding = BindingFlags.Public | BindingFlags.Instance;
-		private ActiveMQMessage message;
+		private IMessage message;
 		private IPrimitiveMap properties;
 		private Type messageType;
 
-		public MessagePropertyHelper(ActiveMQMessage _message, IPrimitiveMap _properties)
+		public MessagePropertyHelper(IMessage _message, IPrimitiveMap _properties)
 		{
 			this.message = _message;
 			this.properties = _properties;

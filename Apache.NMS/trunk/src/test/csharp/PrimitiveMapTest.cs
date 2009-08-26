@@ -17,10 +17,10 @@
 
 using System;
 using System.Collections;
-using Apache.NMS.ActiveMQ.OpenWire;
+using Apache.NMS.Util;
 using NUnit.Framework;
 
-namespace Apache.NMS.ActiveMQ.Test.OpenWire
+namespace Apache.NMS.Test
 {
 	[TestFixture]
 	public class PrimitiveMapTest
