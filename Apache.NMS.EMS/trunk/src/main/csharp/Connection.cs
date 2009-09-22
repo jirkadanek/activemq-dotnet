@@ -27,7 +27,7 @@ namespace Apache.NMS.EMS
     {
     	private Apache.NMS.AcknowledgementMode acknowledgementMode;
     	public readonly TIBCO.EMS.Connection tibcoConnection;
-		private readonly AtomicBoolean started = new AtomicBoolean(false);
+		private readonly Atomic<bool> started = new Atomic<bool>(false);
 		private bool closed = false;
     	private bool disposed = false;
 
