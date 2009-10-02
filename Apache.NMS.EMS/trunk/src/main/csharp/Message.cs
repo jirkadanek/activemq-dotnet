@@ -40,6 +40,28 @@ namespace Apache.NMS.EMS
 		}
 
 		/// <summary>
+		/// Clears out the message body. Clearing a message's body does not clear its header
+		/// values or property entries.
+		///
+		/// If this message body was read-only, calling this method leaves the message body in
+		/// the same state as an empty body in a newly created message.
+		/// </summary>
+		public void ClearBody()
+		{
+			this.tibcoMessage.ClearBody();
+		}
+
+		/// <summary>
+		/// Clears a message's properties.
+		///
+		/// The message's header fields and body are not cleared.
+		/// </summary>
+		public void ClearProperties()
+		{
+			this.tibcoMessage.ClearProperties();
+		}
+
+		/// <summary>
 		/// Provides access to the message properties (headers)
 		/// </summary>
 		public Apache.NMS.IPrimitiveMap Properties
