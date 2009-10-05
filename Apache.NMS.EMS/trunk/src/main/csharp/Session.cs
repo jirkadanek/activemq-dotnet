@@ -84,6 +84,20 @@ namespace Apache.NMS.EMS
 			this.tibcoSession.Unsubscribe(name);
 		}
 
+		public IQueueBrowser CreateBrowser(IQueue queue)
+		{
+			Apache.NMS.EMS.Queue queueObj = (Apache.NMS.EMS.Queue) queue;
+
+			return EMSConvert.ToNMSQueueBrowser(this.tibcoSession.CreateBrowser(queueObj.tibcoQueue));
+		}
+
+		public IQueueBrowser CreateBrowser(IQueue queue, string selector)
+		{
+			Apache.NMS.EMS.Queue queueObj = (Apache.NMS.EMS.Queue) queue;
+
+			return EMSConvert.ToNMSQueueBrowser(this.tibcoSession.CreateBrowser(queueObj.tibcoQueue, selector));
+		}
+
 		public Apache.NMS.IQueue GetQueue(string name)
 		{
 			return EMSConvert.ToNMSQueue(this.tibcoSession.CreateQueue(name));

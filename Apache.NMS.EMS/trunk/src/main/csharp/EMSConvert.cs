@@ -52,13 +52,20 @@ namespace Apache.NMS.EMS
 							: null);
 		}
 
+		public static Apache.NMS.IQueueBrowser ToNMSQueueBrowser(TIBCO.EMS.QueueBrowser tibcoQueueBrowser)
+		{
+			return (null != tibcoQueueBrowser
+							? new Apache.NMS.EMS.QueueBrowser(tibcoQueueBrowser)
+							: null);
+		}
+
 		public static Apache.NMS.IQueue ToNMSQueue(TIBCO.EMS.Queue tibcoQueue)
 		{
 			return (null != tibcoQueue
 							? new Apache.NMS.EMS.Queue(tibcoQueue)
 							: null);
 		}
-
+		
 		public static Apache.NMS.ITopic ToNMSTopic(TIBCO.EMS.Topic tibcoTopic)
 		{
 			return (null != tibcoTopic
