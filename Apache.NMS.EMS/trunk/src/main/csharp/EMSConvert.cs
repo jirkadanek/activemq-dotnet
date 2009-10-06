@@ -126,6 +126,11 @@ namespace Apache.NMS.EMS
 				return ToNMSBytesMessage(tibcoMessage as TIBCO.EMS.BytesMessage);
 			}
 
+			if(tibcoMessage is TIBCO.EMS.StreamMessage)
+			{
+				return ToNMSStreamMessage(tibcoMessage as TIBCO.EMS.StreamMessage);
+			}
+			
 			if(tibcoMessage is TIBCO.EMS.MapMessage)
 			{
 				return ToNMSMapMessage(tibcoMessage as TIBCO.EMS.MapMessage);
@@ -153,6 +158,13 @@ namespace Apache.NMS.EMS
 		{
 			return (null != tibcoBytesMessage
 							? new Apache.NMS.EMS.BytesMessage(tibcoBytesMessage)
+							: null);
+		}
+
+		public static Apache.NMS.IStreamMessage ToNMSStreamMessage(TIBCO.EMS.StreamMessage tibcoStreamMessage)
+		{
+			return (null != tibcoStreamMessage
+							? new Apache.NMS.EMS.StreamMessage(tibcoStreamMessage)
 							: null);
 		}
 

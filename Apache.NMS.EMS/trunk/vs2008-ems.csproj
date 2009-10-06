@@ -71,6 +71,7 @@
     <Compile Include="src\main\csharp\CommonAssemblyInfo.cs" />
     <Compile Include="src\main\csharp\Connection.cs" />
     <Compile Include="src\main\csharp\ConnectionFactory.cs" />
+    <Compile Include="src\main\csharp\StreamMessage.cs" />
     <Compile Include="src\main\csharp\QueueBrowser.cs" />
     <Compile Include="src\main\csharp\Destination.cs" />
     <Compile Include="src\main\csharp\Dispatcher.cs" />

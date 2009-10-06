@@ -210,6 +210,14 @@ namespace Apache.NMS.EMS
 			return this.nmsSession.CreateBytesMessage(body);
 		}
 
+		/// <summary>
+		/// Creates a new stream message
+		/// </summary>
+		public Apache.NMS.IStreamMessage CreateStreamMessage()
+		{
+			return this.nmsSession.CreateStreamMessage();
+		}
+
 		#endregion
 
 		#region IDisposable Members

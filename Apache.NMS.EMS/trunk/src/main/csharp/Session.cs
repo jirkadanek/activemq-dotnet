@@ -164,6 +164,11 @@ namespace Apache.NMS.EMS
 			return bytesMessage;
 		}
 
+		public Apache.NMS.IStreamMessage CreateStreamMessage()
+		{
+			return EMSConvert.ToNMSStreamMessage(this.tibcoSession.CreateStreamMessage());
+		}
+
 		public Apache.NMS.IObjectMessage CreateObjectMessage(Object body)
 		{
 			return EMSConvert.ToNMSObjectMessage(this.tibcoSession.CreateObjectMessage(body));
