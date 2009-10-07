@@ -93,9 +93,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="keyfile\NMSKey.snk" />
-    <None Include="nmsprovider-ems.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">

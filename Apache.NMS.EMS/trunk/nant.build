@@ -116,7 +116,6 @@
 			<include name="NOTICE.txt" />
 			<include name="${build.bin.dir}/${project.name}.dll" />
 			<include name="${build.bin.dir}/${project.name}.pdb" />
-			<include name="nmsprovider-ems.config" />
 		</fileset>
 
 		<fileset id="deploy.filenames">
