@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using System;
 using Apache.NMS.Util;
 
@@ -27,6 +28,7 @@ namespace Apache.NMS.EMS
     {
     	private Apache.NMS.AcknowledgementMode acknowledgementMode;
     	public readonly TIBCO.EMS.Connection tibcoConnection;
+		private ConnectionMetaData metaData = null;
 		private readonly Atomic<bool> started = new Atomic<bool>(false);
 		private bool closed = false;
     	private bool disposed = false;
@@ -171,6 +173,11 @@ namespace Apache.NMS.EMS
             get { return this.tibcoConnection.ClientID; }
             set { this.tibcoConnection.ClientID = value; }
         }
+
+		public IConnectionMetaData MetaData
+		{
+			get { return this.metaData ?? (this.metaData = new ConnectionMetaData()); }
+		}
 
 		#endregion
 
