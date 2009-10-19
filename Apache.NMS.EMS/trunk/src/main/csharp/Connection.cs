@@ -174,6 +174,9 @@ namespace Apache.NMS.EMS
             set { this.tibcoConnection.ClientID = value; }
         }
 
+		/// <summary>
+		/// Gets the Meta Data for the NMS Connection instance.
+		/// </summary>
 		public IConnectionMetaData MetaData
 		{
 			get { return this.metaData ?? (this.metaData = new ConnectionMetaData()); }
@@ -181,7 +184,22 @@ namespace Apache.NMS.EMS
 
 		#endregion
 
-		public event Apache.NMS.ExceptionListener ExceptionListener;
+		/// <summary>
+		/// A delegate that can receive transport level exceptions.
+		/// </summary>
+		public event ExceptionListener ExceptionListener;
+
+		/// <summary>
+		/// An asynchronous listener that is notified when a Fault tolerant connection
+		/// has been interrupted.
+		/// </summary>
+		public event ConnectionInterruptedListener ConnectionInterruptedListener;
+
+		/// <summary>
+		/// An asynchronous listener that is notified when a Fault tolerant connection
+		/// has been resumed.
+		/// </summary>
+		public event ConnectionResumedListener ConnectionResumedListener;
 
 		private void HandleTibcoException(object sender, TIBCO.EMS.EMSExceptionEventArgs arg)
 		{
@@ -192,6 +210,38 @@ namespace Apache.NMS.EMS
 			else
 			{
 				Apache.NMS.Tracer.Error(arg.Exception);
+			}
+		}
+
+		private void HandleTransportInterrupted()
+		{
+			Tracer.Debug("Transport has been Interrupted.");
+
+			if(this.ConnectionInterruptedListener != null && !this.closed)
+			{
+				try
+				{
+					this.ConnectionInterruptedListener();
+				}
+				catch
+				{
+				}
+			}
+		}
+
+		private void HandleTransportResumed()
+		{
+			Tracer.Debug("Transport has resumed normal operation.");
+
+			if(this.ConnectionResumedListener != null && !this.closed)
+			{
+				try
+				{
+					this.ConnectionResumedListener();
+				}
+				catch
+				{
+				}
 			}
 		}
 	}
