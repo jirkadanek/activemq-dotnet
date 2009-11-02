@@ -28,6 +28,7 @@ namespace Apache.NMS.EMS
     {
     	private Apache.NMS.AcknowledgementMode acknowledgementMode;
     	public readonly TIBCO.EMS.Connection tibcoConnection;
+		private IRedeliveryPolicy redeliveryPolicy;
 		private ConnectionMetaData metaData = null;
 		private readonly Atomic<bool> started = new Atomic<bool>(false);
 		private bool closed = false;
@@ -173,6 +174,15 @@ namespace Apache.NMS.EMS
             get { return this.tibcoConnection.ClientID; }
             set { this.tibcoConnection.ClientID = value; }
         }
+
+		/// <summary>
+		/// Get/or set the redelivery policy for this connection.
+		/// </summary>
+		public IRedeliveryPolicy RedeliveryPolicy
+		{
+			get { return this.redeliveryPolicy; }
+			set { this.redeliveryPolicy = value; }
+		}
 
 		/// <summary>
 		/// Gets the Meta Data for the NMS Connection instance.

@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections;
+using Apache.NMS.Policies;
 
 namespace Apache.NMS.EMS
 {
@@ -29,6 +30,8 @@ namespace Apache.NMS.EMS
 		private Uri brokerUri;
 		private string clientId;
 		private Hashtable properties;
+
+		private IRedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
 
 		public ConnectionFactory()
 		{
@@ -117,7 +120,9 @@ namespace Apache.NMS.EMS
 		/// </summary>
 		public Apache.NMS.IConnection CreateConnection()
 		{
-			return EMSConvert.ToNMSConnection(this.tibcoConnectionFactory.CreateConnection());
+			Apache.NMS.IConnection connection = EMSConvert.ToNMSConnection(this.tibcoConnectionFactory.CreateConnection());
+			connection.RedeliveryPolicy = this.redeliveryPolicy.Clone() as IRedeliveryPolicy;
+			return connection;
 		}
 
 		/// <summary>
@@ -125,7 +130,9 @@ namespace Apache.NMS.EMS
 		/// </summary>
 		public Apache.NMS.IConnection CreateConnection(string userName, string password)
 		{
-			return EMSConvert.ToNMSConnection(this.tibcoConnectionFactory.CreateConnection(userName, password));
+			Apache.NMS.IConnection connection = EMSConvert.ToNMSConnection(this.tibcoConnectionFactory.CreateConnection(userName, password));
+			connection.RedeliveryPolicy = this.redeliveryPolicy.Clone() as IRedeliveryPolicy;
+			return connection;
 		}
 
 		/// <summary>
@@ -162,6 +169,22 @@ namespace Apache.NMS.EMS
 							}
 						}
 					}
+				}
+			}
+		}
+
+		/// <summary>
+		/// Get/or set the redelivery policy that new IConnection objects are
+		/// assigned upon creation.
+		/// </summary>
+		public IRedeliveryPolicy RedeliveryPolicy
+		{
+			get { return this.redeliveryPolicy; }
+			set
+			{
+				if(value != null)
+				{
+					this.redeliveryPolicy = value;
 				}
 			}
 		}
