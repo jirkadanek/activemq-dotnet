@@ -42,6 +42,7 @@ namespace Apache.NMS.EMS
 			catch(Exception ex)
 			{
 				Apache.NMS.Tracer.DebugFormat("Exception instantiating TIBCO.EMS.ConnectionFactory: {0}", ex.Message);
+				ExceptionUtil.WrapAndThrowNMSException(ex);
 			}
 
 			VerifyConnectionFactory();
@@ -67,6 +68,7 @@ namespace Apache.NMS.EMS
 			catch(Exception ex)
 			{
 				Apache.NMS.Tracer.DebugFormat("Exception instantiating TIBCO.EMS.ConnectionFactory: {0}", ex.Message);
+				ExceptionUtil.WrapAndThrowNMSException(ex);
 			}
 
 			VerifyConnectionFactory();
@@ -83,6 +85,7 @@ namespace Apache.NMS.EMS
 			catch(Exception ex)
 			{
 				Apache.NMS.Tracer.DebugFormat("Exception instantiating TIBCO.EMS.ConnectionFactory: {0}", ex.Message);
+				ExceptionUtil.WrapAndThrowNMSException(ex);
 			}
 
 			VerifyConnectionFactory();
@@ -100,6 +103,7 @@ namespace Apache.NMS.EMS
 			catch(Exception ex)
 			{
 				Apache.NMS.Tracer.DebugFormat("Exception instantiating TIBCO.EMS.ConnectionFactory: {0}", ex.Message);
+				ExceptionUtil.WrapAndThrowNMSException(ex);
 			}
 
 			VerifyConnectionFactory();
@@ -120,8 +124,18 @@ namespace Apache.NMS.EMS
 		/// </summary>
 		public Apache.NMS.IConnection CreateConnection()
 		{
-			Apache.NMS.IConnection connection = EMSConvert.ToNMSConnection(this.tibcoConnectionFactory.CreateConnection());
-			connection.RedeliveryPolicy = this.redeliveryPolicy.Clone() as IRedeliveryPolicy;
+			Apache.NMS.IConnection connection = null;
+
+			try
+			{
+				connection = EMSConvert.ToNMSConnection(this.tibcoConnectionFactory.CreateConnection());
+				connection.RedeliveryPolicy = this.redeliveryPolicy.Clone() as IRedeliveryPolicy;
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
+
 			return connection;
 		}
 
@@ -130,8 +144,18 @@ namespace Apache.NMS.EMS
 		/// </summary>
 		public Apache.NMS.IConnection CreateConnection(string userName, string password)
 		{
-			Apache.NMS.IConnection connection = EMSConvert.ToNMSConnection(this.tibcoConnectionFactory.CreateConnection(userName, password));
-			connection.RedeliveryPolicy = this.redeliveryPolicy.Clone() as IRedeliveryPolicy;
+			Apache.NMS.IConnection connection = null;
+
+			try
+			{
+				connection = EMSConvert.ToNMSConnection(this.tibcoConnectionFactory.CreateConnection(userName, password));
+				connection.RedeliveryPolicy = this.redeliveryPolicy.Clone() as IRedeliveryPolicy;
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
+
 			return connection;
 		}
 
@@ -143,32 +167,39 @@ namespace Apache.NMS.EMS
 			get { return this.brokerUri; }
 			set
 			{
-				if(null == this.brokerUri || !this.brokerUri.Equals(value))
+				try
 				{
-					// Re-create the TIBCO connection factory.
-					this.brokerUri = value;
-					if(null == this.brokerUri)
+					if(null == this.brokerUri || !this.brokerUri.Equals(value))
 					{
-						this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory();
-					}
-					else
-					{
-						if(null == this.clientId)
+						// Re-create the TIBCO connection factory.
+						this.brokerUri = value;
+						if(null == this.brokerUri)
 						{
-							this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(this.brokerUri.OriginalString);
+							this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory();
 						}
 						else
 						{
-							if(null == this.properties)
+							if(null == this.clientId)
 							{
-								this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(this.brokerUri.OriginalString, this.clientId);
+								this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(this.brokerUri.OriginalString);
 							}
 							else
 							{
-								this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(this.brokerUri.OriginalString, this.clientId, this.properties);
+								if(null == this.properties)
+								{
+									this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(this.brokerUri.OriginalString, this.clientId);
+								}
+								else
+								{
+									this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(this.brokerUri.OriginalString, this.clientId, this.properties);
+								}
 							}
 						}
 					}
+				}
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
 				}
 			}
 		}

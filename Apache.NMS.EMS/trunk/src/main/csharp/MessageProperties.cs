@@ -16,6 +16,7 @@
  */
 
 using System.Collections;
+using System;
 
 namespace Apache.NMS.EMS
 {
@@ -32,7 +33,14 @@ namespace Apache.NMS.EMS
 
 		public void Clear()
 		{
-			this.tibcoMessage.ClearProperties();
+			try
+			{
+				this.tibcoMessage.ClearProperties();
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public bool Contains(object key)
@@ -42,8 +50,15 @@ namespace Apache.NMS.EMS
 
 		public void Remove(object key)
 		{
-			// Best guess at equivalent implementation.
-			this.tibcoMessage.SetObjectProperty(key.ToString(), null);
+			try
+			{
+				// Best guess at equivalent implementation.
+				this.tibcoMessage.SetObjectProperty(key.ToString(), null);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public int Count
@@ -51,14 +66,21 @@ namespace Apache.NMS.EMS
 			get
 			{
 				int count = 0;
-				IEnumerator propertyNamesEnumerator = this.tibcoMessage.PropertyNames;
-
-				if(null != propertyNamesEnumerator)
+				try
 				{
-					while(propertyNamesEnumerator.MoveNext())
+					IEnumerator propertyNamesEnumerator = this.tibcoMessage.PropertyNames;
+
+					if(null != propertyNamesEnumerator)
 					{
-						count++;
+						while(propertyNamesEnumerator.MoveNext())
+						{
+							count++;
+						}
 					}
+				}
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
 				}
 
 				return count;
@@ -71,9 +93,16 @@ namespace Apache.NMS.EMS
 			{
 				ArrayList keys = new ArrayList();
 
-				foreach(string propertyName in EMSConvert.ToEnumerable(this.tibcoMessage.PropertyNames))
+				try
 				{
-					keys.Add(propertyName);
+					foreach(string propertyName in EMSConvert.ToEnumerable(this.tibcoMessage.PropertyNames))
+					{
+						keys.Add(propertyName);
+					}
+				}
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
 				}
 
 				return keys;
@@ -86,9 +115,16 @@ namespace Apache.NMS.EMS
 			{
 				ArrayList values = new ArrayList();
 
-				foreach(string propertyName in EMSConvert.ToEnumerable(this.tibcoMessage.PropertyNames))
+				try
 				{
-					values.Add(this.tibcoMessage.GetObjectProperty(propertyName));
+					foreach(string propertyName in EMSConvert.ToEnumerable(this.tibcoMessage.PropertyNames))
+					{
+						values.Add(this.tibcoMessage.GetObjectProperty(propertyName));
+					}
+				}
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
 				}
 
 				return values;
@@ -97,118 +133,304 @@ namespace Apache.NMS.EMS
 
 		public object this[string key]
 		{
-			get { return this.tibcoMessage.GetObjectProperty(key); }
-			set { this.tibcoMessage.SetObjectProperty(key, value); }
+			get
+			{
+				try
+				{
+					return this.tibcoMessage.GetObjectProperty(key);
+				}
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
+					return null;
+				}
+			}
+			set
+			{
+				try
+				{
+					this.tibcoMessage.SetObjectProperty(key, value);
+				}
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
+				}
+			}
 		}
 
 		public string GetString(string key)
 		{
-			return this.tibcoMessage.GetStringProperty(key);
+			try
+			{
+				return this.tibcoMessage.GetStringProperty(key);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return null;
+			}
 		}
 
 		public void SetString(string key, string value)
 		{
-			this.tibcoMessage.SetStringProperty(key, value);
+			try
+			{
+				this.tibcoMessage.SetStringProperty(key, value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public bool GetBool(string key)
 		{
-			return this.tibcoMessage.GetBooleanProperty(key);
+			try
+			{
+				return this.tibcoMessage.GetBooleanProperty(key);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return false;
+			}
 		}
 
 		public void SetBool(string key, bool value)
 		{
-			this.tibcoMessage.SetBooleanProperty(key, value);
+			try
+			{
+				this.tibcoMessage.SetBooleanProperty(key, value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public byte GetByte(string key)
 		{
-			return this.tibcoMessage.GetByteProperty(key);
+			try
+			{
+				return this.tibcoMessage.GetByteProperty(key);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return 0;
+			}
 		}
 
 		public void SetByte(string key, byte value)
 		{
-			this.tibcoMessage.SetByteProperty(key, value);
+			try
+			{
+				this.tibcoMessage.SetByteProperty(key, value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public char GetChar(string key)
 		{
-			return (char) this.tibcoMessage.GetShortProperty(key);
+			try
+			{
+				return (char) this.tibcoMessage.GetShortProperty(key);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return (char) 0;
+			}
 		}
 
 		public void SetChar(string key, char value)
 		{
-			this.tibcoMessage.SetShortProperty(key, (short) value);
+			try
+			{
+				this.tibcoMessage.SetShortProperty(key, (short) value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public short GetShort(string key)
 		{
-			return this.tibcoMessage.GetShortProperty(key);
+			try
+			{
+				return this.tibcoMessage.GetShortProperty(key);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return 0;
+			}
 		}
 
 		public void SetShort(string key, short value)
 		{
-			this.tibcoMessage.SetShortProperty(key, value);
+			try
+			{
+				this.tibcoMessage.SetShortProperty(key, value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public int GetInt(string key)
 		{
-			return this.tibcoMessage.GetIntProperty(key);
+			try
+			{
+				return this.tibcoMessage.GetIntProperty(key);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return 0;
+			}
 		}
 
 		public void SetInt(string key, int value)
 		{
-			this.tibcoMessage.SetIntProperty(key, value);
+			try
+			{
+				this.tibcoMessage.SetIntProperty(key, value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public long GetLong(string key)
 		{
-			return this.tibcoMessage.GetLongProperty(key);
+			try
+			{
+				return this.tibcoMessage.GetLongProperty(key);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return 0;
+			}
 		}
 
 		public void SetLong(string key, long value)
 		{
-			this.tibcoMessage.SetLongProperty(key, value);
+			try
+			{
+				this.tibcoMessage.SetLongProperty(key, value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public float GetFloat(string key)
 		{
-			return this.tibcoMessage.GetFloatProperty(key);
+			try
+			{
+				return this.tibcoMessage.GetFloatProperty(key);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return 0;
+			}
 		}
 
 		public void SetFloat(string key, float value)
 		{
-			this.tibcoMessage.SetFloatProperty(key, value);
+			try
+			{
+				this.tibcoMessage.SetFloatProperty(key, value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public double GetDouble(string key)
 		{
-			return this.tibcoMessage.GetDoubleProperty(key);
+			try
+			{
+				return this.tibcoMessage.GetDoubleProperty(key);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return 0;
+			}
 		}
 
 		public void SetDouble(string key, double value)
 		{
-			this.tibcoMessage.SetDoubleProperty(key, value);
+			try
+			{
+				this.tibcoMessage.SetDoubleProperty(key, value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public IList GetList(string key)
 		{
-			return (IList) this.tibcoMessage.GetObjectProperty(key);
+			try
+			{
+				return (IList) this.tibcoMessage.GetObjectProperty(key);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return null;
+			}
 		}
 
 		public void SetList(string key, IList list)
 		{
-			this.tibcoMessage.SetObjectProperty(key, list);
+			try
+			{
+				this.tibcoMessage.SetObjectProperty(key, list);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public IDictionary GetDictionary(string key)
 		{
-			return (IDictionary) this.tibcoMessage.GetObjectProperty(key);
+			try
+			{
+				return (IDictionary) this.tibcoMessage.GetObjectProperty(key);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return null;
+			}
 		}
 
 		public void SetDictionary(string key, IDictionary dictionary)
 		{
-			this.tibcoMessage.SetObjectProperty(key, dictionary);
+			try
+			{
+				this.tibcoMessage.SetObjectProperty(key, dictionary);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		#endregion

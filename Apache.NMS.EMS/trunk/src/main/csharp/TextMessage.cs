@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+using System;
 namespace Apache.NMS.EMS
 {
 	class TextMessage : Apache.NMS.EMS.Message, Apache.NMS.ITextMessage
@@ -34,8 +35,29 @@ namespace Apache.NMS.EMS
 
 		public string Text
 		{
-			get { return this.tibcoTextMessage.Text; }
-			set { this.tibcoTextMessage.Text = value; }
+			get
+			{
+				try
+				{
+					return this.tibcoTextMessage.Text;
+				}
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
+					return null;
+				}
+			}
+			set
+			{
+				try
+				{
+					this.tibcoTextMessage.Text = value;
+				}
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
+				}
+			}
 		}
 
 		#endregion

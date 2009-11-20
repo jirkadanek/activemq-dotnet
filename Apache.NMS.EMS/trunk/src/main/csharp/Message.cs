@@ -28,7 +28,7 @@ namespace Apache.NMS.EMS
 			this.tibcoMessage = message;
 		}
 
-#region IMessage Members
+		#region IMessage Members
 
 		/// <summary>
 		/// If using client acknowledgement mode on the session then this method will acknowledge that the
@@ -36,7 +36,14 @@ namespace Apache.NMS.EMS
 		/// </summary>
 		public void Acknowledge()
 		{
-			this.tibcoMessage.Acknowledge();
+			try
+			{
+				this.tibcoMessage.Acknowledge();
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		/// <summary>
@@ -48,7 +55,14 @@ namespace Apache.NMS.EMS
 		/// </summary>
 		public void ClearBody()
 		{
-			this.tibcoMessage.ClearBody();
+			try
+			{
+				this.tibcoMessage.ClearBody();
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		/// <summary>
@@ -58,7 +72,14 @@ namespace Apache.NMS.EMS
 		/// </summary>
 		public void ClearProperties()
 		{
-			this.tibcoMessage.ClearProperties();
+			try
+			{
+				this.tibcoMessage.ClearProperties();
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		/// <summary>
@@ -74,8 +95,29 @@ namespace Apache.NMS.EMS
 		/// </summary>
 		public string NMSCorrelationID
 		{
-			get { return this.tibcoMessage.CorrelationID; }
-			set { this.tibcoMessage.CorrelationID = value; }
+			get
+			{
+				try
+				{
+					return this.tibcoMessage.CorrelationID;
+				}
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
+					return null;
+				}
+			}
+			set
+			{
+				try
+				{
+					this.tibcoMessage.CorrelationID = value;
+				}
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
+				}
+			}
 		}
 
 		/// <summary>
@@ -112,7 +154,17 @@ namespace Apache.NMS.EMS
 		public MsgDeliveryMode NMSDeliveryMode
 		{
 			get { return EMSConvert.ToNMSMsgDeliveryMode(this.tibcoMessage.MsgDeliveryMode); }
-			set { this.tibcoMessage.MsgDeliveryMode = EMSConvert.ToMessageDeliveryMode(value); }
+			set
+			{
+				try
+				{
+					this.tibcoMessage.MsgDeliveryMode = EMSConvert.ToMessageDeliveryMode(value);
+				}
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
+				}
+			}
 		}
 
 		/// <summary>
@@ -121,7 +173,17 @@ namespace Apache.NMS.EMS
 		public MsgPriority NMSPriority
 		{
 			get { return (MsgPriority) this.tibcoMessage.Priority; }
-			set { this.tibcoMessage.Priority = (int) value; }
+			set
+			{
+				try
+				{
+					this.tibcoMessage.Priority = (int) value;
+				}
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
+				}
+			}
 		}
 
 		/// <summary>
@@ -140,13 +202,20 @@ namespace Apache.NMS.EMS
 			get { return EMSConvert.ToNMSDestination(this.tibcoMessage.ReplyTo); }
 			set
 			{
-				if(null == value)
+				try
 				{
-					this.tibcoMessage.ReplyTo = null;
+					if(null == value)
+					{
+						this.tibcoMessage.ReplyTo = null;
+					}
+					else
+					{
+						this.tibcoMessage.ReplyTo = ((Apache.NMS.EMS.Destination) value).tibcoDestination;
+					}
 				}
-				else
+				catch(Exception ex)
 				{
-					this.tibcoMessage.ReplyTo = ((Apache.NMS.EMS.Destination) value).tibcoDestination;
+					ExceptionUtil.WrapAndThrowNMSException(ex);
 				}
 			}
 		}
@@ -166,7 +235,17 @@ namespace Apache.NMS.EMS
 		public string NMSType
 		{
 			get { return this.tibcoMessage.MsgType; }
-			set { this.tibcoMessage.MsgType = value; }
+			set
+			{
+				try
+				{
+					this.tibcoMessage.MsgType = value;
+				}
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
+				}
+			}
 		}
 
 		#endregion

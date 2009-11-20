@@ -55,11 +55,18 @@ namespace Apache.NMS.EMS
 				timeToLive = this.tibcoMessageProducer.TimeToLive;
 			}
 
-			this.tibcoMessageProducer.Send(
-						msg.tibcoMessage,
-						this.tibcoMessageProducer.MsgDeliveryMode,
-						this.tibcoMessageProducer.Priority,
-						timeToLive);
+			try
+			{
+				this.tibcoMessageProducer.Send(
+							msg.tibcoMessage,
+							this.tibcoMessageProducer.MsgDeliveryMode,
+							this.tibcoMessageProducer.Priority,
+							timeToLive);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		/// <summary>
@@ -69,11 +76,18 @@ namespace Apache.NMS.EMS
 		{
 			Apache.NMS.EMS.Message msg = (Apache.NMS.EMS.Message) message;
 
-			this.tibcoMessageProducer.Send(
-						msg.tibcoMessage,
-						EMSConvert.ToMessageDeliveryMode(deliveryMode),
-						(int) priority,
-						(long) timeToLive.TotalMilliseconds);
+			try
+			{
+				this.tibcoMessageProducer.Send(
+							msg.tibcoMessage,
+							EMSConvert.ToMessageDeliveryMode(deliveryMode),
+							(int) priority,
+							(long) timeToLive.TotalMilliseconds);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		/// <summary>
@@ -90,12 +104,19 @@ namespace Apache.NMS.EMS
 				timeToLive = this.tibcoMessageProducer.TimeToLive;
 			}
 
-			this.tibcoMessageProducer.Send(
-						dest.tibcoDestination,
-						msg.tibcoMessage,
-						this.tibcoMessageProducer.MsgDeliveryMode,
-						this.tibcoMessageProducer.Priority,
-						timeToLive);
+			try
+			{
+				this.tibcoMessageProducer.Send(
+							dest.tibcoDestination,
+							msg.tibcoMessage,
+							this.tibcoMessageProducer.MsgDeliveryMode,
+							this.tibcoMessageProducer.Priority,
+							timeToLive);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		/// <summary>
@@ -107,24 +128,51 @@ namespace Apache.NMS.EMS
 			Apache.NMS.EMS.Destination dest = (Apache.NMS.EMS.Destination) destination;
 			Apache.NMS.EMS.Message msg = (Apache.NMS.EMS.Message) message;
 
-			this.tibcoMessageProducer.Send(
-						dest.tibcoDestination,
-						msg.tibcoMessage,
-						EMSConvert.ToMessageDeliveryMode(deliveryMode),
-						(int) priority,
-						(long) timeToLive.TotalMilliseconds);
+			try
+			{
+				this.tibcoMessageProducer.Send(
+							dest.tibcoDestination,
+							msg.tibcoMessage,
+							EMSConvert.ToMessageDeliveryMode(deliveryMode),
+							(int) priority,
+							(long) timeToLive.TotalMilliseconds);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public MsgDeliveryMode DeliveryMode
 		{
 			get { return EMSConvert.ToNMSMsgDeliveryMode(this.tibcoMessageProducer.MsgDeliveryMode); }
-			set { this.tibcoMessageProducer.MsgDeliveryMode = EMSConvert.ToMessageDeliveryMode(value); }
+			set
+			{
+				try
+				{
+					this.tibcoMessageProducer.MsgDeliveryMode = EMSConvert.ToMessageDeliveryMode(value);
+				}
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
+				}
+			}
 		}
 
 		public TimeSpan TimeToLive
 		{
 			get { return TimeSpan.FromMilliseconds(this.tibcoMessageProducer.TimeToLive); }
-			set { this.tibcoMessageProducer.TimeToLive = (long) value.TotalMilliseconds; }
+			set
+			{
+				try
+				{
+					this.tibcoMessageProducer.TimeToLive = (long) value.TotalMilliseconds;
+				}
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
+				}
+			}
 		}
 
 		/// <summary>
@@ -139,19 +187,49 @@ namespace Apache.NMS.EMS
 		public MsgPriority Priority
 		{
 			get { return (MsgPriority) this.tibcoMessageProducer.Priority; }
-			set { this.tibcoMessageProducer.Priority = (int) value; }
+			set
+			{
+				try
+				{
+					this.tibcoMessageProducer.Priority = (int) value;
+				}
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
+				}
+			}
 		}
 
 		public bool DisableMessageID
 		{
 			get { return this.tibcoMessageProducer.DisableMessageID; }
-			set { this.tibcoMessageProducer.DisableMessageID = value; }
+			set
+			{
+				try
+				{
+					this.tibcoMessageProducer.DisableMessageID = value;
+				}
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
+				}
+			}
 		}
 
 		public bool DisableMessageTimestamp
 		{
 			get { return this.tibcoMessageProducer.DisableMessageTimestamp; }
-			set { this.tibcoMessageProducer.DisableMessageTimestamp = value; }
+			set
+			{
+				try
+				{
+					this.tibcoMessageProducer.DisableMessageTimestamp = value;
+				}
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
+				}
+			}
 		}
 
 		/// <summary>
@@ -231,12 +309,21 @@ namespace Apache.NMS.EMS
 					return;
 				}
 
-				if(!this.nmsSession.tibcoSession.IsClosed)
+				try
 				{
-					this.tibcoMessageProducer.Close();
+					if(!this.nmsSession.tibcoSession.IsClosed)
+					{
+						this.tibcoMessageProducer.Close();
+					}
 				}
-
-				closed = true;
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
+				}
+				finally
+				{
+					closed = true;
+				}
 			}
 		}
 		///<summary>

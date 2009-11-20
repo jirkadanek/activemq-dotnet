@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+using System;
 namespace Apache.NMS.EMS
 {
 	class StreamMessage : Apache.NMS.EMS.Message, Apache.NMS.IStreamMessage
@@ -34,122 +35,301 @@ namespace Apache.NMS.EMS
 
 		public bool ReadBoolean()
 		{
-			return this.tibcoStreamMessage.ReadBoolean();
+			try
+			{
+				return this.tibcoStreamMessage.ReadBoolean();
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return false;
+			}
 		}
 
 		public byte ReadByte()
 		{
-			return this.tibcoStreamMessage.ReadByte();
+			try
+			{
+				return this.tibcoStreamMessage.ReadByte();
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return 0;
+			}
 		}
 
 		public int ReadBytes(byte[] value)
 		{
-			return this.tibcoStreamMessage.ReadBytes(value);
+			try
+			{
+				return this.tibcoStreamMessage.ReadBytes(value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return 0;
+			}
 		}
 
 		public char ReadChar()
 		{
-			return this.tibcoStreamMessage.ReadChar();
+			try
+			{
+				return this.tibcoStreamMessage.ReadChar();
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return (char) 0;
+			}
 		}
 
 		public double ReadDouble()
 		{
-			return this.tibcoStreamMessage.ReadDouble();
+			try
+			{
+				return this.tibcoStreamMessage.ReadDouble();
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return 0;
+			}
 		}
 
 		public short ReadInt16()
 		{
-			return this.tibcoStreamMessage.ReadShort();
+			try
+			{
+				return this.tibcoStreamMessage.ReadShort();
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return 0;
+			}
 		}
 
 		public int ReadInt32()
 		{
-			return this.tibcoStreamMessage.ReadInt();
+			try
+			{
+				return this.tibcoStreamMessage.ReadInt();
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return 0;
+			}
 		}
 
 		public long ReadInt64()
 		{
-			return this.tibcoStreamMessage.ReadLong();
+			try
+			{
+				return this.tibcoStreamMessage.ReadLong();
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return 0;
+			}
 		}
 
 		public object ReadObject()
 		{
-			return this.tibcoStreamMessage.ReadObject();
+			try
+			{
+				return this.tibcoStreamMessage.ReadObject();
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return 0;
+			}
 		}
 
 		public float ReadSingle()
 		{
-			return this.tibcoStreamMessage.ReadFloat();
+			try
+			{
+				return this.tibcoStreamMessage.ReadFloat();
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return 0;
+			}
 		}
 
 		public string ReadString()
 		{
-			return this.tibcoStreamMessage.ReadString();
+			try
+			{
+				return this.tibcoStreamMessage.ReadString();
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return null;
+			}
 		}
 
 		public void Reset()
 		{
-			this.tibcoStreamMessage.Reset();
+			try
+			{
+				this.tibcoStreamMessage.Reset();
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public void WriteBoolean(bool value)
 		{
-			this.tibcoStreamMessage.WriteBoolean(value);
+			try
+			{
+				this.tibcoStreamMessage.WriteBoolean(value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public void WriteByte(byte value)
 		{
-			this.tibcoStreamMessage.WriteByte(value);
+			try
+			{
+				this.tibcoStreamMessage.WriteByte(value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public void WriteBytes(byte[] value, int offset, int length)
 		{
-			this.tibcoStreamMessage.WriteBytes(value, offset, length);
+			try
+			{
+				this.tibcoStreamMessage.WriteBytes(value, offset, length);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public void WriteBytes(byte[] value)
 		{
-			this.tibcoStreamMessage.WriteBytes(value);
+			try
+			{
+				this.tibcoStreamMessage.WriteBytes(value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public void WriteChar(char value)
 		{
-			this.tibcoStreamMessage.WriteChar(value);
+			try
+			{
+				this.tibcoStreamMessage.WriteChar(value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public void WriteDouble(double value)
 		{
-			this.tibcoStreamMessage.WriteDouble(value);
+			try
+			{
+				this.tibcoStreamMessage.WriteDouble(value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public void WriteInt16(short value)
 		{
-			this.tibcoStreamMessage.WriteShort(value);
+			try
+			{
+				this.tibcoStreamMessage.WriteShort(value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public void WriteInt32(int value)
 		{
-			this.tibcoStreamMessage.WriteInt(value);
+			try
+			{
+				this.tibcoStreamMessage.WriteInt(value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public void WriteInt64(long value)
 		{
-			this.tibcoStreamMessage.WriteLong(value);
+			try
+			{
+				this.tibcoStreamMessage.WriteLong(value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public void WriteObject(object value)
 		{
-			this.tibcoStreamMessage.WriteObject(value);
+			try
+			{
+				this.tibcoStreamMessage.WriteObject(value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public void WriteSingle(float value)
 		{
-			this.tibcoStreamMessage.WriteFloat(value);
+			try
+			{
+				this.tibcoStreamMessage.WriteFloat(value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public void WriteString(string value)
 		{
-			this.tibcoStreamMessage.WriteString(value);
+			try
+			{
+				this.tibcoStreamMessage.WriteString(value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		#endregion

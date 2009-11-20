@@ -20,19 +20,19 @@ using Apache.NMS.Util;
 
 namespace Apache.NMS.EMS
 {
-    /// <summary>
-    /// Represents a NMS connection to TIBCO.
-    /// </summary>
-    ///
-    public class Connection : Apache.NMS.IConnection
-    {
-    	private Apache.NMS.AcknowledgementMode acknowledgementMode;
-    	public readonly TIBCO.EMS.Connection tibcoConnection;
+	/// <summary>
+	/// Represents a NMS connection to TIBCO.
+	/// </summary>
+	///
+	public class Connection : Apache.NMS.IConnection
+	{
+		private Apache.NMS.AcknowledgementMode acknowledgementMode;
+		public readonly TIBCO.EMS.Connection tibcoConnection;
 		private IRedeliveryPolicy redeliveryPolicy;
 		private ConnectionMetaData metaData = null;
 		private readonly Atomic<bool> started = new Atomic<bool>(false);
 		private bool closed = false;
-    	private bool disposed = false;
+		private bool disposed = false;
 
 		public Connection(TIBCO.EMS.Connection cnx)
 		{
@@ -45,16 +45,23 @@ namespace Apache.NMS.EMS
 			Dispose(false);
 		}
 
-    	#region IStartable Members
+		#region IStartable Members
 
 		/// <summary>
-        /// Starts message delivery for this connection.
-        /// </summary>
-        public void Start()
-        {
+		/// Starts message delivery for this connection.
+		/// </summary>
+		public void Start()
+		{
 			if(started.CompareAndSet(false, true))
 			{
-				this.tibcoConnection.Start();
+				try
+				{
+					this.tibcoConnection.Start();
+				}
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
+				}
 			}
 		}
 
@@ -68,13 +75,20 @@ namespace Apache.NMS.EMS
 		#region IStoppable Members
 
 		/// <summary>
-        /// Stop message delivery for this connection.
-        /// </summary>
-        public void Stop()
-        {
-			if(started.CompareAndSet(true, false))
+		/// Stop message delivery for this connection.
+		/// </summary>
+		public void Stop()
+		{
+			try
 			{
-	            this.tibcoConnection.Stop();
+				if(started.CompareAndSet(true, false))
+				{
+					this.tibcoConnection.Stop();
+				}
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
 			}
 		}
 
@@ -83,21 +97,29 @@ namespace Apache.NMS.EMS
 		#region IConnection Members
 
 		/// <summary>
-        /// Creates a new session to work on this connection
-        /// </summary>
+		/// Creates a new session to work on this connection
+		/// </summary>
 		public Apache.NMS.ISession CreateSession()
-        {
-            return CreateSession(acknowledgementMode);
-        }
-        
-        /// <summary>
-        /// Creates a new session to work on this connection
-        /// </summary>
+		{
+			return CreateSession(acknowledgementMode);
+		}
+
+		/// <summary>
+		/// Creates a new session to work on this connection
+		/// </summary>
 		public Apache.NMS.ISession CreateSession(Apache.NMS.AcknowledgementMode mode)
-        {
-			bool isTransacted = (Apache.NMS.AcknowledgementMode.Transactional == mode);
-			return EMSConvert.ToNMSSession(this.tibcoConnection.CreateSession(isTransacted,
-			                                                  EMSConvert.ToSessionMode(mode)));
+		{
+			try
+			{
+				bool isTransacted = (Apache.NMS.AcknowledgementMode.Transactional == mode);
+				return EMSConvert.ToNMSSession(this.tibcoConnection.CreateSession(isTransacted,
+																  EMSConvert.ToSessionMode(mode)));
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return null;
+			}
 		}
 
 		public void Close()
@@ -109,10 +131,20 @@ namespace Apache.NMS.EMS
 					return;
 				}
 
-				this.tibcoConnection.ExceptionHandler -= this.HandleTibcoException;
-				this.tibcoConnection.Stop();
-				this.tibcoConnection.Close();
-				closed = true;
+				try
+				{
+					this.tibcoConnection.ExceptionHandler -= this.HandleTibcoException;
+					this.tibcoConnection.Stop();
+					this.tibcoConnection.Close();
+				}
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
+				}
+				finally
+				{
+					closed = true;
+				}
 			}
 		}
 
@@ -121,7 +153,7 @@ namespace Apache.NMS.EMS
 		#region IDisposable Members
 
 		public void Dispose()
-        {
+		{
 			Dispose(true);
 			GC.SuppressFinalize(this);
 		}
@@ -164,16 +196,37 @@ namespace Apache.NMS.EMS
 		}
 
 		public Apache.NMS.AcknowledgementMode AcknowledgementMode
-        {
-            get { return acknowledgementMode; }
-            set { acknowledgementMode = value; }
-        }
+		{
+			get { return acknowledgementMode; }
+			set { acknowledgementMode = value; }
+		}
 
-        public string ClientId
-        {
-            get { return this.tibcoConnection.ClientID; }
-            set { this.tibcoConnection.ClientID = value; }
-        }
+		public string ClientId
+		{
+			get
+			{
+				try
+				{
+					return this.tibcoConnection.ClientID;
+				}
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
+					return null;
+				}
+			}
+			set
+			{
+				try
+				{
+					this.tibcoConnection.ClientID = value;
+				}
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
+				}
+			}
+		}
 
 		/// <summary>
 		/// Get/or set the redelivery policy for this connection.

@@ -48,74 +48,169 @@ namespace Apache.NMS.EMS
 		{
 			Apache.NMS.EMS.Destination destinationObj = (Apache.NMS.EMS.Destination) destination;
 
-			return EMSConvert.ToNMSMessageProducer(this, this.tibcoSession.CreateProducer(destinationObj.tibcoDestination));
+			try
+			{
+				return EMSConvert.ToNMSMessageProducer(this, this.tibcoSession.CreateProducer(destinationObj.tibcoDestination));
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return null;
+			}
 		}
 
 		public Apache.NMS.IMessageConsumer CreateConsumer(Apache.NMS.IDestination destination)
 		{
 			Apache.NMS.EMS.Destination destinationObj = (Apache.NMS.EMS.Destination) destination;
 
-			return EMSConvert.ToNMSMessageConsumer(this, this.tibcoSession.CreateConsumer(destinationObj.tibcoDestination));
+			try
+			{
+				return EMSConvert.ToNMSMessageConsumer(this, this.tibcoSession.CreateConsumer(destinationObj.tibcoDestination));
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return null;
+			}
 		}
 
 		public Apache.NMS.IMessageConsumer CreateConsumer(Apache.NMS.IDestination destination, string selector)
 		{
 			Apache.NMS.EMS.Destination destinationObj = (Apache.NMS.EMS.Destination) destination;
 
-			return EMSConvert.ToNMSMessageConsumer(this, this.tibcoSession.CreateConsumer(destinationObj.tibcoDestination, selector));
+			try
+			{
+				return EMSConvert.ToNMSMessageConsumer(this, this.tibcoSession.CreateConsumer(destinationObj.tibcoDestination, selector));
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return null;
+			}
 		}
 
 		public Apache.NMS.IMessageConsumer CreateConsumer(Apache.NMS.IDestination destination, string selector, bool noLocal)
 		{
 			Apache.NMS.EMS.Destination destinationObj = (Apache.NMS.EMS.Destination) destination;
 
-			return EMSConvert.ToNMSMessageConsumer(this, this.tibcoSession.CreateConsumer(destinationObj.tibcoDestination, selector, noLocal));
+			try
+			{
+				return EMSConvert.ToNMSMessageConsumer(this, this.tibcoSession.CreateConsumer(destinationObj.tibcoDestination, selector, noLocal));
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return null;
+			}
 		}
 
 		public Apache.NMS.IMessageConsumer CreateDurableConsumer(Apache.NMS.ITopic destination, string name, string selector, bool noLocal)
 		{
 			Apache.NMS.EMS.Topic topicObj = (Apache.NMS.EMS.Topic) destination;
 
-			return EMSConvert.ToNMSMessageConsumer(this, this.tibcoSession.CreateDurableSubscriber(topicObj.tibcoTopic, name, selector, noLocal));
+			try
+			{
+				return EMSConvert.ToNMSMessageConsumer(this, this.tibcoSession.CreateDurableSubscriber(topicObj.tibcoTopic, name, selector, noLocal));
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return null;
+			}
 		}
 
 		public void DeleteDurableConsumer(string name)
 		{
-			this.tibcoSession.Unsubscribe(name);
+			try
+			{
+				this.tibcoSession.Unsubscribe(name);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public IQueueBrowser CreateBrowser(IQueue queue)
 		{
 			Apache.NMS.EMS.Queue queueObj = (Apache.NMS.EMS.Queue) queue;
 
-			return EMSConvert.ToNMSQueueBrowser(this.tibcoSession.CreateBrowser(queueObj.tibcoQueue));
+			try
+			{
+				return EMSConvert.ToNMSQueueBrowser(this.tibcoSession.CreateBrowser(queueObj.tibcoQueue));
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return null;
+			}
 		}
 
 		public IQueueBrowser CreateBrowser(IQueue queue, string selector)
 		{
 			Apache.NMS.EMS.Queue queueObj = (Apache.NMS.EMS.Queue) queue;
 
-			return EMSConvert.ToNMSQueueBrowser(this.tibcoSession.CreateBrowser(queueObj.tibcoQueue, selector));
+			try
+			{
+				return EMSConvert.ToNMSQueueBrowser(this.tibcoSession.CreateBrowser(queueObj.tibcoQueue, selector));
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return null;
+			}
 		}
 
 		public Apache.NMS.IQueue GetQueue(string name)
 		{
-			return EMSConvert.ToNMSQueue(this.tibcoSession.CreateQueue(name));
+			try
+			{
+				return EMSConvert.ToNMSQueue(this.tibcoSession.CreateQueue(name));
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return null;
+			}
 		}
 
 		public Apache.NMS.ITopic GetTopic(string name)
 		{
-			return EMSConvert.ToNMSTopic(this.tibcoSession.CreateTopic(name));
+			try
+			{
+				return EMSConvert.ToNMSTopic(this.tibcoSession.CreateTopic(name));
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return null;
+			}
 		}
 
 		public Apache.NMS.ITemporaryQueue CreateTemporaryQueue()
 		{
-			return EMSConvert.ToNMSTemporaryQueue(this.tibcoSession.CreateTemporaryQueue());
+			try
+			{
+				return EMSConvert.ToNMSTemporaryQueue(this.tibcoSession.CreateTemporaryQueue());
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return null;
+			}
 		}
 
 		public Apache.NMS.ITemporaryTopic CreateTemporaryTopic()
 		{
-			return EMSConvert.ToNMSTemporaryTopic(this.tibcoSession.CreateTemporaryTopic());
+			try
+			{
+				return EMSConvert.ToNMSTemporaryTopic(this.tibcoSession.CreateTemporaryTopic());
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return null;
+			}
 		}
 
 		/// <summary>
@@ -123,65 +218,142 @@ namespace Apache.NMS.EMS
 		/// </summary>
 		public void DeleteDestination(IDestination destination)
 		{
-			// TODO: Implement if possible.  If not possible, then change exception to NotSupportedException().
-			throw new NotImplementedException();
+			// TODO: Implement if possible.
 		}
 
 		public Apache.NMS.IMessage CreateMessage()
 		{
-			return EMSConvert.ToNMSMessage(this.tibcoSession.CreateMessage());
+			try
+			{
+				return EMSConvert.ToNMSMessage(this.tibcoSession.CreateMessage());
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return null;
+			}
 		}
 
 		public Apache.NMS.ITextMessage CreateTextMessage()
 		{
-			return EMSConvert.ToNMSTextMessage(this.tibcoSession.CreateTextMessage());
+			try
+			{
+				return EMSConvert.ToNMSTextMessage(this.tibcoSession.CreateTextMessage());
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return null;
+			}
 		}
 
 		public Apache.NMS.ITextMessage CreateTextMessage(string text)
 		{
-			return EMSConvert.ToNMSTextMessage(this.tibcoSession.CreateTextMessage(text));
+			try
+			{
+				return EMSConvert.ToNMSTextMessage(this.tibcoSession.CreateTextMessage(text));
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return null;
+			}
 		}
 
 		public Apache.NMS.IMapMessage CreateMapMessage()
 		{
-			return EMSConvert.ToNMSMapMessage(this.tibcoSession.CreateMapMessage());
+			try
+			{
+				return EMSConvert.ToNMSMapMessage(this.tibcoSession.CreateMapMessage());
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return null;
+			}
 		}
 
 		public Apache.NMS.IBytesMessage CreateBytesMessage()
 		{
-			return EMSConvert.ToNMSBytesMessage(this.tibcoSession.CreateBytesMessage());
+			try
+			{
+				return EMSConvert.ToNMSBytesMessage(this.tibcoSession.CreateBytesMessage());
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return null;
+			}
 		}
 
 		public Apache.NMS.IBytesMessage CreateBytesMessage(byte[] body)
 		{
-			Apache.NMS.IBytesMessage bytesMessage = CreateBytesMessage();
-
-			if(null != bytesMessage)
+			try
 			{
-				bytesMessage.Content = body;
-			}
+				Apache.NMS.IBytesMessage bytesMessage = CreateBytesMessage();
 
-			return bytesMessage;
+				if(null != bytesMessage)
+				{
+					bytesMessage.Content = body;
+				}
+
+				return bytesMessage;
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return null;
+			}
 		}
 
 		public Apache.NMS.IStreamMessage CreateStreamMessage()
 		{
-			return EMSConvert.ToNMSStreamMessage(this.tibcoSession.CreateStreamMessage());
+			try
+			{
+				return EMSConvert.ToNMSStreamMessage(this.tibcoSession.CreateStreamMessage());
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return null;
+			}
 		}
 
 		public Apache.NMS.IObjectMessage CreateObjectMessage(Object body)
 		{
-			return EMSConvert.ToNMSObjectMessage(this.tibcoSession.CreateObjectMessage(body));
+			try
+			{
+				return EMSConvert.ToNMSObjectMessage(this.tibcoSession.CreateObjectMessage(body));
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return null;
+			}
 		}
 		
 		public void Commit()
 		{
-			this.tibcoSession.Commit();
+			try
+			{
+				this.tibcoSession.Commit();
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 		
 		public void Rollback()
 		{
-			this.tibcoSession.Rollback();
+			try
+			{
+				this.tibcoSession.Rollback();
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 		
 		// Properties
@@ -215,8 +387,18 @@ namespace Apache.NMS.EMS
 					return;
 				}
 
-				this.tibcoSession.Close();
-				closed = true;
+				try
+				{
+					this.tibcoSession.Close();
+				}
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
+				}
+				finally
+				{
+					closed = true;
+				}
 			}
 		}
 

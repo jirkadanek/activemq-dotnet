@@ -46,18 +46,40 @@ namespace Apache.NMS.EMS
 
 		public void Clear()
 		{
-			this.tibcoMapMessage.ClearBody();
+			try
+			{
+				this.tibcoMapMessage.ClearBody();
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public bool Contains(object key)
 		{
-			return this.tibcoMapMessage.ItemExists(key.ToString());
+			try
+			{
+				return this.tibcoMapMessage.ItemExists(key.ToString());
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return false;
+			}
 		}
 
 		public void Remove(object key)
 		{
-			// Best guess at equivalent implementation.
-			this.tibcoMapMessage.SetObject(key.ToString(), null);
+			try
+			{
+				// Best guess at equivalent implementation.
+				this.tibcoMapMessage.SetObject(key.ToString(), null);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public int Count
@@ -65,14 +87,21 @@ namespace Apache.NMS.EMS
 			get
 			{
 				int count = 0;
-				IEnumerator namesEnumerator = this.tibcoMapMessage.MapNames;
-
-				if(null != namesEnumerator)
+				try
 				{
-					while(namesEnumerator.MoveNext())
+					IEnumerator namesEnumerator = this.tibcoMapMessage.MapNames;
+
+					if(null != namesEnumerator)
 					{
-						count++;
+						while(namesEnumerator.MoveNext())
+						{
+							count++;
+						}
 					}
+				}
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
 				}
 
 				return count;
@@ -85,9 +114,16 @@ namespace Apache.NMS.EMS
 			{
 				ArrayList keys = new ArrayList();
 
-				foreach(string itemName in EMSConvert.ToEnumerable(this.tibcoMapMessage.MapNames))
+				try
 				{
-					keys.Add(itemName);
+					foreach(string itemName in EMSConvert.ToEnumerable(this.tibcoMapMessage.MapNames))
+					{
+						keys.Add(itemName);
+					}
+				}
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
 				}
 
 				return keys;
@@ -100,9 +136,16 @@ namespace Apache.NMS.EMS
 			{
 				ArrayList keys = new ArrayList();
 
-				foreach(string itemName in EMSConvert.ToEnumerable(this.tibcoMapMessage.MapNames))
+				try
 				{
-					keys.Add(this.tibcoMapMessage.GetObject(itemName));
+					foreach(string itemName in EMSConvert.ToEnumerable(this.tibcoMapMessage.MapNames))
+					{
+						keys.Add(this.tibcoMapMessage.GetObject(itemName));
+					}
+				}
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
 				}
 
 				return keys;
@@ -113,122 +156,302 @@ namespace Apache.NMS.EMS
 		{
 			get
 			{
-				return this.tibcoMapMessage.GetObject(key);
+				try
+				{
+					return this.tibcoMapMessage.GetObject(key);
+				}
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
+					return null;
+				}
 			}
 			set
 			{
-				this.tibcoMapMessage.SetObject(key, value);
+				try
+				{
+					this.tibcoMapMessage.SetObject(key, value);
+				}
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
+				}
 			}
 		}
 
 		public string GetString(string key)
 		{
-			return this.tibcoMapMessage.GetString(key);
+			try
+			{
+				return this.tibcoMapMessage.GetString(key);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return null;
+			}
 		}
 
 		public void SetString(string key, string value)
 		{
-			this.tibcoMapMessage.SetString(key, value);
+			try
+			{
+				this.tibcoMapMessage.SetString(key, value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public bool GetBool(string key)
 		{
-			return this.tibcoMapMessage.GetBoolean(key);
+			try
+			{
+				return this.tibcoMapMessage.GetBoolean(key);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return false;
+			}
 		}
 
 		public void SetBool(string key, bool value)
 		{
-			this.tibcoMapMessage.SetBoolean(key, value);
+			try
+			{
+				this.tibcoMapMessage.SetBoolean(key, value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public byte GetByte(string key)
 		{
-			return this.tibcoMapMessage.GetByte(key);
+			try
+			{
+				return this.tibcoMapMessage.GetByte(key);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return 0;
+			}
 		}
 
 		public void SetByte(string key, byte value)
 		{
-			this.tibcoMapMessage.SetByte(key, value);
+			try
+			{
+				this.tibcoMapMessage.SetByte(key, value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public char GetChar(string key)
 		{
-			return this.tibcoMapMessage.GetChar(key);
+			try
+			{
+				return this.tibcoMapMessage.GetChar(key);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return (char) 0;
+			}
 		}
 
 		public void SetChar(string key, char value)
 		{
-			this.tibcoMapMessage.SetChar(key, value);
+			try
+			{
+				this.tibcoMapMessage.SetChar(key, value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public short GetShort(string key)
 		{
-			return this.tibcoMapMessage.GetShort(key);
+			try
+			{
+				return this.tibcoMapMessage.GetShort(key);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return 0;
+			}
 		}
 
 		public void SetShort(string key, short value)
 		{
-			this.tibcoMapMessage.SetShort(key, value);
+			try
+			{
+				this.tibcoMapMessage.SetShort(key, value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public int GetInt(string key)
 		{
-			return this.tibcoMapMessage.GetInt(key);
+			try
+			{
+				return this.tibcoMapMessage.GetInt(key);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return 0;
+			}
 		}
 
 		public void SetInt(string key, int value)
 		{
-			this.tibcoMapMessage.SetInt(key, value);
+			try
+			{
+				this.tibcoMapMessage.SetInt(key, value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public long GetLong(string key)
 		{
-			return this.tibcoMapMessage.GetLong(key);
+			try
+			{
+				return this.tibcoMapMessage.GetLong(key);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return 0;
+			}
 		}
 
 		public void SetLong(string key, long value)
 		{
-			this.tibcoMapMessage.SetLong(key, value);
+			try
+			{
+				this.tibcoMapMessage.SetLong(key, value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public float GetFloat(string key)
 		{
-			return this.tibcoMapMessage.GetFloat(key);
+			try
+			{
+				return this.tibcoMapMessage.GetFloat(key);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return 0;
+			}
 		}
 
 		public void SetFloat(string key, float value)
 		{
-			this.tibcoMapMessage.SetFloat(key, value);
+			try
+			{
+				this.tibcoMapMessage.SetFloat(key, value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public double GetDouble(string key)
 		{
-			return this.tibcoMapMessage.GetDouble(key);
+			try
+			{
+				return this.tibcoMapMessage.GetDouble(key);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return 0;
+			}
 		}
 
 		public void SetDouble(string key, double value)
 		{
-			this.tibcoMapMessage.SetDouble(key, value);
+			try
+			{
+				this.tibcoMapMessage.SetDouble(key, value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public IList GetList(string key)
 		{
-			return (IList) this.tibcoMapMessage.GetObject(key);
+			try
+			{
+				return (IList) this.tibcoMapMessage.GetObject(key);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return null;
+			}
 		}
 
 		public void SetList(string key, IList list)
 		{
-			this.tibcoMapMessage.SetObject(key, list);
+			try
+			{
+				this.tibcoMapMessage.SetObject(key, list);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		public IDictionary GetDictionary(string key)
 		{
-			return (IDictionary) this.tibcoMapMessage.GetObject(key);
+			try
+			{
+				return (IDictionary) this.tibcoMapMessage.GetObject(key);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return null;
+			}
 		}
 
 		public void SetDictionary(string key, IDictionary dictionary)
 		{
-			this.tibcoMapMessage.SetObject(key, dictionary);
+			try
+			{
+				this.tibcoMapMessage.SetObject(key, dictionary);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
 		}
 
 		#endregion

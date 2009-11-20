@@ -93,13 +93,22 @@ namespace Apache.NMS.EMS
 
 			lock(this)
 			{
-				if(!this.nmsSession.tibcoSession.IsClosed)
+				try
 				{
-					this.tibcoMessageConsumer.MessageHandler -= this.HandleTibcoMsg;
-					this.tibcoMessageConsumer.Close();
+					if(!this.nmsSession.tibcoSession.IsClosed)
+					{
+						this.tibcoMessageConsumer.MessageHandler -= this.HandleTibcoMsg;
+						this.tibcoMessageConsumer.Close();
+					}
 				}
-
-				closed = true;
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
+				}
+				finally
+				{
+					closed = true;
+				}
 			}
 		}
 
