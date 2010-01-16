@@ -14,7 +14,7 @@
 # limitations under the License.
 
 $pkgname = "Apache.NMS.WCF"
-$pkgver = "1.2.0"
+$pkgver = "1.2.x"
 $configurations = "release", "debug"
 $frameworks = "net-3.5"
 
