@@ -48,55 +48,37 @@ namespace Apache.NMS.EMS
 			VerifyConnectionFactory();
 		}
 
-		public ConnectionFactory(Uri uriProvider)
-			: this(uriProvider.AbsolutePath)
+		public ConnectionFactory(Uri serverUrl)
+			: this(serverUrl, string.Empty)
 		{
 		}
 
-		public ConnectionFactory(Uri uriProvider, string clientId)
-			: this(uriProvider.AbsolutePath, clientId)
+		public ConnectionFactory(Uri serverUrl, string clientId)
+			: this(serverUrl, clientId, null)
 		{
 		}
 
 		public ConnectionFactory(string serverUrl)
+			: this(new Uri(serverUrl))
 		{
-			try
-			{
-				this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(serverUrl);
-				this.brokerUri = new Uri(serverUrl);
-			}
-			catch(Exception ex)
-			{
-				Apache.NMS.Tracer.DebugFormat("Exception instantiating TIBCO.EMS.ConnectionFactory: {0}", ex.Message);
-				ExceptionUtil.WrapAndThrowNMSException(ex);
-			}
-
-			VerifyConnectionFactory();
 		}
 
 		public ConnectionFactory(string serverUrl, string clientId)
+			: this(new Uri(serverUrl), clientId)
 		{
-			try
-			{
-				this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(serverUrl, clientId);
-				this.brokerUri = new Uri(serverUrl);
-				this.clientId = clientId;
-			}
-			catch(Exception ex)
-			{
-				Apache.NMS.Tracer.DebugFormat("Exception instantiating TIBCO.EMS.ConnectionFactory: {0}", ex.Message);
-				ExceptionUtil.WrapAndThrowNMSException(ex);
-			}
-
-			VerifyConnectionFactory();
 		}
 
 		public ConnectionFactory(string serverUrl, string clientId, Hashtable properties)
+			: this(new Uri(serverUrl), clientId, properties)
+		{
+		}
+
+		public ConnectionFactory(Uri serverUrl, string clientId, Hashtable properties)
 		{
 			try
 			{
-				this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(serverUrl, clientId, properties);
-				this.brokerUri = new Uri(serverUrl);
+				this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(serverUrl.AbsolutePath, clientId, properties);
+				this.brokerUri = serverUrl;
 				this.clientId = clientId;
 				this.properties = properties;
 			}
