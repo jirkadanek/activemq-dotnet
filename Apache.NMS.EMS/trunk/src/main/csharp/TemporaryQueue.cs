@@ -17,7 +17,7 @@
 
 namespace Apache.NMS.EMS
 {
-	class TemporaryQueue : Apache.NMS.EMS.Destination, Apache.NMS.ITemporaryQueue
+	class TemporaryQueue : Apache.NMS.EMS.Queue, Apache.NMS.ITemporaryQueue
 	{
 		public TIBCO.EMS.TemporaryQueue tibcoTemporaryQueue
 		{
@@ -32,24 +32,33 @@ namespace Apache.NMS.EMS
 
 		#region IDestination Members
 
-		public Apache.NMS.DestinationType DestinationType
+		public new Apache.NMS.DestinationType DestinationType
 		{
 			get { return Apache.NMS.DestinationType.TemporaryQueue; }
 		}
 
-		public bool IsTopic
+		public new bool IsTopic
 		{
 			get { return false; }
 		}
 
-		public bool IsQueue
+		public new bool IsQueue
 		{
 			get { return true; }
 		}
 
-		public bool IsTemporary
+		public new bool IsTemporary
 		{
 			get { return true; }
+		}
+
+		#endregion
+
+		#region ITemporaryQueue Members
+
+		public void Delete()
+		{
+			this.tibcoTemporaryQueue.Delete();
 		}
 
 		#endregion
