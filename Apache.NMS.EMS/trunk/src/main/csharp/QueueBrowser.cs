@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+using System;
 using System.Collections;
 
 namespace Apache.NMS.EMS
@@ -22,15 +23,78 @@ namespace Apache.NMS.EMS
 	public class QueueBrowser : Apache.NMS.IQueueBrowser
 	{
 		public TIBCO.EMS.QueueBrowser tibcoQueueBrowser;
+		private bool closed = false;
+		private bool disposed = false;
 
 		public QueueBrowser(TIBCO.EMS.QueueBrowser queueBrowser)
 		{
 			this.tibcoQueueBrowser = queueBrowser;
 		}
 
+		~QueueBrowser()
+		{
+			Dispose(false);
+		}
+
+		#region IDisposable Members
+
+		///<summary>
+		/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+		///</summary>
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		protected void Dispose(bool disposing)
+		{
+			if(disposed)
+			{
+				return;
+			}
+
+			if(disposing)
+			{
+				// Dispose managed code here.
+			}
+
+			try
+			{
+				Close();
+			}
+			catch
+			{
+				// Ignore errors.
+			}
+
+			disposed = true;
+		}
+
+		#endregion
+
 		public void  Close()
 		{
-			this.tibcoQueueBrowser.Close();
+			lock(this)
+			{
+				if(closed)
+				{
+					return;
+				}
+
+				try
+				{
+					this.tibcoQueueBrowser.Close();
+				}
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
+				}
+				finally
+				{
+					closed = true;
+				}
+			}
 		}
 
 		public string MessageSelector
