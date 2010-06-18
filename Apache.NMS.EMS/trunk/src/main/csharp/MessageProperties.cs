@@ -408,6 +408,50 @@ namespace Apache.NMS.EMS
 			}
 		}
 
+		public void SetBytes(string key, byte[] value)
+		{
+			try
+			{
+				this.tibcoMessage.SetObjectProperty(key, value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
+		}
+
+		public void SetBytes(string key, byte[] value, int offset, int length)
+		{
+			try
+			{
+				byte[] byteSection = new byte[length];
+
+				for(int srcIndex = offset, destIndex = 0; srcIndex < (offset + length); srcIndex++, destIndex++)
+				{
+					byteSection[destIndex] = value[srcIndex];
+				}
+
+				this.tibcoMessage.SetObjectProperty(key, byteSection);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
+		}
+
+		public byte[] GetBytes(string key)
+		{
+			try
+			{
+				return (byte[]) this.tibcoMessage.GetObjectProperty(key);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return null;
+			}
+		}
+
 		public IDictionary GetDictionary(string key)
 		{
 			try

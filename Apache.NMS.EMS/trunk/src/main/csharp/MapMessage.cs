@@ -429,6 +429,43 @@ namespace Apache.NMS.EMS
 			}
 		}
 
+		public void SetBytes(string key, byte[] value)
+		{
+			try
+			{
+				this.tibcoMapMessage.SetBytes(key, value);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
+		}
+
+		public void SetBytes(string key, byte[] value, int offset, int length)
+		{
+			try
+			{
+				this.tibcoMapMessage.SetBytes(key, value, offset, length);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+			}
+		}
+
+		public byte[] GetBytes(string key)
+		{
+			try
+			{
+				return this.tibcoMapMessage.GetBytes(key);
+			}
+			catch(Exception ex)
+			{
+				ExceptionUtil.WrapAndThrowNMSException(ex);
+				return null;
+			}
+		}
+
 		public IDictionary GetDictionary(string key)
 		{
 			try
