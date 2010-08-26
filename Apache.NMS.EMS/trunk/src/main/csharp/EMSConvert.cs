@@ -114,6 +114,16 @@ namespace Apache.NMS.EMS
 			return null;
 		}
 
+		public static TIBCO.EMS.Destination ToEMSDestination(Apache.NMS.IDestination nmsDestination)
+		{
+			if(nmsDestination is Apache.NMS.EMS.Destination)
+			{
+				return ((Apache.NMS.EMS.Destination) nmsDestination).tibcoDestination;
+			}
+
+			return null;
+		}
+
 		public static Apache.NMS.IMessage ToNMSMessage(TIBCO.EMS.Message tibcoMessage)
 		{
 			if(tibcoMessage is TIBCO.EMS.TextMessage)

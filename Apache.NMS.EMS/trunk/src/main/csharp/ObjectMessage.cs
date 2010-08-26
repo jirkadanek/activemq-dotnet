@@ -35,6 +35,7 @@ namespace Apache.NMS.EMS
 		public object Body
 		{
 			get { return this.tibcoObjectMessage.TheObject; }
+			set { this.tibcoObjectMessage.TheObject = value; }
 		}
 
 		#endregion

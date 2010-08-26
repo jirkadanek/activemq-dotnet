@@ -126,6 +126,17 @@ namespace Apache.NMS.EMS
 		public Apache.NMS.IDestination NMSDestination
 		{
 			get { return EMSConvert.ToNMSDestination(this.tibcoMessage.Destination); }
+			set
+			{
+				try
+				{
+					this.tibcoMessage.Destination = EMSConvert.ToEMSDestination(value);
+				}
+				catch(Exception ex)
+				{
+					ExceptionUtil.WrapAndThrowNMSException(ex);
+				}
+			}
 		}
 
 		protected TimeSpan timeToLive;
@@ -146,6 +157,7 @@ namespace Apache.NMS.EMS
 		public string NMSMessageId
 		{
 			get { return this.tibcoMessage.MessageID; }
+			set { this.tibcoMessage.MessageID = value; }
 		}
 
 		/// <summary>
@@ -192,6 +204,7 @@ namespace Apache.NMS.EMS
 		public bool NMSRedelivered
 		{
 			get { return this.tibcoMessage.Redelivered; }
+			set { this.tibcoMessage.Redelivered = value; }
 		}
 
 		/// <summary>
@@ -204,14 +217,7 @@ namespace Apache.NMS.EMS
 			{
 				try
 				{
-					if(null == value)
-					{
-						this.tibcoMessage.ReplyTo = null;
-					}
-					else
-					{
-						this.tibcoMessage.ReplyTo = ((Apache.NMS.EMS.Destination) value).tibcoDestination;
-					}
+					this.tibcoMessage.ReplyTo = EMSConvert.ToEMSDestination(value);
 				}
 				catch(Exception ex)
 				{
@@ -227,6 +233,7 @@ namespace Apache.NMS.EMS
 		public DateTime NMSTimestamp
 		{
 			get { return DateUtils.ToDateTime(this.tibcoMessage.Timestamp); }
+			set { this.tibcoMessage.Timestamp = DateUtils.ToJavaTime(value); }
 		}
 
 		/// <summary>
