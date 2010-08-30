@@ -307,5 +307,33 @@ namespace Apache.NMS.EMS
 				}
 			}
 		}
+
+		private ConsumerTransformerDelegate consumerTransformer;
+		/// <summary>
+		/// A Delegate that is called each time a Message is dispatched to allow the client to do
+		/// any necessary transformations on the received message before it is delivered.  The
+		/// ConnectionFactory sets the provided delegate instance on each Connection instance that
+		/// is created from this factory, each connection in turn passes the delegate along to each
+		/// Session it creates which then passes that along to the Consumers it creates.
+		/// </summary>
+		public ConsumerTransformerDelegate ConsumerTransformer
+		{
+			get { return this.consumerTransformer; }
+			set { this.consumerTransformer = value; }
+		}
+
+		private ProducerTransformerDelegate producerTransformer;
+		/// <summary>
+		/// A delegate that is called each time a Message is sent from this Producer which allows
+		/// the application to perform any needed transformations on the Message before it is sent.
+		/// The ConnectionFactory sets the provided delegate instance on each Connection instance that
+		/// is created from this factory, each connection in turn passes the delegate along to each
+		/// Session it creates which then passes that along to the Producers it creates.
+		/// </summary>
+		public ProducerTransformerDelegate ProducerTransformer
+		{
+			get { return this.producerTransformer; }
+			set { this.producerTransformer = value; }
+		}
 	}
 }

@@ -40,6 +40,22 @@ namespace Apache.NMS.EMS
 			Dispose(false);
 		}
 
+		private Apache.NMS.EMS.Message GetEMSMessage(Apache.NMS.IMessage message)
+		{
+			Apache.NMS.EMS.Message msg = (Apache.NMS.EMS.Message) message;
+
+			if(this.ProducerTransformer != null)
+			{
+				IMessage transformed = this.ProducerTransformer(this.nmsSession, this, message);
+				if(transformed != null)
+				{
+					msg = (Apache.NMS.EMS.Message) transformed;
+				}
+			}
+
+			return msg;
+		}
+
 		#region IMessageProducer Members
 
 		/// <summary>
@@ -47,7 +63,7 @@ namespace Apache.NMS.EMS
 		/// </summary>
 		public void Send(Apache.NMS.IMessage message)
 		{
-			Apache.NMS.EMS.Message msg = (Apache.NMS.EMS.Message) message;
+			Apache.NMS.EMS.Message msg = GetEMSMessage(message);
 			long timeToLive = (long) message.NMSTimeToLive.TotalMilliseconds;
 
 			if(0 == timeToLive)
@@ -74,7 +90,7 @@ namespace Apache.NMS.EMS
 		/// </summary>
 		public void Send(Apache.NMS.IMessage message, MsgDeliveryMode deliveryMode, MsgPriority priority, TimeSpan timeToLive)
 		{
-			Apache.NMS.EMS.Message msg = (Apache.NMS.EMS.Message) message;
+			Apache.NMS.EMS.Message msg = GetEMSMessage(message);
 
 			try
 			{
@@ -96,7 +112,7 @@ namespace Apache.NMS.EMS
 		public void Send(Apache.NMS.IDestination destination, Apache.NMS.IMessage message)
 		{
 			Apache.NMS.EMS.Destination dest = (Apache.NMS.EMS.Destination) destination;
-			Apache.NMS.EMS.Message msg = (Apache.NMS.EMS.Message) message;
+			Apache.NMS.EMS.Message msg = GetEMSMessage(message);
 			long timeToLive = (long) message.NMSTimeToLive.TotalMilliseconds;
 
 			if(0 == timeToLive)
@@ -126,7 +142,7 @@ namespace Apache.NMS.EMS
 						MsgDeliveryMode deliveryMode, MsgPriority priority, TimeSpan timeToLive)
 		{
 			Apache.NMS.EMS.Destination dest = (Apache.NMS.EMS.Destination) destination;
-			Apache.NMS.EMS.Message msg = (Apache.NMS.EMS.Message) message;
+			Apache.NMS.EMS.Message msg = GetEMSMessage(message);
 
 			try
 			{
@@ -141,6 +157,17 @@ namespace Apache.NMS.EMS
 			{
 				ExceptionUtil.WrapAndThrowNMSException(ex);
 			}
+		}
+
+		private ProducerTransformerDelegate producerTransformer;
+		/// <summary>
+		/// A delegate that is called each time a Message is sent from this Producer which allows
+		/// the application to perform any needed transformations on the Message before it is sent.
+		/// </summary>
+		public ProducerTransformerDelegate ProducerTransformer
+		{
+			get { return this.producerTransformer; }
+			set { this.producerTransformer = value; }
 		}
 
 		public MsgDeliveryMode DeliveryMode

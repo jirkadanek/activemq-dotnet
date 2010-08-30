@@ -50,7 +50,9 @@ namespace Apache.NMS.EMS
 
 			try
 			{
-				return EMSConvert.ToNMSMessageProducer(this, this.tibcoSession.CreateProducer(destinationObj.tibcoDestination));
+				Apache.NMS.IMessageProducer producer = EMSConvert.ToNMSMessageProducer(this, this.tibcoSession.CreateProducer(destinationObj.tibcoDestination));
+				ConfigureProducer(producer);
+				return producer;
 			}
 			catch(Exception ex)
 			{
@@ -65,7 +67,9 @@ namespace Apache.NMS.EMS
 
 			try
 			{
-				return EMSConvert.ToNMSMessageConsumer(this, this.tibcoSession.CreateConsumer(destinationObj.tibcoDestination));
+				Apache.NMS.IMessageConsumer consumer = EMSConvert.ToNMSMessageConsumer(this, this.tibcoSession.CreateConsumer(destinationObj.tibcoDestination));
+				ConfigureConsumer(consumer);
+				return consumer;
 			}
 			catch(Exception ex)
 			{
@@ -80,7 +84,9 @@ namespace Apache.NMS.EMS
 
 			try
 			{
-				return EMSConvert.ToNMSMessageConsumer(this, this.tibcoSession.CreateConsumer(destinationObj.tibcoDestination, selector));
+				Apache.NMS.IMessageConsumer consumer = EMSConvert.ToNMSMessageConsumer(this, this.tibcoSession.CreateConsumer(destinationObj.tibcoDestination, selector));
+				ConfigureConsumer(consumer);
+				return consumer;
 			}
 			catch(Exception ex)
 			{
@@ -95,7 +101,9 @@ namespace Apache.NMS.EMS
 
 			try
 			{
-				return EMSConvert.ToNMSMessageConsumer(this, this.tibcoSession.CreateConsumer(destinationObj.tibcoDestination, selector, noLocal));
+				Apache.NMS.IMessageConsumer consumer = EMSConvert.ToNMSMessageConsumer(this, this.tibcoSession.CreateConsumer(destinationObj.tibcoDestination, selector, noLocal));
+				ConfigureConsumer(consumer);
+				return consumer;
 			}
 			catch(Exception ex)
 			{
@@ -110,13 +118,25 @@ namespace Apache.NMS.EMS
 
 			try
 			{
-				return EMSConvert.ToNMSMessageConsumer(this, this.tibcoSession.CreateDurableSubscriber(topicObj.tibcoTopic, name, selector, noLocal));
+				Apache.NMS.IMessageConsumer consumer = EMSConvert.ToNMSMessageConsumer(this, this.tibcoSession.CreateDurableSubscriber(topicObj.tibcoTopic, name, selector, noLocal));
+				ConfigureConsumer(consumer);
+				return consumer;
 			}
 			catch(Exception ex)
 			{
 				ExceptionUtil.WrapAndThrowNMSException(ex);
 				return null;
 			}
+		}
+
+		private void ConfigureProducer(Apache.NMS.IMessageProducer producer)
+		{
+			producer.ProducerTransformer = this.ProducerTransformer;
+		}
+
+		private void ConfigureConsumer(Apache.NMS.IMessageConsumer consumer)
+		{
+			consumer.ConsumerTransformer = this.ConsumerTransformer;
 		}
 
 		public void DeleteDurableConsumer(string name)
@@ -331,7 +351,7 @@ namespace Apache.NMS.EMS
 				return null;
 			}
 		}
-		
+
 		public void Commit()
 		{
 			try
@@ -343,7 +363,7 @@ namespace Apache.NMS.EMS
 				ExceptionUtil.WrapAndThrowNMSException(ex);
 			}
 		}
-		
+
 		public void Rollback()
 		{
 			try
@@ -355,7 +375,31 @@ namespace Apache.NMS.EMS
 				ExceptionUtil.WrapAndThrowNMSException(ex);
 			}
 		}
-		
+
+		private ConsumerTransformerDelegate consumerTransformer;
+		/// <summary>
+		/// A Delegate that is called each time a Message is dispatched to allow the client to do
+		/// any necessary transformations on the received message before it is delivered.
+		/// The Session instance sets the delegate on each Consumer it creates.
+		/// </summary>
+		public ConsumerTransformerDelegate ConsumerTransformer
+		{
+			get { return this.consumerTransformer; }
+			set { this.consumerTransformer = value; }
+		}
+
+		private ProducerTransformerDelegate producerTransformer;
+		/// <summary>
+		/// A delegate that is called each time a Message is sent from this Producer which allows
+		/// the application to perform any needed transformations on the Message before it is sent.
+		/// The Session instance sets the delegate on each Producer it creates.
+		/// </summary>
+		public ProducerTransformerDelegate ProducerTransformer
+		{
+			get { return this.producerTransformer; }
+			set { this.producerTransformer = value; }
+		}
+
 		// Properties
 
 		/// <summary>
@@ -367,7 +411,7 @@ namespace Apache.NMS.EMS
 			get { return this.requestTimeout; }
 			set { this.requestTimeout = value; }
 		}
-		
+
 		public bool Transacted
 		{
 			get { return this.tibcoSession.Transacted; }
@@ -405,7 +449,7 @@ namespace Apache.NMS.EMS
 		#endregion
 
 		#region IDisposable Members
-		
+
 		///<summary>
 		/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
 		///</summary>

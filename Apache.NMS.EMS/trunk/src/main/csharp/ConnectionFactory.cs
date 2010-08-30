@@ -111,7 +111,7 @@ namespace Apache.NMS.EMS
 			try
 			{
 				connection = EMSConvert.ToNMSConnection(this.tibcoConnectionFactory.CreateConnection());
-				connection.RedeliveryPolicy = this.redeliveryPolicy.Clone() as IRedeliveryPolicy;
+				ConfigureConnection(connection);
 			}
 			catch(Exception ex)
 			{
@@ -131,7 +131,7 @@ namespace Apache.NMS.EMS
 			try
 			{
 				connection = EMSConvert.ToNMSConnection(this.tibcoConnectionFactory.CreateConnection(userName, password));
-				connection.RedeliveryPolicy = this.redeliveryPolicy.Clone() as IRedeliveryPolicy;
+				ConfigureConnection(connection);
 			}
 			catch(Exception ex)
 			{
@@ -139,6 +139,17 @@ namespace Apache.NMS.EMS
 			}
 
 			return connection;
+		}
+
+		/// <summary>
+		/// Configure the newly created connection.
+		/// </summary>
+		/// <param name="connection"></param>
+		private void ConfigureConnection(IConnection connection)
+		{
+			connection.RedeliveryPolicy = this.redeliveryPolicy.Clone() as IRedeliveryPolicy;
+			connection.ConsumerTransformer = this.consumerTransformer;
+			connection.ProducerTransformer = this.producerTransformer;
 		}
 
 		/// <summary>
@@ -200,6 +211,34 @@ namespace Apache.NMS.EMS
 					this.redeliveryPolicy = value;
 				}
 			}
+		}
+
+		private ConsumerTransformerDelegate consumerTransformer;
+		/// <summary>
+		/// A Delegate that is called each time a Message is dispatched to allow the client to do
+		/// any necessary transformations on the received message before it is delivered.  The
+		/// ConnectionFactory sets the provided delegate instance on each Connection instance that
+		/// is created from this factory, each connection in turn passes the delegate along to each
+		/// Session it creates which then passes that along to the Consumers it creates.
+		/// </summary>
+		public ConsumerTransformerDelegate ConsumerTransformer
+		{
+			get { return this.consumerTransformer; }
+			set { this.consumerTransformer = value; }
+		}
+
+		private ProducerTransformerDelegate producerTransformer;
+		/// <summary>
+		/// A delegate that is called each time a Message is sent from this Producer which allows
+		/// the application to perform any needed transformations on the Message before it is sent.
+		/// The ConnectionFactory sets the provided delegate instance on each Connection instance that
+		/// is created from this factory, each connection in turn passes the delegate along to each
+		/// Session it creates which then passes that along to the Producers it creates.
+		/// </summary>
+		public ProducerTransformerDelegate ProducerTransformer
+		{
+			get { return this.producerTransformer; }
+			set { this.producerTransformer = value; }
 		}
 
 		#endregion

@@ -41,6 +41,17 @@ namespace Apache.NMS.EMS
 
 		#region IMessageConsumer Members
 
+		private ConsumerTransformerDelegate consumerTransformer;
+		/// <summary>
+		/// A Delegate that is called each time a Message is dispatched to allow the client to do
+		/// any necessary transformations on the received message before it is delivered.
+		/// </summary>
+		public ConsumerTransformerDelegate ConsumerTransformer
+		{
+			get { return this.consumerTransformer; }
+			set { this.consumerTransformer = value; }
+		}
+
 		/// <summary>
 		/// Waits until a message is available and returns it
 		/// </summary>
@@ -158,6 +169,16 @@ namespace Apache.NMS.EMS
 
 			if(null != message)
 			{
+				if(this.ConsumerTransformer != null)
+				{
+					IMessage newMessage = ConsumerTransformer(this.nmsSession, this, message);
+
+					if(newMessage != null)
+					{
+						message = newMessage;
+					}
+				}
+
 				if(Listener != null)
 				{
 					try
