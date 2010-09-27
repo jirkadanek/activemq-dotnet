@@ -31,6 +31,9 @@
     <property name="lib.dir"                 value="${path::combine(basedir, 'lib')}" dynamic="true" />
     <property name="lib.family.dir"          value="${path::combine(lib.dir, framework::get-family(framework::get-target-framework()))}" dynamic="true" />
     <property name="lib.framework.dir"       value="${path::combine(lib.family.dir, version::to-string(framework::get-version(framework::get-target-framework())))}" dynamic="true" />
+    <property name="package.dir"             value="${basedir}/package" />
+    <property name="src.package.name"        value="${project.name + '-' + project.version + if(project.release.type == 'SNAPSHOT', '-' + project.release.type, '') + '-src.zip'}" />
+    <property name="bin.package.name"        value="${project.name + '-' + project.version + if(project.release.type == 'SNAPSHOT', '-' + project.release.type, '') + '-bin.zip'}" />
 
     <!-- default configuration -->
     <property name="build.defines"           value="" />
@@ -41,7 +44,7 @@
     <property name="current.build.config"    value="${if(project.release.type == 'release', 'release', 'debug')}" overwrite="false" />
     <property name="current.build.framework" value="${framework::get-target-framework()}" overwrite="false" />
     <property name="current.build.defines"   value="${build.defines}" />
-    <property name="build.framework.strings" value="net-2.0,net-3.5,mono-2.0,netcf-2.0,netcf-3.5" unless="${property::exists('build.framework.strings')}"/>
+    <property name="build.framework.strings" value="net-2.0,net-3.5,net-4.0,mono-2.0,netcf-2.0,netcf-3.5" unless="${property::exists('build.framework.strings')}"/>
     <property name="current.build.framework.assembly.dir" value="${framework::get-assembly-directory(framework::get-target-framework())}" dynamic="true" />
 
     <property name="build.config.strings"    value="${if(property::exists('configuration'), configuration, if(build.skip.release == 'true', 'debug', 'debug,release'))}" dynamic="true" />
@@ -85,7 +88,7 @@
 
         <!-- Check to see if our build setup for the target framework -->
         <if test="${not(target::exists('set-'+current.build.framework+'-framework-configuration'))}">
-            <fail message="The '${current.build.framework}' framework is not supported by this version of the .NET Zip Library" />
+            <fail message="The '${current.build.framework}' framework is not supported by this version of ActiveMQ .NET" />
         </if>
         <call target="set-${current.build.framework}-framework-configuration" />
 
@@ -112,7 +115,7 @@
         </if>
 
         <property name="current.build.keysign" value="${current.build.framework.sign}" />
-        <property name="build.bin.dir" value="${build.dir}/${nant.settings.currentframework}/${current.build.config}" />
+        <property name="build.bin.dir" value="${build.dir}/${current.build.framework}/${current.build.config}" />
         <if test="${not(build.skip)}">
             <echo message="Doing ${if(current.build.keysign,'a signed','an unsigned')} ${current.build.config} build for the ${current.build.framework.name} framework" />
             <mkdir dir="${build.bin.dir}" />
@@ -201,8 +204,9 @@
         <property name="current.build.framework.sign" value="true" />
         <property name="link.sdkdoc.version" value="SDK_v2_0" />
         <property name="link.sdkdoc.web" value="true" />
-        <if test="${framework::exists(current.build.framework)}">
-            <property name="nant.settings.currentframework" value="${current.build.framework}" />
+        <!-- Use the .NET 3.5 compiler for improved language features.  Still targets same runtime. -->
+        <if test="${framework::exists('net-3.5')}">
+            <property name="nant.settings.currentframework" value="net-3.5" />
         </if>
     </target>
 
@@ -218,11 +222,21 @@
         </if>
     </target>
 
+    <target name="set-net-4.0-framework-configuration">
+        <property name="current.build.framework" value="net-4.0" />
+        <property name="current.build.framework.name" value=".NET 4.0" />
+        <property name="current.build.defines" value="${build.defines}NET,NET_2_0,NET_3_5,NET_4_0" dynamic="true" />
+        <property name="current.build.framework.sign" value="true" />
+        <property name="link.sdkdoc.version" value="SDK_v7_0" />
+        <property name="link.sdkdoc.web" value="true" />
+        <property name="nant.settings.currentframework" value="${current.build.framework}" />
+    </target>
+
     <target name="set-netcf-2.0-framework-configuration">
         <property name="current.build.framework" value="netcf-2.0" />
         <property name="current.build.framework.name" value=".NET Compact Framework 2.0" />
         <property name="current.build.defines" value="${build.defines}PocketPC,NETCF,NETCF_2_0" dynamic="true" />
-        <property name="current.build.framework.sign" value="false" />
+        <property name="current.build.framework.sign" value="true" />
         <property name="link.sdkdoc.version" value="SDK_v1_1" />
         <property name="link.sdkdoc.web" value="true" />
         <if test="${framework::exists(current.build.framework)}">
@@ -234,7 +248,7 @@
         <property name="current.build.framework" value="netcf-3.5" />
         <property name="current.build.framework.name" value=".NET Compact Framework 3.5" />
         <property name="current.build.defines" value="${build.defines}PocketPC,NETCF,NETCF_3_5" dynamic="true" />
-        <property name="current.build.framework.sign" value="false" />
+        <property name="current.build.framework.sign" value="true" />
         <property name="link.sdkdoc.version" value="SDK_v3_5" />
         <property name="link.sdkdoc.web" value="true" />
         <if test="${framework::exists(current.build.framework)}">
@@ -320,6 +334,7 @@
                 output="${build.bin.dir}/${project.name}.Test.dll" doc="${build.bin.dir}/${project.name}.Test.xml">
             <nowarn>
                 <warning number="1591" /> <!-- do not report warnings for missing XML comments -->
+                <warning number="3016" /> <!-- do not report warnings for array parameters  -->
             </nowarn>
             <sources failonempty="true">
                 <include name="src/test/csharp/**.cs" />
@@ -331,6 +346,7 @@
                 output="${build.bin.dir}/${project.name}.Test.dll" doc="${build.bin.dir}/${project.name}.Test.xml">
             <nowarn>
                 <warning number="1591" /> <!-- do not report warnings for missing XML comments -->
+                <warning number="3016" /> <!-- do not report warnings for array parameters  -->
             </nowarn>
             <sources failonempty="true">
                 <include name="src/test/csharp/**.cs" />
@@ -414,16 +430,15 @@
             Update the LIB folder with the latest version of the file.  If there is a newer version
             installed in the local repository, then that version will be copied into the LIB folder.
             -->
-            <if test="${not directory::exists(local.repo.vendor.path)}">
-                <echo message="Required dependent assemblies from ${vendor.name} for ${current.build.framework.name} are not available. Build skipped." />
-                <property name="build.skip" value="true" />
-            </if>
-
             <foreach item="String" in="${vendor.filenames}" delim="," property="repo.task.artifact">
                 <property name="lib.task.dest" value="${lib.path}/${repo.task.artifact}" />
                 <mkdir dir="${directory::get-parent-directory(lib.task.dest)}" />
                 <property name="repo.task.src" value="${local.repo.vendor.path}/${repo.task.artifact}" />
                 <copy file="${repo.task.src}" tofile="${lib.task.dest}" if="${file::exists(repo.task.src)}" />
+                <if test="${not file::exists(lib.task.dest)}">
+                    <echo message="Required dependent assembly ${repo.task.artifact} from ${vendor.name} for ${current.build.framework.name} is not available. Build skipped." />
+                    <property name="build.skip" value="true" />
+                </if>
             </foreach>
         </foreach>
     </target>
@@ -473,8 +488,18 @@
         </if>
         <delete dir="build" if="${directory::exists('build')}" />
         <delete dir="obj" if="${directory::exists('obj')}" />
-        <delete dir="lib" if="${directory::exists('lib')}" />
         <delete dir="package" if="${directory::exists('package')}" />
+    </target>
+
+    <target name="package" description="Bundle the source and binary distributions.">
+        <mkdir dir="${package.dir}"
+                if="${not directory::exists(package.dir)}" />
+        <zip zipfile="${package.dir}/${bin.package.name}">
+            <fileset refid="bin.package.contents"/>
+        </zip>
+        <zip zipfile="${package.dir}/${src.package.name}">
+            <fileset refid="src.package.contents"/>
+        </zip>
     </target>
 
     <target name="doc" depends="build">

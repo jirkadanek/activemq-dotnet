@@ -28,7 +28,7 @@
 	<property name="project.short_description" value="NUnit Unit Test Assemblies"/>
 	<property name="project.description" value="NUnit Unit Test Assemblies"/>
 	<property name="compile.skip" value="true"/>
-	<property name="build.framework.strings" value="net-2.0,net-3.5,mono-2.0,netcf-2.0" />
+	<property name="build.framework.strings" value="net-2.0,net-3.5,net-4.0,mono-2.0,netcf-2.0" />
 
 	<!-- Repository organized as: organization/module/version/plaform/artifact, platform might be something like 'all' or 'net-2.0/release' -->
 	<target name="vendor-init" description="Initializes Vendor library from local repository.">
