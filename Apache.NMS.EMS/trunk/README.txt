@@ -1,23 +1,23 @@
 =======================================================================
 Welcome to:
- * Apache.NMS.EMS : Apache NMS for Tibco EMS Class Library
+ * Apache.NMS.EMS : Apache NMS for Tibco EMS Client Library
 =======================================================================
 
 For more information see http://activemq.apache.org/nms
 
 =======================================================================
-Building With NAnt 0.86-Beta2 http://nant.sourceforge.net/
+Building With NAnt 0.86 see http://nant.sourceforge.net/
 =======================================================================
 
-A recent nightly build of the NAnt 0.86 beta 2 is required to build Apache.NMS.
+NAnt version 0.86 or newer is required to build Apache.NMS.EMS.  Version 0.90
+or newer is highly recommended.
 To build the code using NAnt, run:
 
   nant
-    
+
 To generate the documentation, run:
 
   nant doc
-
 
 =======================================================================
 Building With Visual Studio 2008
