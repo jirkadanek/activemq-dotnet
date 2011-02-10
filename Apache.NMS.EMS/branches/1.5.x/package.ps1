@@ -14,7 +14,7 @@
 # limitations under the License.
 
 $pkgname = "Apache.NMS.EMS"
-$pkgver = "1.6-SNAPSHOT"
+$pkgver = "1.5-SNAPSHOT"
 $configurations = "release", "debug"
 $frameworks = "net-2.0", "net-3.5", "net-4.0"
 
