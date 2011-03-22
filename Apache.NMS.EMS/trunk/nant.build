@@ -67,7 +67,7 @@
 		<!-- Property grouping for 'vendor.tibco.org' -->
 		<property name="vendor.tibco.org.name" value="TIBCO.EMS" />
 		<property name="vendor.tibco.org.group" value="org.tibco.ems" />
-		<property name="vendor.tibco.org.version" value="4.1.0" />
+		<property name="vendor.tibco.org.version" value="6.0.1" />
 		<property name="vendor.tibco.org.filenames" value="TIBCO.EMS.dll" />
 	</target>
 
