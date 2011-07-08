@@ -123,10 +123,9 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="lib\clrzmq\net-4.0x64\libzmq.dll">
-      <Link>libzmq.dll</Link>
+    <None Include="Apache.NMS.ZMQ.Test.nunit">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSHARP.Targets" />
   <PropertyGroup>
