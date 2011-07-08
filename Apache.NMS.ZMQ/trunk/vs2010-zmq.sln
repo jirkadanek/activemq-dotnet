@@ -1,11 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vs2010-zmq-net-4.0", "vs2010-zmq-net-4.0.csproj", "{A5FCA129-991B-4CB2-987A-B25E43B0F5EC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vs2010-zmq-net-4.0x64", "vs2010-zmq-net-4.0x64.csproj", "{A5FCA129-991B-4CB2-987A-B25E43B0F5EC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vs2010-zmq-net-4.0-test", "vs2010-zmq-net-4.0-test.csproj", "{2F31ED5C-44A2-464A-BD55-2B5B010654E8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vs2010-zmq-net-4.0", "vs2010-zmq-net-4.0.csproj", "{5AA5A595-FF56-444D-A7BD-988001619FDC}"
+EndProject
 Global
+	GlobalSection(SubversionScc) = preSolution
+		Svn-Managed = True
+		Manager = AnkhSVN - Subversion Support for Visual Studio
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -19,12 +25,12 @@ Global
 		{2F31ED5C-44A2-464A-BD55-2B5B010654E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F31ED5C-44A2-464A-BD55-2B5B010654E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2F31ED5C-44A2-464A-BD55-2B5B010654E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5AA5A595-FF56-444D-A7BD-988001619FDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5AA5A595-FF56-444D-A7BD-988001619FDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5AA5A595-FF56-444D-A7BD-988001619FDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5AA5A595-FF56-444D-A7BD-988001619FDC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(SubversionScc) = preSolution
-		Svn-Managed = True
-		Manager = AnkhSVN - Subversion Support for Visual Studio
 	EndGlobalSection
 EndGlobal

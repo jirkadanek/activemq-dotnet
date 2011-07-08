@@ -24,41 +24,9 @@ namespace Apache.NMS.ZMQ
 	/// </summary>
 	public class ConnectionFactory : IConnectionFactory
 	{
-		public const string DEFAULT_BROKER_URL = "zmq://localhost";
-		public const string ENV_BROKER_URL = "ZMQ_BROKER_URL";
 		private Uri brokerUri;
-		private IRedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
 		private string clientID;
-
-		public static string GetDefaultBrokerUrl()
-		{
-			string answer = Environment.GetEnvironmentVariable(ENV_BROKER_URL);
-			if(answer == null)
-			{
-				answer = DEFAULT_BROKER_URL;
-			}
-			return answer;
-		}
-
-		public ConnectionFactory()
-			: this(GetDefaultBrokerUrl())
-		{
-		}
-
-		public ConnectionFactory(string brokerUri)
-			: this(brokerUri, null)
-		{
-		}
-
-		public ConnectionFactory(string brokerUri, string clientID)
-			: this(new Uri(brokerUri), clientID)
-		{
-		}
-
-		public ConnectionFactory(Uri brokerUri)
-			: this(brokerUri, null)
-		{
-		}
+		private IRedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
 
 		public ConnectionFactory(Uri brokerUri, string clientID)
 		{

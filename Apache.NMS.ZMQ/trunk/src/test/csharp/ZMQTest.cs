@@ -69,8 +69,8 @@ namespace Apache.NMS.ZMQ
 			////////////////////////////
 			// Factory check
 			////////////////////////////
-			Apache.NMS.ZMQ.ConnectionFactory factory = new Apache.NMS.ZMQ.ConnectionFactory("zmq:tcp://localhost:5556", "");
-			Assert.IsNotNull(factory);
+			IConnectionFactory factory = new ConnectionFactory("tcp://localhost:5556", "");
+			Assert.IsNotNull(factory, "Error creating connection factory.");
 
 			////////////////////////////
 			// Connection check
@@ -96,7 +96,7 @@ namespace Apache.NMS.ZMQ
 			////////////////////////////
 			// Consumer check
 			////////////////////////////
-			IQueue testQueue = new Queue("ZMQTestQueue");
+			IQueue testQueue = session.GetQueue("ZMQTestQueue");
 			Assert.IsNotNull(testQueue, "Error creating test queue.");
 			IMessageConsumer consumer = session.CreateConsumer(testQueue);
 			Assert.IsNotNull(consumer, "Error creating consumer.");
@@ -107,7 +107,7 @@ namespace Apache.NMS.ZMQ
 			// Producer check
 			////////////////////////////
 			IMessageProducer producer = session.CreateProducer(testQueue);
-			Assert.IsNotNull(consumer);
+			Assert.IsNotNull(consumer, "Error creating producer.");
 
 			ITextMessage testMsg = producer.CreateTextMessage("Zero Message.");
 			Assert.IsNotNull(testMsg, "Error creating test message.");
