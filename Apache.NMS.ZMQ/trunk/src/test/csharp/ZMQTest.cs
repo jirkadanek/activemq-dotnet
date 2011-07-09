@@ -19,6 +19,7 @@ using System;
 using System.Messaging;
 using NUnit.Framework;
 using System.Threading;
+using System.IO;
 
 namespace Apache.NMS.ZMQ
 {
@@ -48,23 +49,17 @@ namespace Apache.NMS.ZMQ
 			////////////////////////////
 			// Dependencies check
 			////////////////////////////
-			string TmpPath;
-			string TmpFilename;
-			//TmpPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-			TmpPath = System.Environment.CurrentDirectory;
-			if(!TmpPath.EndsWith("\\"))
-			{
-				TmpPath += "\\";
-			}
+			string libFolder = System.Environment.CurrentDirectory;
+			string libFileName;
 
-			TmpFilename = TmpPath + "libzmq.dll";
-			Assert.IsTrue(System.IO.File.Exists(TmpFilename), "Missing zmq library file: {0}", TmpFilename);
-			TmpFilename = TmpPath + "clrzmq.dll";
-			Assert.IsTrue(System.IO.File.Exists(TmpFilename), "Missing zmq wrapper file: {0}", TmpFilename);
-			TmpFilename = TmpPath + "Apache.NMS.dll";
-			Assert.IsTrue(System.IO.File.Exists(TmpFilename), "Missing Apache.NMS library file: {0}", TmpFilename);
-			TmpFilename = TmpPath + "Apache.NMS.ZMQ.dll";
-			Assert.IsTrue(System.IO.File.Exists(TmpFilename), "Missing Apache.NMS.ZMQ library file: {0}", TmpFilename);
+			libFileName = Path.Combine(libFolder, "libzmq.dll");
+			Assert.IsTrue(File.Exists(libFileName), "Missing zmq library file: {0}", libFileName);
+			libFileName = Path.Combine(libFolder, "clrzmq.dll");
+			Assert.IsTrue(File.Exists(libFileName), "Missing zmq wrapper file: {0}", libFileName);
+			libFileName = Path.Combine(libFolder, "Apache.NMS.dll");
+			Assert.IsTrue(File.Exists(libFileName), "Missing Apache.NMS library file: {0}", libFileName);
+			libFileName = Path.Combine(libFolder, "Apache.NMS.ZMQ.dll");
+			Assert.IsTrue(File.Exists(libFileName), "Missing Apache.NMS.ZMQ library file: {0}", libFileName);
 
 			////////////////////////////
 			// Factory check

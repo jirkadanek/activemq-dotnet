@@ -17,6 +17,8 @@
 
 using System;
 using System.Reflection;
+using System.Collections;
+using System.IO;
 
 namespace Apache.NMS.ZMQ
 {
@@ -34,49 +36,13 @@ namespace Apache.NMS.ZMQ
 		// 64-bit runtimes' ItrPtr size is 8.
 		static private bool is32bit = (IntPtr.Size == 4);
 
+		private static Assembly factoryAssembly = null;
 		private static Type factoryType = null;
 		private IConnectionFactory connFactory = null;
+		private object connectionFactoryLock = new object();
 
 		private const string DEFAULT_BROKER_URL = "tcp://localhost:5556";
 		private const string ENV_BROKER_URL = "ZMQ_BROKER_URL";
-
-		/// <summary>
-		/// Static class constructor that is executed only once before any normal object constructors.
-		/// This is the type constructor.
-		/// </summary>
-		static ConnectionFactory()
-		{
-			// Load the assembly and get the type.
-			string assemblyFileName = (is32bit ? "Apache.NMS.ZMQ32.dll" : "Apache.NMS.ZMQ64.dll");
-			Assembly assembly;
-
-			try
-			{
-				assembly = Assembly.Load(assemblyFileName);
-				if(null != assembly)
-				{
-					Tracer.DebugFormat("Succesfully loaded provider: {0}", assemblyFileName);
-					factoryType = assembly.GetType("Apache.NMS.ZMQ.ConnectionFactory", true, true);
-				}
-			}
-			catch(Exception ex)
-			{
-				Tracer.ErrorFormat("Exception loading assembly {0} failed: {1}", assemblyFileName, ex.Message);
-				factoryType = null;
-			}
-		}
-
-		private static string GetDefaultBrokerUrl()
-		{
-			string brokerUrl = Environment.GetEnvironmentVariable(ENV_BROKER_URL);
-
-			if(string.IsNullOrEmpty(brokerUrl))
-			{
-				brokerUrl = DEFAULT_BROKER_URL;
-			}
-
-			return brokerUrl;
-		}
 
 		public ConnectionFactory()
 			: this(GetDefaultBrokerUrl())
@@ -100,12 +66,100 @@ namespace Apache.NMS.ZMQ
 
 		public ConnectionFactory(Uri brokerUri, string clientID)
 		{
-			if(null == factoryType)
+			LoadConnectionFactory();
+			connFactory = (IConnectionFactory) Activator.CreateInstance(factoryType, new object[] { brokerUri, clientID });
+		}
+
+		/// <summary>
+		/// Static class constructor that is executed only once before any normal object constructors.
+		/// This is the type constructor.
+		/// </summary>
+		private void LoadConnectionFactory()
+		{
+			lock(connectionFactoryLock)
 			{
-				throw new ApplicationException("Could not load the ZMQ connection factory assembly.");
+				if(null == factoryType)
+				{
+					// Load the assembly and get the type.
+					string assemblyFileName = (is32bit ? "Apache.NMS.ZMQ32.dll" : "Apache.NMS.ZMQ64.dll");
+					string[] searchPaths = GetAssemblySearchPaths();
+
+					foreach(string path in searchPaths)
+					{
+						string fullFileName = Path.Combine(path, assemblyFileName);
+
+						try
+						{
+							factoryAssembly = Assembly.Load(fullFileName);
+							if(null != factoryAssembly)
+							{
+								Tracer.DebugFormat("Succesfully loaded provider: {0}", fullFileName);
+								factoryType = factoryAssembly.GetType("Apache.NMS.ZMQ.ConnectionFactory", true, true);
+								if(null != factoryType)
+								{
+									break;
+								}
+							}
+						}
+						catch(Exception ex)
+						{
+							Tracer.DebugFormat("Exception loading assembly {0} failed: {1}", fullFileName, ex.Message);
+							factoryType = null;
+						}
+					}
+
+					if(null == factoryType)
+					{
+						Tracer.ErrorFormat("Failed to load assembly {0}", assemblyFileName);
+						throw new ApplicationException(string.Format("Could not load the ZMQ connection factory assembly {0}.", assemblyFileName));
+					}
+				}
+			}
+		}
+
+		/// <summary>
+		/// Get the paths to search for the assembly file.
+		/// </summary>
+		/// <returns></returns>
+		private static string[] GetAssemblySearchPaths()
+		{
+			ArrayList pathList = new ArrayList();
+
+			// Check the current folder first.
+			pathList.Add("");
+
+			// Check the folder the assembly is located in.
+			AppDomain currentDomain = AppDomain.CurrentDomain;
+
+			pathList.Add(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+			if(null != currentDomain.BaseDirectory)
+			{
+				pathList.Add(currentDomain.BaseDirectory);
 			}
 
-			connFactory = (IConnectionFactory) Activator.CreateInstance(factoryType, new object[] { brokerUri, clientID });
+			if(null != currentDomain.RelativeSearchPath)
+			{
+				pathList.Add(currentDomain.RelativeSearchPath);
+			}
+
+			return (string[]) pathList.ToArray(typeof(string));
+		}
+
+		/// <summary>
+		/// Get the default connection Uri if none is specified.
+		/// The environment variable is checked first.
+		/// </summary>
+		/// <returns></returns>
+		private static string GetDefaultBrokerUrl()
+		{
+			string brokerUrl = Environment.GetEnvironmentVariable(ENV_BROKER_URL);
+
+			if(string.IsNullOrEmpty(brokerUrl))
+			{
+				brokerUrl = DEFAULT_BROKER_URL;
+			}
+
+			return brokerUrl;
 		}
 
 		#region IConnectionFactory Members
