@@ -16,9 +16,12 @@
  */
 
 using System;
+using System.Text;
 using System.Threading;
 using Apache.NMS.Util;
-using CLRZMQ = ZMQ;
+using ZSocket = ZMQ.Socket;
+using ZSocketType = ZMQ.SocketType;
+using ZSendRecvOpt = ZMQ.SendRecvOpt;
 
 namespace Apache.NMS.ZMQ
 {
@@ -31,7 +34,14 @@ namespace Apache.NMS.ZMQ
 
 		private readonly Session session;
 		private readonly AcknowledgementMode acknowledgementMode;
-		private ZmqSubscriber messageSubscriber;
+		/// <summary>
+		/// Socket object
+		/// </summary>
+		private ZSocket messageSubscriber = null;
+		/// <summary>
+		/// Context binding string
+		/// </summary>
+		private string contextBinding;
 		private event MessageListener listener;
 		private int listenerCount = 0;
 		private Thread asyncDeliveryThread = null;
@@ -45,11 +55,31 @@ namespace Apache.NMS.ZMQ
 			set { this.consumerTransformer = value; }
 		}
 
-		public MessageConsumer(Session session, AcknowledgementMode acknowledgementMode, ZmqSubscriber messageSubscriber)
+		public MessageConsumer(Session session, AcknowledgementMode acknowledgementMode, IDestination destination, string selector)
 		{
+			if(null == Connection.Context)
+			{
+				throw new NMSConnectionException();
+			}
+
 			this.session = session;
 			this.acknowledgementMode = acknowledgementMode;
-			this.messageSubscriber = messageSubscriber;
+			this.messageSubscriber = Connection.Context.Socket(ZSocketType.SUB);
+			if(null == this.messageSubscriber)
+			{
+				throw new ResourceAllocationException();
+			}
+
+			string clientId = session.Connection.ClientId;
+
+			this.contextBinding = session.Connection.BrokerUri.LocalPath;
+			if(!string.IsNullOrEmpty(clientId))
+			{
+				this.messageSubscriber.StringToIdentity(clientId, Encoding.Unicode);
+			}
+
+			this.messageSubscriber.Connect(contextBinding);
+			this.messageSubscriber.Subscribe(selector ?? string.Empty, Encoding.ASCII);
 		}
 
 		public event MessageListener Listener
@@ -87,7 +117,7 @@ namespace Apache.NMS.ZMQ
 			IMessage nmsMessage = null;
 			if(null != messageSubscriber)
 			{
-				string messageText = messageSubscriber.Subscriber.Recv(System.Text.Encoding.ASCII, CLRZMQ.SendRecvOpt.NOBLOCK);
+				string messageText = messageSubscriber.Recv(Encoding.ASCII, ZSendRecvOpt.NOBLOCK);
 				if(!string.IsNullOrEmpty(messageText))
 				{
 					nmsMessage = ToNmsMessage(messageText);
@@ -107,7 +137,7 @@ namespace Apache.NMS.ZMQ
 			IMessage nmsMessage = null;
 			if(null != messageSubscriber)
 			{
-				string messageText = messageSubscriber.Subscriber.Recv(System.Text.Encoding.ASCII, timeout.Milliseconds);
+				string messageText = messageSubscriber.Recv(Encoding.ASCII, timeout.Milliseconds);
 				if(!string.IsNullOrEmpty(messageText))
 				{
 					nmsMessage = ToNmsMessage(messageText);
@@ -173,7 +203,7 @@ namespace Apache.NMS.ZMQ
 			if(asyncDelivery.CompareAndSet(false, true))
 			{
 				asyncDeliveryThread = new Thread(new ThreadStart(DispatchLoop));
-				asyncDeliveryThread.Name = "Message Consumer Dispatch: " + messageSubscriber.Binding;
+				asyncDeliveryThread.Name = "Message Consumer Dispatch: " + contextBinding;
 				asyncDeliveryThread.IsBackground = true;
 				asyncDeliveryThread.Start();
 			}
@@ -277,7 +307,7 @@ namespace Apache.NMS.ZMQ
 		private ZmqMessage ToZmqMessage(string messageText)
 		{
 			ZmqMessage message = new ZmqMessage();
-			message.Destination = new Queue(session.Connection.BrokerUri.LocalPath);
+			message.Destination = new Queue(this.contextBinding);
 			message.ClientId = session.Connection.ClientId;
 			message.Text = messageText;
 			return message;

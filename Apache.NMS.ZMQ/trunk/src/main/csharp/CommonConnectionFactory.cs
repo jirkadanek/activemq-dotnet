@@ -90,7 +90,7 @@ namespace Apache.NMS.ZMQ
 
 						try
 						{
-							factoryAssembly = Assembly.Load(fullFileName);
+							factoryAssembly = Assembly.LoadFile(fullFileName);
 							if(null != factoryAssembly)
 							{
 								Tracer.DebugFormat("Succesfully loaded provider: {0}", fullFileName);
@@ -126,18 +126,21 @@ namespace Apache.NMS.ZMQ
 			ArrayList pathList = new ArrayList();
 
 			// Check the current folder first.
-			pathList.Add("");
+			pathList.Add(Environment.CurrentDirectory);
 
-			// Check the folder the assembly is located in.
 			AppDomain currentDomain = AppDomain.CurrentDomain;
 
+			// Check the folder the assembly is located in.
 			pathList.Add(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
-			if(null != currentDomain.BaseDirectory)
+
+			// Check the domain's base directory
+			if(!string.IsNullOrEmpty(currentDomain.BaseDirectory))
 			{
 				pathList.Add(currentDomain.BaseDirectory);
 			}
 
-			if(null != currentDomain.RelativeSearchPath)
+			// Search the domain's relative paths.
+			if(!string.IsNullOrEmpty(currentDomain.RelativeSearchPath))
 			{
 				pathList.Add(currentDomain.RelativeSearchPath);
 			}

@@ -16,6 +16,9 @@
  */
 
 using System;
+using ZSocket = ZMQ.Socket;
+using ZSocketType = ZMQ.SocketType;
+using System.Text;
 
 namespace Apache.NMS.ZMQ
 {
@@ -24,11 +27,13 @@ namespace Apache.NMS.ZMQ
 	/// </summary>
 	public class MessageProducer : IMessageProducer
 	{
-
 		private readonly Session session;
-		private Destination destination;
+		private IDestination destination;
 
-		//private long messageCounter;
+		/// <summary>
+		/// Socket object
+		/// </summary>
+		private ZSocket messageProducer = null;
 		private MsgDeliveryMode deliveryMode;
 		private TimeSpan timeToLive;
 		private MsgPriority priority;
@@ -42,13 +47,24 @@ namespace Apache.NMS.ZMQ
 			set { this.producerTransformer = value; }
 		}
 
-		public MessageProducer(Session session, Destination destination)
+		public MessageProducer(Connection connection, Session session, IDestination destination)
 		{
+			if(null == Connection.Context)
+			{
+				throw new NMSConnectionException();
+			}
+
 			this.session = session;
 			this.destination = destination;
-			if(destination != null)
+			this.messageProducer = Connection.Context.Socket(ZSocketType.SUB);
+
+			string clientId = connection.ClientId;
+			if(!string.IsNullOrEmpty(clientId))
 			{
+				this.messageProducer.StringToIdentity(clientId, Encoding.Unicode);
 			}
+
+			this.messageProducer.Connect(connection.BrokerUri.LocalPath);
 		}
 
 		public void Send(IMessage message)
@@ -68,16 +84,21 @@ namespace Apache.NMS.ZMQ
 
 		public void Send(IDestination destination, IMessage message, MsgDeliveryMode deliveryMode, MsgPriority priority, TimeSpan timeToLive)
 		{
-			// TODO: Implement sending a message.
-		}
-
-		public void Close()
-		{
+			messageProducer.Send();
 		}
 
 		public void Dispose()
 		{
 			Close();
+		}
+
+		public void Close()
+		{
+			if(null != messageProducer)
+			{
+				messageProducer.Dispose();
+				messageProducer = null;
+			}
 		}
 
 		public IMessage CreateMessage()
@@ -144,7 +165,7 @@ namespace Apache.NMS.ZMQ
 		public IDestination Destination
 		{
 			get { return destination; }
-			set { destination = (Destination) value; }
+			set { destination = value; }
 		}
 
 		public MsgPriority Priority

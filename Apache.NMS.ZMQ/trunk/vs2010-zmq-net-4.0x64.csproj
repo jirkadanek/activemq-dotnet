@@ -70,7 +70,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="src\main\csharp\TextMessage.cs" />
-    <Compile Include="src\main\csharp\ZmqSubscriber.cs" />
     <Compile Include="src\main\csharp\ZmqMessage.cs" />
   </ItemGroup>
   <ItemGroup>

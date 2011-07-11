@@ -57,7 +57,7 @@ namespace Apache.NMS.ZMQ
 
 		public IMessageProducer CreateProducer(IDestination destination)
 		{
-			throw new NotSupportedException("Producer is not supported/implemented");
+			return new MessageProducer(connection, this, destination);
 		}
 		#endregion
 
@@ -76,7 +76,7 @@ namespace Apache.NMS.ZMQ
 		{
 			// Subscriber client reads messages from a publisher and forwards messages 
 			// through the message consumer 
-			return new MessageConsumer(this, acknowledgementMode, new ZmqSubscriber(connection, destination, selector));
+			return new MessageConsumer(this, acknowledgementMode, destination, selector);
 		}
 
 		public IMessageConsumer CreateDurableConsumer(ITopic destination, string name, string selector, bool noLocal)
