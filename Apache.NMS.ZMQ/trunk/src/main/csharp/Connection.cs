@@ -27,8 +27,6 @@ namespace Apache.NMS.ZMQ
 	public class Connection : IConnection
 	{
 		private AcknowledgementMode acknowledgementMode = AcknowledgementMode.AutoAcknowledge;
-		private IMessageConverter messageConverter = new DefaultMessageConverter();
-
 		private IRedeliveryPolicy redeliveryPolicy;
 		private ConnectionMetaData metaData = null;
 		private bool closed = true;
@@ -45,7 +43,7 @@ namespace Apache.NMS.ZMQ
 		/// </summary>
 		public void Start()
 		{
-			CheckConnected();
+			closed = false;
 		}
 
 		/// <summary>
@@ -54,7 +52,7 @@ namespace Apache.NMS.ZMQ
 		/// </summary>
 		public bool IsStarted
 		{
-			get { return true; }
+			get { return !closed; }
 		}
 
 		/// <summary>
@@ -62,7 +60,7 @@ namespace Apache.NMS.ZMQ
 		/// </summary>
 		public void Stop()
 		{
-			CheckConnected();
+			closed = true;
 		}
 
 		/// <summary>
@@ -78,13 +76,17 @@ namespace Apache.NMS.ZMQ
 		/// </summary>
 		public ISession CreateSession(AcknowledgementMode mode)
 		{
-			CheckConnected();
 			return new Session(this, mode);
 		}
 
 		public void Dispose()
 		{
-			closed = true;
+			Close();
+		}
+
+		public void Close()
+		{
+			Stop();
 		}
 
 		/// <summary>
@@ -102,12 +104,6 @@ namespace Apache.NMS.ZMQ
 			set { acknowledgementMode = value; }
 		}
 
-		public IMessageConverter MessageConverter
-		{
-			get { return messageConverter; }
-			set { messageConverter = value; }
-		}
-
 		/// <summary>
 		/// Get/or set the broker Uri.
 		/// </summary>
@@ -123,10 +119,7 @@ namespace Apache.NMS.ZMQ
 		public string ClientId
 		{
 			get { return clientId; }
-			set
-			{
-				clientId = value;
-			}
+			set { clientId = value; }
 		}
 
 		/// <summary>
@@ -157,10 +150,7 @@ namespace Apache.NMS.ZMQ
 		/// </summary>
 		static internal ZContext Context
 		{
-			get
-			{
-				return _context;
-			}
+			get { return _context; }
 		}
 
 		/// <summary>
@@ -187,20 +177,6 @@ namespace Apache.NMS.ZMQ
 		/// has been resumed.
 		/// </summary>
 		public event ConnectionResumedListener ConnectionResumedListener;
-
-		protected void CheckConnected()
-		{
-			closed = false;
-			if(null == messageConverter)
-			{
-				throw new NMSException("Context Not Created");
-			}
-		}
-
-		public void Close()
-		{
-			Dispose();
-		}
 
 		public void HandleException(System.Exception e)
 		{

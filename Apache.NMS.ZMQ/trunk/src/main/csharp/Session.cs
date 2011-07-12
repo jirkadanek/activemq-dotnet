@@ -28,13 +28,11 @@ namespace Apache.NMS.ZMQ
 		private Connection connection;
 		private AcknowledgementMode acknowledgementMode;
 		private MessageQueueTransaction messageQueueTransaction;
-		private IMessageConverter messageConverter;
 
 		public Session(Connection connection, AcknowledgementMode acknowledgementMode)
 		{
 			this.connection = connection;
 			this.acknowledgementMode = acknowledgementMode;
-			MessageConverter = connection.MessageConverter;
 			if(this.acknowledgementMode == AcknowledgementMode.Transactional)
 			{
 				MessageQueueTransaction = new MessageQueueTransaction();
@@ -43,9 +41,15 @@ namespace Apache.NMS.ZMQ
 
 		public void Dispose()
 		{
+			Close();
+		}
+
+		public void Close()
+		{
 			if(MessageQueueTransaction != null)
 			{
 				MessageQueueTransaction.Dispose();
+				MessageQueueTransaction = null;
 			}
 		}
 
@@ -229,12 +233,6 @@ namespace Apache.NMS.ZMQ
 			set { messageQueueTransaction = value; }
 		}
 
-		public IMessageConverter MessageConverter
-		{
-			get { return messageConverter; }
-			set { messageConverter = value; }
-		}
-
 		private ConsumerTransformerDelegate consumerTransformer;
 		public ConsumerTransformerDelegate ConsumerTransformer
 		{
@@ -247,11 +245,6 @@ namespace Apache.NMS.ZMQ
 		{
 			get { return this.producerTransformer; }
 			set { this.producerTransformer = value; }
-		}
-
-		public void Close()
-		{
-			Dispose();
 		}
 	}
 }

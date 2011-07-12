@@ -19,9 +19,9 @@ using System;
 using System.Text;
 using System.Threading;
 using Apache.NMS.Util;
+using ZSendRecvOpt = ZMQ.SendRecvOpt;
 using ZSocket = ZMQ.Socket;
 using ZSocketType = ZMQ.SocketType;
-using ZSendRecvOpt = ZMQ.SendRecvOpt;
 
 namespace Apache.NMS.ZMQ
 {
@@ -114,16 +114,8 @@ namespace Apache.NMS.ZMQ
 		/// </returns>
 		public IMessage Receive()
 		{
-			IMessage nmsMessage = null;
-			if(null != messageSubscriber)
-			{
-				string messageText = messageSubscriber.Recv(Encoding.ASCII, ZSendRecvOpt.NOBLOCK);
-				if(!string.IsNullOrEmpty(messageText))
-				{
-					nmsMessage = ToNmsMessage(messageText);
-				}
-			}
-			return nmsMessage;
+			// TODO: Support decoding of all message types + all meta data (e.g., headers and properties)
+			return ToNmsMessage(messageSubscriber.Recv(Encoding.ASCII, ZSendRecvOpt.NOBLOCK));
 		}
 
 		/// <summary>
@@ -134,16 +126,8 @@ namespace Apache.NMS.ZMQ
 		/// </returns>
 		public IMessage Receive(TimeSpan timeout)
 		{
-			IMessage nmsMessage = null;
-			if(null != messageSubscriber)
-			{
-				string messageText = messageSubscriber.Recv(Encoding.ASCII, timeout.Milliseconds);
-				if(!string.IsNullOrEmpty(messageText))
-				{
-					nmsMessage = ToNmsMessage(messageText);
-				}
-			}
-			return nmsMessage;
+			// TODO: Support decoding of all message types + all meta data (e.g., headers and properties)
+			return ToNmsMessage(messageSubscriber.Recv(Encoding.ASCII, timeout.Milliseconds));
 		}
 
 		/// <summary>
@@ -257,60 +241,36 @@ namespace Apache.NMS.ZMQ
 		/// <returns>
 		/// nms message object
 		/// </returns>
-		protected virtual IMessage ToNmsMessage(ZmqMessage message)
-		{
-			IMessage ReturnValue = null;
-			if(null == message)
-			{
-				return ReturnValue;
-			}
-
-			ReturnValue = session.MessageConverter.ToNmsMessage(message);
-
-			if(this.ConsumerTransformer != null)
-			{
-				IMessage newMessage = ConsumerTransformer(this.session, this, ReturnValue);
-				if(newMessage != null)
-				{
-					ReturnValue = newMessage;
-				}
-			}
-			return ReturnValue;
-		}
-
-		/// <summary>
-		/// Create nms message object
-		/// </summary>
-		/// <param name="message">
-		/// message text
-		/// </param>
-		/// <returns>
-		/// nms message object
-		/// </returns>
 		protected virtual IMessage ToNmsMessage(string messageText)
 		{
-			IMessage ReturnValue = null;
-			ZmqMessage message = ToZmqMessage(messageText);
-			ReturnValue = ToNmsMessage(message);
-			return ReturnValue;
-		}
+			IMessage nmsMessage = new TextMessage(messageText);
 
-		/// <summary>
-		/// Create zmq message object 
-		/// </summary>
-		/// <param name="messageText">
-		/// message text
-		/// </param>
-		/// <returns>
-		/// zmq message object
-		/// </returns>
-		private ZmqMessage ToZmqMessage(string messageText)
-		{
-			ZmqMessage message = new ZmqMessage();
-			message.Destination = new Queue(this.contextBinding);
-			message.ClientId = session.Connection.ClientId;
-			message.Text = messageText;
-			return message;
+			try
+			{
+				nmsMessage.NMSMessageId = "";
+				nmsMessage.NMSDestination = new Queue(contextBinding);
+				nmsMessage.NMSDeliveryMode = MsgDeliveryMode.NonPersistent;
+				nmsMessage.NMSPriority = MsgPriority.Normal;
+				nmsMessage.NMSTimestamp = DateTime.Now;
+				nmsMessage.NMSTimeToLive = new TimeSpan(0);
+				nmsMessage.NMSType = "";
+			}
+			catch(InvalidOperationException)
+			{
+				// Log error
+			}
+
+			if(null != this.ConsumerTransformer)
+			{
+				IMessage transformedMessage = ConsumerTransformer(this.session, this, nmsMessage);
+
+				if(null != transformedMessage)
+				{
+					nmsMessage = transformedMessage;
+				}
+			}
+
+			return nmsMessage;
 		}
 	}
 }

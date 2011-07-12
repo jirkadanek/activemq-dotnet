@@ -84,7 +84,18 @@ namespace Apache.NMS.ZMQ
 
 		public void Send(IDestination destination, IMessage message, MsgDeliveryMode deliveryMode, MsgPriority priority, TimeSpan timeToLive)
 		{
-			messageProducer.Send();
+			if(null != this.ProducerTransformer)
+			{
+				IMessage transformedMessage = ProducerTransformer(this.session, this, message);
+
+				if(null != transformedMessage)
+				{
+					message = transformedMessage;
+				}
+			}
+
+			// TODO: Support encoding of all message types + all meta data (e.g., headers and properties)
+			messageProducer.Send(((ITextMessage) message).Text, Encoding.ASCII);
 		}
 
 		public void Dispose()
