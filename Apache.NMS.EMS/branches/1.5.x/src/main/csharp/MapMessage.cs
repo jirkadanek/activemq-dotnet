@@ -87,16 +87,14 @@ namespace Apache.NMS.EMS
 			get
 			{
 				int count = 0;
+
 				try
 				{
-					IEnumerator namesEnumerator = this.tibcoMapMessage.MapNames;
+					ICollection mapNames = this.tibcoMapMessage.GetMapNames();
 
-					if(null != namesEnumerator)
+					if(null != mapNames)
 					{
-						while(namesEnumerator.MoveNext())
-						{
-							count++;
-						}
+						count = mapNames.Count;
 					}
 				}
 				catch(Exception ex)
@@ -116,7 +114,7 @@ namespace Apache.NMS.EMS
 
 				try
 				{
-					foreach(string itemName in EMSConvert.ToEnumerable(this.tibcoMapMessage.MapNames))
+					foreach(string itemName in this.tibcoMapMessage.GetMapNames())
 					{
 						keys.Add(itemName);
 					}
@@ -138,7 +136,7 @@ namespace Apache.NMS.EMS
 
 				try
 				{
-					foreach(string itemName in EMSConvert.ToEnumerable(this.tibcoMapMessage.MapNames))
+					foreach(string itemName in this.tibcoMapMessage.GetMapNames())
 					{
 						keys.Add(this.tibcoMapMessage.GetObject(itemName));
 					}

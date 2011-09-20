@@ -75,6 +75,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\test\csharp\CommonAssemblyInfo.cs" />
+    <Compile Include="src\test\csharp\ReqResponseTempQueue.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="vs2008-ems.csproj">
