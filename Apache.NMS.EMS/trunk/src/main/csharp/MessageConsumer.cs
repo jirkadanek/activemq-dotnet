@@ -108,7 +108,16 @@ namespace Apache.NMS.EMS
 				{
 					if(!this.nmsSession.tibcoSession.IsClosed)
 					{
-						this.tibcoMessageConsumer.MessageHandler -= this.HandleTibcoMsg;
+						// JGomes: Calling the following message handler removal code creates an
+						// instability in the TIBCO consumer and will fail to unregister a consumer.
+						// This is a very odd bug, but it has been observed that unregistering the
+						// message handler is not necessary and can be harmful.  When the unregister is
+						// executed slowly step-by-step under a debugger, then it works correctly.  When
+						// it is run full speed, it creates a race condition.  Therefore, the code is left
+						// here in a commented out state to demonstrate what normal cleanup code should
+						// look like, but don't uncomment it.
+
+						// this.tibcoMessageConsumer.MessageHandler -= this.HandleTibcoMsg;
 						this.tibcoMessageConsumer.Close();
 					}
 				}
