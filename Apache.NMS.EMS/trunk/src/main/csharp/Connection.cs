@@ -20,320 +20,324 @@ using Apache.NMS.Util;
 
 namespace Apache.NMS.EMS
 {
-	/// <summary>
-	/// Represents a NMS connection to TIBCO.
-	/// </summary>
-	///
-	public class Connection : Apache.NMS.IConnection
-	{
-		private Apache.NMS.AcknowledgementMode acknowledgementMode;
-		public readonly TIBCO.EMS.Connection tibcoConnection;
-		private IRedeliveryPolicy redeliveryPolicy;
-		private ConnectionMetaData metaData = null;
-		private readonly Atomic<bool> started = new Atomic<bool>(false);
-		private bool closed = false;
-		private bool disposed = false;
+    /// <summary>
+    /// Represents a NMS connection to TIBCO.
+    /// </summary>
+    ///
+    public class Connection : Apache.NMS.IConnection
+    {
+        private Apache.NMS.AcknowledgementMode acknowledgementMode;
+        public readonly TIBCO.EMS.Connection tibcoConnection;
+        private IRedeliveryPolicy redeliveryPolicy;
+        private ConnectionMetaData metaData = null;
+        private readonly Atomic<bool> started = new Atomic<bool>(false);
+        private bool closed = false;
+        private bool disposed = false;
 
-		public Connection(TIBCO.EMS.Connection cnx)
-		{
-			this.tibcoConnection = cnx;
-			this.tibcoConnection.ExceptionHandler += this.HandleTibcoException;
-		}
+        public Connection(TIBCO.EMS.Connection cnx)
+        {
+            this.tibcoConnection = cnx;
+            this.tibcoConnection.ExceptionHandler += this.HandleTibcoException;
+        }
 
-		~Connection()
-		{
-			Dispose(false);
-		}
+        ~Connection()
+        {
+            Dispose(false);
+        }
 
-		#region IStartable Members
+        #region IStartable Members
 
-		/// <summary>
-		/// Starts message delivery for this connection.
-		/// </summary>
-		public void Start()
-		{
-			if(started.CompareAndSet(false, true))
-			{
-				try
-				{
-					this.tibcoConnection.Start();
-				}
-				catch(Exception ex)
-				{
-					ExceptionUtil.WrapAndThrowNMSException(ex);
-				}
-			}
-		}
+        /// <summary>
+        /// Starts message delivery for this connection.
+        /// </summary>
+        public void Start()
+        {
+            if(started.CompareAndSet(false, true))
+            {
+                try
+                {
+                    this.tibcoConnection.Start();
+                }
+                catch(Exception ex)
+                {
+                    ExceptionUtil.WrapAndThrowNMSException(ex);
+                }
+            }
+        }
 
-		public bool IsStarted
-		{
-			get { return this.started.Value; }
-		}
+        public bool IsStarted
+        {
+            get { return this.started.Value; }
+        }
 
-		#endregion
+        #endregion
 
-		#region IStoppable Members
+        #region IStoppable Members
 
-		/// <summary>
-		/// Stop message delivery for this connection.
-		/// </summary>
-		public void Stop()
-		{
-			try
-			{
-				if(started.CompareAndSet(true, false))
-				{
-					this.tibcoConnection.Stop();
-				}
-			}
-			catch(Exception ex)
-			{
-				ExceptionUtil.WrapAndThrowNMSException(ex);
-			}
-		}
+        /// <summary>
+        /// Stop message delivery for this connection.
+        /// </summary>
+        public void Stop()
+        {
+            try
+            {
+                if(started.CompareAndSet(true, false))
+                {
+                    this.tibcoConnection.Stop();
+                }
+            }
+            catch(Exception ex)
+            {
+                ExceptionUtil.WrapAndThrowNMSException(ex);
+            }
+        }
 
-		#endregion
+        #endregion
 
-		#region IConnection Members
+        #region IConnection Members
 
-		/// <summary>
-		/// Creates a new session to work on this connection
-		/// </summary>
-		public Apache.NMS.ISession CreateSession()
-		{
-			return CreateSession(acknowledgementMode);
-		}
+        /// <summary>
+        /// Creates a new session to work on this connection
+        /// </summary>
+        public Apache.NMS.ISession CreateSession()
+        {
+            return CreateSession(acknowledgementMode);
+        }
 
-		/// <summary>
-		/// Creates a new session to work on this connection
-		/// </summary>
-		public Apache.NMS.ISession CreateSession(Apache.NMS.AcknowledgementMode mode)
-		{
-			try
-			{
-				bool isTransacted = (Apache.NMS.AcknowledgementMode.Transactional == mode);
-				return EMSConvert.ToNMSSession(this.tibcoConnection.CreateSession(isTransacted,
-																  EMSConvert.ToSessionMode(mode)));
-			}
-			catch(Exception ex)
-			{
-				ExceptionUtil.WrapAndThrowNMSException(ex);
-				return null;
-			}
-		}
+        /// <summary>
+        /// Creates a new session to work on this connection
+        /// </summary>
+        public Apache.NMS.ISession CreateSession(Apache.NMS.AcknowledgementMode mode)
+        {
+            try
+            {
+                bool isTransacted = (Apache.NMS.AcknowledgementMode.Transactional == mode);
+                return EMSConvert.ToNMSSession(this.tibcoConnection.CreateSession(isTransacted,
+                                                                  EMSConvert.ToSessionMode(mode)));
+            }
+            catch(Exception ex)
+            {
+                ExceptionUtil.WrapAndThrowNMSException(ex);
+                return null;
+            }
+        }
 
-		public void Close()
-		{
-			lock(this)
-			{
-				if(closed)
-				{
-					return;
-				}
+        public void Close()
+        {
+            lock(this)
+            {
+                if(closed)
+                {
+                    return;
+                }
 
-				try
-				{
-					this.tibcoConnection.ExceptionHandler -= this.HandleTibcoException;
-					this.tibcoConnection.Stop();
-					this.tibcoConnection.Close();
-				}
-				catch(Exception ex)
-				{
-					ExceptionUtil.WrapAndThrowNMSException(ex);
-				}
-				finally
-				{
-					closed = true;
-				}
-			}
-		}
+                try
+                {
+                    this.tibcoConnection.ExceptionHandler -= this.HandleTibcoException;
+                    this.tibcoConnection.Stop();
+                    this.tibcoConnection.Close();
+                }
+                catch(Exception ex)
+                {
+                    ExceptionUtil.WrapAndThrowNMSException(ex);
+                }
+                finally
+                {
+                    closed = true;
+                }
+            }
+        }
 
-		#endregion
+        public void PurgeTempDestinations()
+        {
+        }
 
-		#region IDisposable Members
+        #endregion
 
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
+        #region IDisposable Members
 
-		protected void Dispose(bool disposing)
-		{
-			if(disposed)
-			{
-				return;
-			}
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
-			if(disposing)
-			{
-				// Dispose managed code here.
-			}
+        protected void Dispose(bool disposing)
+        {
+            if(disposed)
+            {
+                return;
+            }
 
-			try
-			{
-				Close();
-			}
-			catch
-			{
-				// Ignore errors.
-			}
+            if(disposing)
+            {
+                // Dispose managed code here.
+            }
 
-			disposed = true;
-		}
+            try
+            {
+                Close();
+            }
+            catch
+            {
+                // Ignore errors.
+            }
 
-		#endregion
+            disposed = true;
+        }
 
-		#region Attributes
+        #endregion
 
-		/// <summary>
-		/// The default timeout for network requests.
-		/// </summary>
-		public TimeSpan RequestTimeout
-		{
-			get { return Apache.NMS.NMSConstants.defaultRequestTimeout; }
-			set { }
-		}
+        #region Attributes
 
-		public Apache.NMS.AcknowledgementMode AcknowledgementMode
-		{
-			get { return acknowledgementMode; }
-			set { acknowledgementMode = value; }
-		}
+        /// <summary>
+        /// The default timeout for network requests.
+        /// </summary>
+        public TimeSpan RequestTimeout
+        {
+            get { return Apache.NMS.NMSConstants.defaultRequestTimeout; }
+            set { }
+        }
 
-		public string ClientId
-		{
-			get
-			{
-				try
-				{
-					return this.tibcoConnection.ClientID;
-				}
-				catch(Exception ex)
-				{
-					ExceptionUtil.WrapAndThrowNMSException(ex);
-					return null;
-				}
-			}
-			set
-			{
-				try
-				{
-					this.tibcoConnection.ClientID = value;
-				}
-				catch(Exception ex)
-				{
-					ExceptionUtil.WrapAndThrowNMSException(ex);
-				}
-			}
-		}
+        public Apache.NMS.AcknowledgementMode AcknowledgementMode
+        {
+            get { return acknowledgementMode; }
+            set { acknowledgementMode = value; }
+        }
 
-		/// <summary>
-		/// Get/or set the redelivery policy for this connection.
-		/// </summary>
-		public IRedeliveryPolicy RedeliveryPolicy
-		{
-			get { return this.redeliveryPolicy; }
-			set { this.redeliveryPolicy = value; }
-		}
+        public string ClientId
+        {
+            get
+            {
+                try
+                {
+                    return this.tibcoConnection.ClientID;
+                }
+                catch(Exception ex)
+                {
+                    ExceptionUtil.WrapAndThrowNMSException(ex);
+                    return null;
+                }
+            }
+            set
+            {
+                try
+                {
+                    this.tibcoConnection.ClientID = value;
+                }
+                catch(Exception ex)
+                {
+                    ExceptionUtil.WrapAndThrowNMSException(ex);
+                }
+            }
+        }
 
-		/// <summary>
-		/// Gets the Meta Data for the NMS Connection instance.
-		/// </summary>
-		public IConnectionMetaData MetaData
-		{
-			get { return this.metaData ?? (this.metaData = new ConnectionMetaData()); }
-		}
+        /// <summary>
+        /// Get/or set the redelivery policy for this connection.
+        /// </summary>
+        public IRedeliveryPolicy RedeliveryPolicy
+        {
+            get { return this.redeliveryPolicy; }
+            set { this.redeliveryPolicy = value; }
+        }
 
-		#endregion
+        /// <summary>
+        /// Gets the Meta Data for the NMS Connection instance.
+        /// </summary>
+        public IConnectionMetaData MetaData
+        {
+            get { return this.metaData ?? (this.metaData = new ConnectionMetaData()); }
+        }
 
-		/// <summary>
-		/// A delegate that can receive transport level exceptions.
-		/// </summary>
-		public event ExceptionListener ExceptionListener;
+        #endregion
 
-		/// <summary>
-		/// An asynchronous listener that is notified when a Fault tolerant connection
-		/// has been interrupted.
-		/// </summary>
-		public event ConnectionInterruptedListener ConnectionInterruptedListener;
+        /// <summary>
+        /// A delegate that can receive transport level exceptions.
+        /// </summary>
+        public event ExceptionListener ExceptionListener;
 
-		/// <summary>
-		/// An asynchronous listener that is notified when a Fault tolerant connection
-		/// has been resumed.
-		/// </summary>
-		public event ConnectionResumedListener ConnectionResumedListener;
+        /// <summary>
+        /// An asynchronous listener that is notified when a Fault tolerant connection
+        /// has been interrupted.
+        /// </summary>
+        public event ConnectionInterruptedListener ConnectionInterruptedListener;
 
-		private void HandleTibcoException(object sender, TIBCO.EMS.EMSExceptionEventArgs arg)
-		{
-			if(ExceptionListener != null)
-			{
-				ExceptionListener(arg.Exception);
-			}
-			else
-			{
-				Apache.NMS.Tracer.Error(arg.Exception);
-			}
-		}
+        /// <summary>
+        /// An asynchronous listener that is notified when a Fault tolerant connection
+        /// has been resumed.
+        /// </summary>
+        public event ConnectionResumedListener ConnectionResumedListener;
 
-		private void HandleTransportInterrupted()
-		{
-			Tracer.Debug("Transport has been Interrupted.");
+        private void HandleTibcoException(object sender, TIBCO.EMS.EMSExceptionEventArgs arg)
+        {
+            if(ExceptionListener != null)
+            {
+                ExceptionListener(arg.Exception);
+            }
+            else
+            {
+                Apache.NMS.Tracer.Error(arg.Exception);
+            }
+        }
 
-			if(this.ConnectionInterruptedListener != null && !this.closed)
-			{
-				try
-				{
-					this.ConnectionInterruptedListener();
-				}
-				catch
-				{
-				}
-			}
-		}
+        private void HandleTransportInterrupted()
+        {
+            Tracer.Debug("Transport has been Interrupted.");
 
-		private void HandleTransportResumed()
-		{
-			Tracer.Debug("Transport has resumed normal operation.");
+            if(this.ConnectionInterruptedListener != null && !this.closed)
+            {
+                try
+                {
+                    this.ConnectionInterruptedListener();
+                }
+                catch
+                {
+                }
+            }
+        }
 
-			if(this.ConnectionResumedListener != null && !this.closed)
-			{
-				try
-				{
-					this.ConnectionResumedListener();
-				}
-				catch
-				{
-				}
-			}
-		}
+        private void HandleTransportResumed()
+        {
+            Tracer.Debug("Transport has resumed normal operation.");
 
-		private ConsumerTransformerDelegate consumerTransformer;
-		/// <summary>
-		/// A Delegate that is called each time a Message is dispatched to allow the client to do
-		/// any necessary transformations on the received message before it is delivered.  The
-		/// ConnectionFactory sets the provided delegate instance on each Connection instance that
-		/// is created from this factory, each connection in turn passes the delegate along to each
-		/// Session it creates which then passes that along to the Consumers it creates.
-		/// </summary>
-		public ConsumerTransformerDelegate ConsumerTransformer
-		{
-			get { return this.consumerTransformer; }
-			set { this.consumerTransformer = value; }
-		}
+            if(this.ConnectionResumedListener != null && !this.closed)
+            {
+                try
+                {
+                    this.ConnectionResumedListener();
+                }
+                catch
+                {
+                }
+            }
+        }
 
-		private ProducerTransformerDelegate producerTransformer;
-		/// <summary>
-		/// A delegate that is called each time a Message is sent from this Producer which allows
-		/// the application to perform any needed transformations on the Message before it is sent.
-		/// The ConnectionFactory sets the provided delegate instance on each Connection instance that
-		/// is created from this factory, each connection in turn passes the delegate along to each
-		/// Session it creates which then passes that along to the Producers it creates.
-		/// </summary>
-		public ProducerTransformerDelegate ProducerTransformer
-		{
-			get { return this.producerTransformer; }
-			set { this.producerTransformer = value; }
-		}
-	}
+        private ConsumerTransformerDelegate consumerTransformer;
+        /// <summary>
+        /// A Delegate that is called each time a Message is dispatched to allow the client to do
+        /// any necessary transformations on the received message before it is delivered.  The
+        /// ConnectionFactory sets the provided delegate instance on each Connection instance that
+        /// is created from this factory, each connection in turn passes the delegate along to each
+        /// Session it creates which then passes that along to the Consumers it creates.
+        /// </summary>
+        public ConsumerTransformerDelegate ConsumerTransformer
+        {
+            get { return this.consumerTransformer; }
+            set { this.consumerTransformer = value; }
+        }
+
+        private ProducerTransformerDelegate producerTransformer;
+        /// <summary>
+        /// A delegate that is called each time a Message is sent from this Producer which allows
+        /// the application to perform any needed transformations on the Message before it is sent.
+        /// The ConnectionFactory sets the provided delegate instance on each Connection instance that
+        /// is created from this factory, each connection in turn passes the delegate along to each
+        /// Session it creates which then passes that along to the Producers it creates.
+        /// </summary>
+        public ProducerTransformerDelegate ProducerTransformer
+        {
+            get { return this.producerTransformer; }
+            set { this.producerTransformer = value; }
+        }
+    }
 }
