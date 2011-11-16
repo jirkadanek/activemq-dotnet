@@ -405,6 +405,14 @@ namespace Apache.NMS.EMS
             set { this.producerTransformer = value; }
         }
 
+        #region Transaction State Events
+
+        public event SessionTxEventDelegate TransactionStartedListener;
+        public event SessionTxEventDelegate TransactionCommittedListener;
+        public event SessionTxEventDelegate TransactionRolledBackListener;
+
+        #endregion
+
         // Properties
 
         /// <summary>

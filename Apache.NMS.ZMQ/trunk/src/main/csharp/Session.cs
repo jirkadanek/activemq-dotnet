@@ -193,6 +193,14 @@ namespace Apache.NMS.ZMQ
             messageQueueTransaction.Abort();
         }
 
+        #region Transaction State Events
+
+        public event SessionTxEventDelegate TransactionStartedListener;
+        public event SessionTxEventDelegate TransactionCommittedListener;
+        public event SessionTxEventDelegate TransactionRolledBackListener;
+
+        #endregion
+
         public void Recover()
         {
             throw new NotSupportedException();
