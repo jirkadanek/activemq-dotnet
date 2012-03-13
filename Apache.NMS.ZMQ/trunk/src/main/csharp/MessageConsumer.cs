@@ -42,6 +42,7 @@ namespace Apache.NMS.ZMQ
 		/// Context binding string
 		/// </summary>
 		private string contextBinding;
+		private Queue destination;
 		private event MessageListener listener;
 		private int listenerCount = 0;
 		private Thread asyncDeliveryThread = null;
@@ -73,6 +74,7 @@ namespace Apache.NMS.ZMQ
 			string clientId = session.Connection.ClientId;
 
 			this.contextBinding = session.Connection.BrokerUri.LocalPath;
+			this.destination = new Queue(this.contextBinding);
 			if(!string.IsNullOrEmpty(clientId))
 			{
 				this.messageSubscriber.StringToIdentity(clientId, Encoding.Unicode);
@@ -115,7 +117,7 @@ namespace Apache.NMS.ZMQ
 		public IMessage Receive()
 		{
 			// TODO: Support decoding of all message types + all meta data (e.g., headers and properties)
-			return ToNmsMessage(messageSubscriber.Recv(Encoding.ASCII, ZSendRecvOpt.NOBLOCK));
+			return ToNmsMessage(messageSubscriber.Recv(Encoding.ASCII, ZSendRecvOpt.NONE));
 		}
 
 		/// <summary>
@@ -248,7 +250,7 @@ namespace Apache.NMS.ZMQ
 			try
 			{
 				nmsMessage.NMSMessageId = "";
-				nmsMessage.NMSDestination = new Queue(contextBinding);
+				nmsMessage.NMSDestination = this.destination;
 				nmsMessage.NMSDeliveryMode = MsgDeliveryMode.NonPersistent;
 				nmsMessage.NMSPriority = MsgPriority.Normal;
 				nmsMessage.NMSTimestamp = DateTime.Now;
