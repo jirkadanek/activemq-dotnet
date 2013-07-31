@@ -62,5 +62,13 @@ namespace Apache.NMS.EMS
 		}
 
 		#endregion
+
+		/// <summary>
+		/// </summary>
+		/// <returns>string representation of this instance</returns>
+		public override System.String ToString()
+		{
+			return "temp-queue://" + QueueName;
+		}
 	}
 }
