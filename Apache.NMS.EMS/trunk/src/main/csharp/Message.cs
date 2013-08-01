@@ -21,6 +21,11 @@ namespace Apache.NMS.EMS
 {
 	class Message : Apache.NMS.IMessage
 	{
+		private Apache.NMS.IPrimitiveMap properties = null;
+		private Apache.NMS.Util.MessagePropertyIntercepter propertyHelper;
+		private bool readOnlyMsgProperties = false;
+		private bool readOnlyMsgBody = false;
+
 		public TIBCO.EMS.Message tibcoMessage;
 
 		public Message(TIBCO.EMS.Message message)
@@ -57,6 +62,7 @@ namespace Apache.NMS.EMS
 		{
 			try
 			{
+				this.ReadOnlyBody = false;
 				this.tibcoMessage.ClearBody();
 			}
 			catch(Exception ex)
@@ -74,6 +80,7 @@ namespace Apache.NMS.EMS
 		{
 			try
 			{
+				this.ReadOnlyProperties = false;
 				this.tibcoMessage.ClearProperties();
 			}
 			catch(Exception ex)
@@ -82,12 +89,44 @@ namespace Apache.NMS.EMS
 			}
 		}
 
+		public virtual bool ReadOnlyBody
+		{
+			get { return this.readOnlyMsgBody; }
+			set { this.readOnlyMsgBody = value; }
+		}
+
+		public virtual bool ReadOnlyProperties
+		{
+			get { return this.readOnlyMsgProperties; }
+
+			set
+			{
+				if(this.propertyHelper != null)
+				{
+					this.propertyHelper.ReadOnly = value;
+				}
+				this.readOnlyMsgProperties = value;
+			}
+		}
+
 		/// <summary>
 		/// Provides access to the message properties (headers)
 		/// </summary>
 		public Apache.NMS.IPrimitiveMap Properties
 		{
-			get { return EMSConvert.ToMessageProperties(this.tibcoMessage); }
+			get
+			{
+				if(null == properties)
+				{
+					properties = EMSConvert.ToMessageProperties(this.tibcoMessage);
+					propertyHelper = new Apache.NMS.Util.MessagePropertyIntercepter(this, properties, this.ReadOnlyProperties) { AllowByteArrays = false };
+
+					// Since JMS doesn't define a Byte array interface for properties we
+					// disable them here to prevent sending invalid data to the broker.
+				}
+
+				return propertyHelper;
+			}
 		}
 
 		/// <summary>
@@ -256,5 +295,15 @@ namespace Apache.NMS.EMS
 		}
 
 		#endregion
+
+		public virtual void OnSend()
+		{
+			this.ReadOnlyProperties = true;
+			this.ReadOnlyBody = true;
+		}
+
+		public virtual void OnMessageRollback()
+		{
+		}
 	}
 }

@@ -46,6 +46,7 @@ namespace Apache.NMS.EMS
 
 			set
 			{
+				this.ReadOnlyBody = false;
 				this.tibcoBytesMessage.ClearBody();
 				this.tibcoBytesMessage.WriteBytes(value, 0, value.Length);
 			}

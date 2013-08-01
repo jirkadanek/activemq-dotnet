@@ -73,6 +73,7 @@ namespace Apache.NMS.EMS
 
 			try
 			{
+				msg.OnSend();
 				this.tibcoMessageProducer.Send(
 							msg.tibcoMessage,
 							this.tibcoMessageProducer.MsgDeliveryMode,

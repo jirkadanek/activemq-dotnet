@@ -48,6 +48,7 @@ namespace Apache.NMS.EMS
 		{
 			try
 			{
+				this.ReadOnlyBody = false;
 				this.tibcoMapMessage.ClearBody();
 			}
 			catch(Exception ex)

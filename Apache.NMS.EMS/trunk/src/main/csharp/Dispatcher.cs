@@ -103,12 +103,17 @@ namespace Apache.NMS.EMS
         /// </summary>
 		public Apache.NMS.IMessage DequeueNoWait()
         {
-			Apache.NMS.IMessage rc = null;
+			Apache.NMS.EMS.Message rc = null;
             lock (semaphore)
             {
                 if (!m_bClosed && queue.Count > 0)
                 {
-					rc = (Apache.NMS.IMessage) queue.Dequeue();
+					rc = (Apache.NMS.EMS.Message) queue.Dequeue();
+					if(null != rc)
+					{
+						rc.ReadOnlyBody = true;
+						rc.ReadOnlyProperties = true;
+					}
                 } 
             }
             return rc;
