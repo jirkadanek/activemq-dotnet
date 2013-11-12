@@ -47,7 +47,6 @@ namespace Apache.NMS.MQTT
         private AcknowledgementMode acknowledgementMode = AcknowledgementMode.AutoAcknowledge;
 
         private IRedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
-        private PrefetchPolicy prefetchPolicy = new PrefetchPolicy();
 
         static ConnectionFactory()
         {
@@ -246,12 +245,6 @@ namespace Apache.NMS.MQTT
         {
             get { return acknowledgementMode; }
             set { this.acknowledgementMode = value; }
-        }
-
-        public PrefetchPolicy PrefetchPolicy
-        {
-            get { return this.prefetchPolicy; }
-            set { this.prefetchPolicy = value; }
         }
 
         public IRedeliveryPolicy RedeliveryPolicy
