@@ -29,6 +29,7 @@ namespace Apache.NMS.MQTT.Commands
 	public class CONNECT
 	{
 		public const byte TYPE = 1;
+		public const String PROTOCOL_NAME = "MQIsdp";
 
 		private byte version = 3;
 		public byte Version

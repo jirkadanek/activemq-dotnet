@@ -47,8 +47,7 @@ namespace Apache.NMS.MQTT
             this.providerMinorVersion = asmName.Version.Minor;
             this.providerVersion = asmName.Version.ToString();
 
-            this.nmsxProperties =
-                new String[]{ "NMSXGroupID", "NMSXGroupSeq", "NMSXDeliveryCount", "NMSXProducerTXID" };
+			this.nmsxProperties = null;
 
             foreach(AssemblyName name in self.GetReferencedAssemblies())
             {
