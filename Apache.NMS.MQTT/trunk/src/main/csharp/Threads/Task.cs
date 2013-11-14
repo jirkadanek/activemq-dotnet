@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,27 +15,22 @@
  * limitations under the License.
  */
 
-using System;
-
 namespace Apache.NMS.MQTT
 {
 	/// <summary>
-	/// Exception thrown when an IO error occurs
+	/// Represents a task that may take a few iterations to complete.
 	/// </summary>
-	public class IOException : NMSException
+	public interface Task
 	{
-		public IOException() : base("IO Exception failed with missing exception log")
-		{
-		}
-
-		public IOException(String msg) : base(msg)
-		{
-		}
-
-		public IOException(String msg, Exception inner) : base(msg, inner)
-		{
-		}
+		/// <summary>
+		/// Performs some portion of the work that this Task object is
+		/// assigned to complete.  When the task is entirely finished this
+		/// method should return false. 
+		/// </summary>
+		/// <returns>
+		/// A <see cref="System.Boolean"/> this indicates if this Task should 
+		/// be run again.
+		/// </returns>
+		bool Iterate();
 	}
 }
-
-

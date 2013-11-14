@@ -39,23 +39,46 @@
   <ItemGroup>
     <Compile Include="src\main\csharp\ConnectionFactory.cs" />
     <Compile Include="src\main\csharp\ConnectionMetaData.cs" />
-    <Compile Include="src\main\csharp\commands\CONNECT.cs" />
-    <Compile Include="src\main\csharp\commands\CONNACK.cs" />
-    <Compile Include="src\main\csharp\commands\PUBLISH.cs" />
-    <Compile Include="src\main\csharp\commands\PUBACK.cs" />
-    <Compile Include="src\main\csharp\commands\PUBREC.cs" />
-    <Compile Include="src\main\csharp\commands\PUBREL.cs" />
-    <Compile Include="src\main\csharp\commands\SUBSCRIBE.cs" />
-    <Compile Include="src\main\csharp\commands\SUBACK.cs" />
-    <Compile Include="src\main\csharp\commands\UNSUBSCRIBE.cs" />
-    <Compile Include="src\main\csharp\commands\UNSUBACK.cs" />
-    <Compile Include="src\main\csharp\commands\PINGREQ.cs" />
-    <Compile Include="src\main\csharp\commands\PINGRESP.cs" />
-    <Compile Include="src\main\csharp\commands\DISCONNECT.cs" />
+    <Compile Include="src\main\csharp\Connection.cs" />
+    <Compile Include="src\main\csharp\CommonAssemblyInfo.cs" />
+    <Compile Include="src\main\csharp\Session.cs" />
+    <Compile Include="src\main\csharp\MessageConsumer.cs" />
+    <Compile Include="src\main\csharp\MessageProducer.cs" />
+    <Compile Include="src\main\csharp\Commands\CONNACK.cs" />
+    <Compile Include="src\main\csharp\Commands\CONNECT.cs" />
+    <Compile Include="src\main\csharp\Commands\DISCONNECT.cs" />
+    <Compile Include="src\main\csharp\Commands\PINGREQ.cs" />
+    <Compile Include="src\main\csharp\Commands\PINGRESP.cs" />
+    <Compile Include="src\main\csharp\Commands\PUBACK.cs" />
+    <Compile Include="src\main\csharp\Commands\PUBLISH.cs" />
+    <Compile Include="src\main\csharp\Commands\PUBREC.cs" />
+    <Compile Include="src\main\csharp\Commands\PUBREL.cs" />
+    <Compile Include="src\main\csharp\Commands\SUBACK.cs" />
+    <Compile Include="src\main\csharp\Commands\SUBSCRIBE.cs" />
+    <Compile Include="src\main\csharp\Commands\UNSUBACK.cs" />
+    <Compile Include="src\main\csharp\Commands\UNSUBSCRIBE.cs" />
+    <Compile Include="src\main\csharp\Threads\ThreadPoolExecutor.cs" />
+    <Compile Include="src\main\csharp\Transport\ITransport.cs" />
+    <Compile Include="src\main\csharp\Transport\ITransportFactory.cs" />
+    <Compile Include="src\main\csharp\Util\MQTTMessageTransformation.cs" />
+    <Compile Include="src\main\csharp\ConnectionClosedException.cs" />
+    <Compile Include="src\main\csharp\IDispatcher.cs" />
+    <Compile Include="src\main\csharp\IOException.cs" />
+    <Compile Include="src\main\csharp\SessionExecutor.cs" />
+    <Compile Include="src\main\csharp\Util\FifoMessageDispatchChannel.cs" />
+    <Compile Include="src\main\csharp\Util\MessageDispatchChannel.cs" />
+    <Compile Include="src\main\csharp\Threads\DedicatedTaskRunner.cs" />
+    <Compile Include="src\main\csharp\Threads\Scheduler.cs" />
+    <Compile Include="src\main\csharp\Threads\Task.cs" />
+    <Compile Include="src\main\csharp\Threads\TaskRunner.cs" />
+    <Compile Include="src\main\csharp\Threads\TaskRunnerFactory.cs" />
+    <Compile Include="src\main\csharp\Messages\MessageDispatch.cs" />
+    <Compile Include="src\main\csharp\Messages\BytesMessage.cs" />
+    <Compile Include="src\main\csharp\Messages\MQTTMessage.cs" />
+    <Compile Include="src\main\csharp\Transport\Command.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="keyfile\" />
-    <Folder Include="src\main\csharp\commands\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="LICENSE.txt" />
