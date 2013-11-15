@@ -16,7 +16,7 @@
  */
 
 using System;
-using Apache.NMS.MQTT.Commands;
+using Apache.NMS.MQTT.Messages;
 
 namespace Apache.NMS.MQTT.Util
 {

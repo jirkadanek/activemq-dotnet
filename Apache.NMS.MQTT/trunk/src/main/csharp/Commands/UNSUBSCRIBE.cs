@@ -25,6 +25,16 @@ namespace Apache.NMS.MQTT.Commands
 		public UNSUBSCRIBE()
 		{
 		}
+
+		public int CommandType
+		{
+			get { return TYPE; }
+		}
+
+		public int CommandName
+		{
+			get { return "UNSUBSCRIBE"; }
+		}
 	}
 }
 

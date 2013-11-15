@@ -16,6 +16,7 @@
  */
 
 using System;
+using Apache.NMS.MQTT.Transport;
 
 namespace Apache.NMS.MQTT.Messages
 {
@@ -30,10 +31,8 @@ namespace Apache.NMS.MQTT.Messages
      */
     public class MessageDispatch : BaseCommand
     {
-        ConsumerId consumerId;
-        ActiveMQDestination destination;
-        Message message;
-        int redeliveryCounter;
+        Topic destination;
+        MQTTMessage message;
 
         ///
         /// <summery>
@@ -46,10 +45,8 @@ namespace Apache.NMS.MQTT.Messages
             return GetType().Name + "[ " + 
                 "commandId = " + this.CommandId + ", " + 
                 "responseRequired = " + this.ResponseRequired + ", " + 
-                "ConsumerId = " + ConsumerId + ", " + 
                 "Destination = " + Destination + ", " + 
-                "Message = " + Message + ", " + 
-                "RedeliveryCounter = " + RedeliveryCounter + " ]";
+                "Message = " + Message + " ]";
         }
 
         public Exception RollbackCause
@@ -58,38 +55,24 @@ namespace Apache.NMS.MQTT.Messages
             set { this.rollbackCause = value; }
         }
 
-        public ConsumerId ConsumerId
-        {
-            get { return consumerId; }
-            set { this.consumerId = value; }
-        }
-
-        public ActiveMQDestination Destination
+        public Topic Destination
         {
             get { return destination; }
             set { this.destination = value; }
         }
 
-        public Message Message
+        public MQTTMessage Message
         {
             get { return message; }
             set { this.message = value; }
-        }
-
-        public int RedeliveryCounter
-        {
-            get { return redeliveryCounter; }
-            set { this.redeliveryCounter = value; }
         }
 
         public override int GetHashCode()
         {
             int answer = 0;
 
-            answer = (answer * 37) + HashCode(ConsumerId);
             answer = (answer * 37) + HashCode(Destination);
             answer = (answer * 37) + HashCode(Message);
-            answer = (answer * 37) + HashCode(RedeliveryCounter);
 
             return answer;
         }
@@ -106,19 +89,11 @@ namespace Apache.NMS.MQTT.Messages
 
         public virtual bool Equals(MessageDispatch that)
         {
-            if(!Equals(this.ConsumerId, that.ConsumerId))
-            {
-                return false;
-            }
             if(!Equals(this.Destination, that.Destination))
             {
                 return false;
             }
             if(!Equals(this.Message, that.Message))
-            {
-                return false;
-            }
-            if(!Equals(this.RedeliveryCounter, that.RedeliveryCounter))
             {
                 return false;
             }

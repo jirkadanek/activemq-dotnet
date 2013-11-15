@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+using System;
 using Apache.NMS.Util;
 using Apache.NMS.MQTT.Commands;
 

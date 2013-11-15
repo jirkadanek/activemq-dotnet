@@ -16,26 +16,44 @@
 //
 using System;
 
-namespace Apache.NMS.MQTT.Commands
+namespace Apache.NMS.MQTT
 {
-	public class PINGREQ
+	/// <summary>
+	/// MQTT Topic Destination.  
+	/// </summary>
+	public class Topic : ITopic
 	{
-		public const byte TYPE = 11;
+		string name;
 
-		public PINGREQ()
+		public Topic(string name)
 		{
+			this.name = name;
 		}
 
-		public int CommandType
-		{
-			get { return TYPE; }
+		public string TopicName 
+		{ 
+			get { return this.name; }
 		}
 
-		public int CommandName
-		{
-			get { return "PINGREQ"; }
+		DestinationType DestinationType 
+		{ 
+			get { return DestinationType.Topic; }
 		}
-
+		
+		bool IsTopic
+		{ 
+			get { return true; }
+		}
+		
+		bool IsQueue 
+		{ 
+			get { return false; }
+		}
+		
+		bool IsTemporary 
+		{ 
+			get { return false; }
+		}
 	}
 }
 

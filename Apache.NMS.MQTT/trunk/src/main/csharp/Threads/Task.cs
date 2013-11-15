@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-namespace Apache.NMS.MQTT
+namespace Apache.NMS.MQTT.Threads
 {
 	/// <summary>
 	/// Represents a task that may take a few iterations to complete.

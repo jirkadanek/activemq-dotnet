@@ -19,7 +19,7 @@ using System;
 using System.IO;
 using Apache.NMS.Util;
 
-namespace Apache.NMS.MQTT.Commands
+namespace Apache.NMS.MQTT.Messages
 {
 	public class BytesMessage : MQTTMessage, IBytesMessage
 	{
@@ -34,7 +34,7 @@ namespace Apache.NMS.MQTT.Commands
 			return base.Clone();
 		}
 
-		public override void OnSend()
+		public virtual void OnSend()
 		{
 			base.OnSend();
 			StoreContent();
@@ -563,10 +563,10 @@ namespace Apache.NMS.MQTT.Commands
         /// </summary>
         private class LengthTrackerStream : Stream
         {
-            private readonly ActiveMQBytesMessage parent;
+            private readonly BytesMessage parent;
             private readonly Stream sink;
 
-            public LengthTrackerStream(Stream sink, ActiveMQBytesMessage parent) : base()
+            public LengthTrackerStream(Stream sink, BytesMessage parent) : base()
             {
                 this.sink = sink;
                 this.parent = parent;

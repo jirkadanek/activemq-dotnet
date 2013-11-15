@@ -31,6 +31,16 @@ namespace Apache.NMS.MQTT.Commands
 	{
 		public const byte TYPE = 3;
 
+		public int CommandType
+		{
+			get { return TYPE; }
+		}
+
+		public int CommandName
+		{
+			get { return "PUBLISH"; }
+		}
+
 		private byte qosLevel;
 		public byte QoSLevel
 		{

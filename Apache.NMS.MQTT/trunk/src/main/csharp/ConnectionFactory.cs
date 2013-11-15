@@ -19,6 +19,8 @@ using System;
 using System.Collections.Specialized;
 using Apache.NMS.Util;
 using Apache.NMS.Policies;
+using Apache.NMS.MQTT.Transport;
+using Apache.NMS.MQTT.Util;
 
 namespace Apache.NMS.MQTT
 {
@@ -36,7 +38,7 @@ namespace Apache.NMS.MQTT
         private string connectionPassword;
         private string clientId;
         private string clientIdPrefix;
-        //private IdGenerator clientIdGenerator;
+        private IdGenerator clientIdGenerator;
 
         private bool copyMessageOnSend = true;
         private bool asyncSend;
@@ -159,23 +161,17 @@ namespace Apache.NMS.MQTT
                     StringDictionary properties = URISupport.ParseQuery(query);
                 
                     StringDictionary connection = URISupport.ExtractProperties(properties, "connection.");
-                    StringDictionary nms = URISupport.ExtractProperties(properties, "nms.");
                     
                     if(connection != null)
                     {
                         URISupport.SetProperties(this, connection, "connection.");
-                    }
-                    
-                    if(nms != null)
-                    {
-                        URISupport.SetProperties(this.PrefetchPolicy, nms, "nms.PrefetchPolicy.");
-                        URISupport.SetProperties(this.RedeliveryPolicy, nms, "nms.RedeliveryPolicy.");
                     }
 
                     brokerUri = URISupport.CreateRemainingUri(brokerUri, properties);
                 }
             }
         }
+
         public string UserName
         {
             get { return connectionUserName; }
@@ -259,29 +255,29 @@ namespace Apache.NMS.MQTT
             }
         }
 
-//        public IdGenerator ClientIdGenerator
-//        {
-//            set { this.clientIdGenerator = value; }
-//            get
-//            {
-//                lock(this)
-//                {
-//                    if(this.clientIdGenerator == null)
-//                    {
-//                        if(this.clientIdPrefix != null)
-//                        {
-//                            this.clientIdGenerator = new IdGenerator(this.clientIdPrefix);
-//                        }
-//                        else
-//                        {
-//                            this.clientIdGenerator = new IdGenerator();
-//                        }
-//                    }
-//
-//                    return this.clientIdGenerator;
-//                }
-//            }
-//        }
+        public IdGenerator ClientIdGenerator
+        {
+            set { this.clientIdGenerator = value; }
+            get
+            {
+                lock(this)
+                {
+                    if(this.clientIdGenerator == null)
+                    {
+                        if(this.clientIdPrefix != null)
+                        {
+                            this.clientIdGenerator = new IdGenerator(this.clientIdPrefix);
+                        }
+                        else
+                        {
+                            this.clientIdGenerator = new IdGenerator();
+                        }
+                    }
+
+                    return this.clientIdGenerator;
+                }
+            }
+        }
 
         public event ExceptionListener OnException
         {
@@ -313,15 +309,8 @@ namespace Apache.NMS.MQTT
 
         protected virtual void ConfigureConnection(Connection connection)
         {
-            connection.AsyncSend = this.AsyncSend;
-            connection.CopyMessageOnSend = this.CopyMessageOnSend;
-            connection.AlwaysSyncSend = this.AlwaysSyncSend;
-            connection.SendAcksAsync = this.SendAcksAsync;
-            connection.DispatchAsync = this.DispatchAsync;
             connection.AcknowledgementMode = this.acknowledgementMode;
             connection.RequestTimeout = this.requestTimeout;
-            connection.RedeliveryPolicy = this.redeliveryPolicy.Clone() as IRedeliveryPolicy;
-            connection.PrefetchPolicy = this.prefetchPolicy.Clone() as PrefetchPolicy;
             connection.ConsumerTransformer = this.consumerTransformer;
             connection.ProducerTransformer = this.producerTransformer;
         }

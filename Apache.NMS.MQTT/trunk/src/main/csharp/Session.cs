@@ -16,6 +16,7 @@
 //
 using System;
 using System.Collections;
+using Apache.NMS.MQTT.Messages;
 
 namespace Apache.NMS.MQTT
 {
@@ -235,7 +236,7 @@ namespace Apache.NMS.MQTT
 
         public ITopic GetTopic(string name)
         {
-			return null;  // TODO
+			return new Topic(name);
         }
 
         public ITemporaryQueue CreateTemporaryQueue()
@@ -384,14 +385,14 @@ namespace Apache.NMS.MQTT
             }
         }
 
-        public void RemoveProducer(ProducerId objectId)
-        {
-            connection.RemoveProducer(objectId);
-            if(!this.closing)
-            {
-                producers.Remove(objectId);
-            }
-        }
+//        public void RemoveProducer(ProducerId objectId)
+//        {
+//            connection.RemoveProducer(objectId);
+//            if(!this.closing)
+//            {
+//                producers.Remove(objectId);
+//            }
+//        }
 
         private MQTTMessage ConfigureMessage(MQTTMessage message)
         {
@@ -416,7 +417,7 @@ namespace Apache.NMS.MQTT
         /// <param name="message">
         /// A <see cref="ActiveMQMessage"/>
         /// </param>
-        private static void DoNothingAcknowledge(ActiveMQMessage message)
+        private static void DoNothingAcknowledge(MQTTMessage message)
         {
         }
 

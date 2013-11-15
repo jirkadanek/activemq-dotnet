@@ -15,13 +15,23 @@
 // limitations under the License.
 //
 using System;
+using System.Threading;
+using System.Collections;
+using System.Collections.Generic;
+using Apache.NMS.Util;
 using Apache.NMS.MQTT.Transport;
+using Apache.NMS.MQTT.Threads;
 using Apache.NMS.MQTT.Commands;
+using Apache.NMS.MQTT.Util;
 
 namespace Apache.NMS.MQTT
 {
 	public class Connection : IConnection
 	{
+		private static readonly IdGenerator CONNECTION_ID_GENERATOR = new IdGenerator();
+		private static readonly TimeSpan InfiniteTimeSpan = TimeSpan.FromMilliseconds(Timeout.Infinite);
+
+		private AcknowledgementMode acknowledgementMode = AcknowledgementMode.AutoAcknowledge;
 		private readonly CONNECT info = null;
 		private ITransport transport;
 		private readonly Uri brokerUri;
@@ -32,15 +42,19 @@ namespace Apache.NMS.MQTT
         private readonly Atomic<bool> closed = new Atomic<bool>(false);
         private readonly Atomic<bool> closing = new Atomic<bool>(false);
         private readonly Atomic<bool> transportFailed = new Atomic<bool>(false);
+		private readonly object connectedLock = new object();
         private Exception firstFailureError = null;
+		private bool userSpecifiedClientID;
         private int sessionCounter = 0;
         private readonly Atomic<bool> started = new Atomic<bool>(false);
         private ConnectionMetaData metaData = null;
         private bool disposed = false;
+		private TimeSpan requestTimeout = NMSConstants.defaultRequestTimeout; // from connection factory
         private readonly MessageTransformation messageTransformation;
         private readonly ThreadPoolExecutor executor = new ThreadPoolExecutor();
+		private readonly IdGenerator clientIdGenerator;
 
-		public Connection(Uri connectionUri, ITransport transport)
+		public Connection(Uri connectionUri, ITransport transport, IdGenerator clientIdGenerator)
 		{
 			this.brokerUri = connectionUri;
 			this.clientIdGenerator = clientIdGenerator;
@@ -98,6 +112,34 @@ namespace Apache.NMS.MQTT
 		{
 			get { return this.info.Password; }
 			set { this.info.Password = value; }
+		}
+
+        public string ClientId
+        {
+            get { return info.ClientId; }
+            set
+            {
+                if(this.connected.Value)
+                {
+                    throw new NMSException("You cannot change the ClientId once the Connection is connected");
+                }
+
+                this.info.ClientId = value;
+                this.userSpecifiedClientID = true;
+                CheckConnected();
+            }
+        }
+
+		/// <summary>
+		/// The Default Client Id used if the ClientId property is not set explicity.
+		/// </summary>
+		public string DefaultClientId
+		{
+			set
+			{
+				this.info.ClientId = value;
+				this.userSpecifiedClientID = true;
+			}
 		}
 
 		/// <summary>
@@ -229,7 +271,7 @@ namespace Apache.NMS.MQTT
 		protected virtual Session CreateMQTTSession(AcknowledgementMode ackMode)
 		{
 			CheckConnected();
-			return new Session(this, NextSessionId, ackMode);
+			return new Session(this, ackMode);
 		}
 
 		internal void AddSession(Session session)
@@ -249,41 +291,40 @@ namespace Apache.NMS.MQTT
 			}
 		}
 
-		internal void AddDispatcher(ConsumerId id, IDispatcher dispatcher)
-		{
-			if(!this.closing.Value)
-			{
-				this.dispatchers.Add(id, dispatcher);
-			}
-		}
-
-		internal void RemoveDispatcher(ConsumerId id)
-		{
-			if(!this.closing.Value)
-			{
-				this.dispatchers.Remove(id);
-			}
-		}
-
-		internal void AddProducer(ProducerId id, MessageProducer producer)
-		{
-			if(!this.closing.Value)
-			{
-				this.producers.Add(id, producer);
-			}
-		}
-
-		internal void RemoveProducer(ProducerId id)
-		{
-			if(!this.closing.Value)
-			{
-				this.producers.Remove(id);
-			}
-		}
+//		internal void AddDispatcher(ConsumerId id, IDispatcher dispatcher)
+//		{
+//			if(!this.closing.Value)
+//			{
+//				this.dispatchers.Add(id, dispatcher);
+//			}
+//		}
+//
+//		internal void RemoveDispatcher(ConsumerId id)
+//		{
+//			if(!this.closing.Value)
+//			{
+//				this.dispatchers.Remove(id);
+//			}
+//		}
+//
+//		internal void AddProducer(ProducerId id, MessageProducer producer)
+//		{
+//			if(!this.closing.Value)
+//			{
+//				this.producers.Add(id, producer);
+//			}
+//		}
+//
+//		internal void RemoveProducer(ProducerId id)
+//		{
+//			if(!this.closing.Value)
+//			{
+//				this.producers.Remove(id);
+//			}
+//		}
 
 	    internal void RemoveDispatcher(IDispatcher dispatcher) 
 		{
-	        this.connectionAudit.RemoveDispatcher(dispatcher);
 	    }
 
 		public void Close()
@@ -316,6 +357,22 @@ namespace Apache.NMS.MQTT
 			disposed = true;
 		}
 
+		protected void OnCommand(ITransport commandTransport, Command command)
+		{
+		}
+
+		internal void OnTransportException(ITransport source, Exception cause)
+		{
+		}
+
+		protected void OnTransportInterrupted(ITransport sender)
+		{
+		}
+
+		protected void OnTransportResumed(ITransport sender)
+		{
+		}
+
 		protected void CheckClosedOrFailed()
 		{
 			CheckClosed();
@@ -330,6 +387,106 @@ namespace Apache.NMS.MQTT
 			if(closed.Value)
 			{
 				throw new ConnectionClosedException();
+			}
+		}
+
+		/// <summary>
+		/// Check and ensure that the connection object is connected.  If it is not
+		/// connected or is closed or closing, a ConnectionClosedException is thrown.
+		/// </summary>
+		internal void CheckConnected()
+		{
+			if(closed.Value)
+			{
+				throw new ConnectionClosedException();
+			}
+
+			if(!connected.Value)
+			{
+				DateTime timeoutTime = DateTime.Now + this.RequestTimeout;
+				int waitCount = 1;
+
+				while(true)
+				{
+					if(Monitor.TryEnter(connectedLock))
+					{
+						try
+						{
+							if(closed.Value || closing.Value)
+							{
+								break;
+							}
+							else if(!connected.Value)
+							{
+								if(!this.userSpecifiedClientID)
+								{
+									this.info.ClientId = this.clientIdGenerator.GenerateId();
+								}
+
+								try
+								{
+									if(null != transport)
+									{
+										// Make sure the transport is started.
+										if(!this.transport.IsStarted)
+										{
+											this.transport.Start();
+										}
+
+										// Send the connection and see if an ack/nak is returned.
+										Response response = transport.Request(this.info, this.RequestTimeout);
+										if(!(response is ExceptionResponse))
+										{
+											connected.Value = true;
+										}
+										else
+										{
+											ExceptionResponse error = response as ExceptionResponse;
+											NMSException exception = CreateExceptionFromBrokerError(error.Exception);
+											if(exception is InvalidClientIDException)
+											{
+												// This is non-recoverable.
+												// Shutdown the transport connection, and re-create it, but don't start it.
+												// It will be started if the connection is re-attempted.
+												this.transport.Stop();
+												ITransport newTransport = TransportFactory.CreateTransport(this.brokerUri);
+												SetTransport(newTransport);
+												throw exception;
+											}
+										}
+									}
+								}
+								catch(BrokerException)
+								{
+									// We Swallow the generic version and throw ConnectionClosedException
+								}
+								catch(NMSException)
+								{
+									throw;
+								}
+							}
+						}
+						finally
+						{
+							Monitor.Exit(connectedLock);
+						}
+					}
+
+					if(connected.Value || closed.Value || closing.Value
+						|| (DateTime.Now > timeoutTime && this.RequestTimeout != InfiniteTimeSpan))
+					{
+						break;
+					}
+
+					// Back off from being overly aggressive.  Having too many threads
+					// aggressively trying to connect to a down broker pegs the CPU.
+					Thread.Sleep(5 * (waitCount++));
+				}
+
+				if(!connected.Value)
+				{
+					throw new ConnectionClosedException();
+				}
 			}
 		}
 

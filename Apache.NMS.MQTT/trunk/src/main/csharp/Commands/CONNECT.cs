@@ -31,6 +31,16 @@ namespace Apache.NMS.MQTT.Commands
 		public const byte TYPE = 1;
 		public const String PROTOCOL_NAME = "MQIsdp";
 
+		public int CommandType
+		{
+			get { return TYPE; }
+		}
+
+		public int CommandName
+		{
+			get { return "CONNECT"; }
+		}
+
 		private byte version = 3;
 		public byte Version
 		{
@@ -64,6 +74,13 @@ namespace Apache.NMS.MQTT.Commands
 		{
 			get { return this.password; }
 			set { this.password = value; }
+		}
+
+		private String clientId;
+		public String ClientId
+		{
+			get { return this.clientId; }
+			set { this.clientId = value; }
 		}
 
 		private bool cleanSession;

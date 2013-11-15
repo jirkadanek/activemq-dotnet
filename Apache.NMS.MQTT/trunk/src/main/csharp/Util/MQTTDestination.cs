@@ -16,26 +16,18 @@
 //
 using System;
 
-namespace Apache.NMS.MQTT.Commands
+namespace Apache.NMS.MQTT.Util
 {
-	public class PINGREQ
+	public class MQTTDestination
 	{
-		public const byte TYPE = 11;
-
-		public PINGREQ()
+		private MQTTDestination()
 		{
 		}
 
-		public int CommandType
+		public static IDestination Transform(IDestination destination)
 		{
-			get { return TYPE; }
+			return null;
 		}
-
-		public int CommandName
-		{
-			get { return "PINGREQ"; }
-		}
-
 	}
 }
 

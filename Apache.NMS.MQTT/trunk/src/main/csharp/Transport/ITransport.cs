@@ -16,7 +16,6 @@
  */
 
 using System;
-using Apache.NMS.Stomp.Commands;
 
 namespace Apache.NMS.MQTT.Transport
 {
@@ -149,6 +148,36 @@ namespace Apache.NMS.MQTT.Transport
             get;
         }
         
+		/// <summary>
+		/// Returns true if this Transport supports reconnections.
+		/// </summary>
+	    bool IsReconnectSupported
+		{
+			get;
+		}
+
+		/// <summary>
+		/// Returns true if this Transport can accept updated lists of connection Uri's.
+		/// </summary>
+	    bool IsUpdateURIsSupported
+		{
+			get;
+		}
+
+		/// <summary>
+		/// Updates the Uri's that this Transport is aware of and will use to
+		/// connect itself to.  If the rebalance option is true this method will
+		/// terminate any current connection and reconnect to another available
+		/// Uri.
+		/// </summary>
+		/// <param name="rebalance">
+		/// A <see cref="System.Boolean"/>
+		/// </param>
+		/// <param name="updatedURIs">
+		/// A <see cref="Uri"/>
+		/// </param>
+		void UpdateURIs(bool rebalance, Uri[] updatedURIs);
+
 	}
 }
 

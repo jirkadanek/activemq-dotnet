@@ -17,7 +17,7 @@
 
 using System;
 using System.Collections;
-using Apache.NMS.MQTT.Commands;
+using Apache.NMS.MQTT.Messages;
 using Apache.NMS.MQTT.Util;
 using Apache.NMS.MQTT.Threads;
 

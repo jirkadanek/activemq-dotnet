@@ -25,6 +25,16 @@ namespace Apache.NMS.MQTT.Commands
 		public PUBACK()
 		{
 		}
+
+		public int CommandType
+		{
+			get { return TYPE; }
+		}
+
+		public int CommandName
+		{
+			get { return "PUBACK"; }
+		}
 	}
 }
 

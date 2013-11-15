@@ -29,6 +29,16 @@ namespace Apache.NMS.MQTT.Commands
 		public SUBSCRIBE()
 		{
 		}
+
+		public int CommandType
+		{
+			get { return TYPE; }
+		}
+
+		public int CommandName
+		{
+			get { return "SUBSCRIBE"; }
+		}
 	}
 }
 

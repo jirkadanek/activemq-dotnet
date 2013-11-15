@@ -76,6 +76,19 @@
     <Compile Include="src\main\csharp\Messages\BytesMessage.cs" />
     <Compile Include="src\main\csharp\Messages\MQTTMessage.cs" />
     <Compile Include="src\main\csharp\Transport\Command.cs" />
+    <Compile Include="src\main\csharp\Topic.cs" />
+    <Compile Include="src\main\csharp\Transport\BaseCommand.cs" />
+    <Compile Include="src\main\csharp\Transport\FutureResponse.cs" />
+    <Compile Include="src\main\csharp\Transport\Response.cs" />
+    <Compile Include="src\main\csharp\Threads\TimerEx.cs" />
+    <Compile Include="src\main\csharp\Threads\TimerTask.cs" />
+    <Compile Include="src\main\csharp\Util\FactoryAttribute.cs" />
+    <Compile Include="src\main\csharp\Util\FactoryFinder.cs" />
+    <Compile Include="src\main\csharp\Util\IdGenerator.cs" />
+    <Compile Include="src\main\csharp\ConnectionFailedException.cs" />
+    <Compile Include="src\main\csharp\Util\MQTTDestination.cs" />
+    <Compile Include="src\main\csharp\Transport\TransportFactory.cs" />
+    <Compile Include="src\main\csharp\Transport\MQTTTransportFactoryAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="keyfile\" />

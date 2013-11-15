@@ -16,7 +16,7 @@
 //
 using System;
 
-namespace Apache.NMS.MQTT.Command
+namespace Apache.NMS.MQTT.Commands
 {
 	public class CONNACK
 	{
@@ -32,6 +32,17 @@ namespace Apache.NMS.MQTT.Command
 		public CONNACK()
 		{
 		}
+
+		public int CommandType
+		{
+			get { return TYPE; }
+		}
+
+		public int CommandName
+		{
+			get { return "CONNACK"; }
+		}
+
 	}
 }
 

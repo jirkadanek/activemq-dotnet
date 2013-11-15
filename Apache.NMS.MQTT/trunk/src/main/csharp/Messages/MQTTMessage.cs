@@ -49,12 +49,7 @@ namespace Apache.NMS.MQTT.Messages
             return id != null ? id.GetHashCode() : base.GetHashCode();
         }
 
-	    public override byte GetDataStructureType()
-		{
-			return ID_ACTIVEMQMESSAGE;
-		}
-
-		public override object Clone()
+		public virtual object Clone()
 		{
 			MQTTMessage cloneMessage = (MQTTMessage) base.Clone();
 
@@ -118,20 +113,6 @@ namespace Apache.NMS.MQTT.Messages
 			}
 		}
 
-        public override bool ReadOnlyProperties
-        {
-            get{ return base.ReadOnlyProperties; }
-            
-            set
-            {
-                if(this.propertyHelper != null)
-                {
-                    this.propertyHelper.ReadOnly = value;
-                }
-                base.ReadOnlyProperties = value;
-            }
-        }
-        
 		#region Properties
 
 		public IPrimitiveMap Properties
@@ -385,26 +366,6 @@ namespace Apache.NMS.MQTT.Messages
 		public void SetObjectProperty(string name, object value)
 		{
 			Properties[name] = value;
-		}
-
-		// MarshallAware interface
-		public override bool IsMarshallAware()
-		{
-			return true;
-		}
-
-		public override void BeforeMarshall(OpenWireFormat wireFormat)
-		{
-			MarshalledProperties = null;
-			if(properties != null)
-			{
-				MarshalledProperties = properties.Marshal();
-			}
-		}
-
-		public override Response Visit(ICommandVisitor visitor)
-		{
-			return visitor.ProcessMessage(this);
 		}
 	}
 }

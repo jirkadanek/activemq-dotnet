@@ -25,6 +25,16 @@ namespace Apache.NMS.MQTT.Commands
 		public PUBREL()
 		{
 		}
+
+		public int CommandType
+		{
+			get { return TYPE; }
+		}
+
+		public int CommandName
+		{
+			get { return "PUBREL"; }
+		}
 	}
 }
 

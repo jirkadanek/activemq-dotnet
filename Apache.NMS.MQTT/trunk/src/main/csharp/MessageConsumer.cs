@@ -18,7 +18,7 @@ using System;
 using System.Threading;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using Apache.NMS.MQTT.Commands;
+using Apache.NMS.MQTT.Messages;
 using Apache.NMS.MQTT.Util;
 using Apache.NMS.MQTT.Threads;
 using Apache.NMS.Util;
@@ -27,6 +27,7 @@ namespace Apache.NMS.MQTT
 {
 	public class MessageConsumer : IMessageConsumer, IDispatcher
 	{
+        private readonly Session session;
         private readonly MessageTransformation messageTransformation;
         private readonly MessageDispatchChannel unconsumedMessages;
         private readonly LinkedList<MessageDispatch> dispatchedMessages = new LinkedList<MessageDispatch>();
@@ -61,7 +62,110 @@ namespace Apache.NMS.MQTT
 			set { this.consumerTransformer = value; }
 		}
 
+
+		public event MessageListener Listener
+		{
+			add
+			{
+				CheckClosed();
+
+				bool wasStarted = this.session.Started;
+
+				if(wasStarted)
+				{
+					this.session.Stop();
+				}
+
+				listener += value;
+				this.session.Redispatch(this.unconsumedMessages);
+
+				if(wasStarted)
+				{
+					this.session.Start();
+				}
+			}
+			remove { listener -= value; }
+		}
+
 		#endregion
+
+		public void Start()
+		{
+			if(this.unconsumedMessages.Closed)
+			{
+				return;
+			}
+
+			this.started.Value = true;
+			this.unconsumedMessages.Start();
+			this.session.Executor.Wakeup();
+		}
+
+		public void Stop()
+		{
+			this.started.Value = false;
+			this.unconsumedMessages.Stop();
+		}
+
+		public bool Iterate()
+		{
+			if(this.listener != null)
+			{
+				MessageDispatch dispatch = this.unconsumedMessages.DequeueNoWait();
+				if(dispatch != null)
+				{
+					this.Dispatch(dispatch);
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		private void CheckClosed()
+		{
+			if(this.unconsumedMessages.Closed)
+			{
+				throw new NMSException("The Consumer has been Closed");
+			}
+		}
+
+		private void CheckMessageListener()
+		{
+			if(this.listener != null)
+			{
+				throw new NMSException("Cannot set Async listeners on Consumers with a prefetch limit of zero");
+			}
+		}
+
+		protected bool IsAutoAcknowledgeEach
+		{
+			get
+			{
+				return this.session.IsAutoAcknowledge ||
+					   (this.session.IsDupsOkAcknowledge && this.info.Destination.IsQueue);
+			}
+		}
+
+	    protected bool IsAutoAcknowledgeBatch
+		{
+			get { return this.session.IsDupsOkAcknowledge && !this.info.Destination.IsQueue; }
+		}
+
+        protected bool IsIndividualAcknowledge
+		{
+			get { return this.session.IsIndividualAcknowledge; }
+		}
+
+        protected bool IsClientAcknowledge
+		{
+			get { return this.session.IsClientAcknowledge; }
+		}
+
+	    internal bool Closed
+	    {
+            get { return this.unconsumedMessages.Closed; }
+	    }
 
 	}
 }
