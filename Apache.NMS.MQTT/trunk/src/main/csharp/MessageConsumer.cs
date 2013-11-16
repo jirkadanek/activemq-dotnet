@@ -36,6 +36,7 @@ namespace Apache.NMS.MQTT
 
         private Exception failureError;
 		private ThreadPoolExecutor executor;
+		private int consumerId;
 
 		private event MessageListener listener;
 
@@ -77,7 +78,7 @@ namespace Apache.NMS.MQTT
 				}
 
 				listener += value;
-				this.session.Redispatch(this.unconsumedMessages);
+				//this.session.Redispatch(this.unconsumedMessages);
 
 				if(wasStarted)
 				{
@@ -85,6 +86,11 @@ namespace Apache.NMS.MQTT
 				}
 			}
 			remove { listener -= value; }
+		}
+
+		public int ConsumerId
+		{
+			get { return this.consumerId; }
 		}
 
 		#endregion
@@ -114,7 +120,7 @@ namespace Apache.NMS.MQTT
 				MessageDispatch dispatch = this.unconsumedMessages.DequeueNoWait();
 				if(dispatch != null)
 				{
-					this.Dispatch(dispatch);
+					//this.Dispatch(dispatch);
 					return true;
 				}
 			}
@@ -138,18 +144,9 @@ namespace Apache.NMS.MQTT
 			}
 		}
 
-		protected bool IsAutoAcknowledgeEach
+	    protected bool IsAutoAcknowledge
 		{
-			get
-			{
-				return this.session.IsAutoAcknowledge ||
-					   (this.session.IsDupsOkAcknowledge && this.info.Destination.IsQueue);
-			}
-		}
-
-	    protected bool IsAutoAcknowledgeBatch
-		{
-			get { return this.session.IsDupsOkAcknowledge && !this.info.Destination.IsQueue; }
+			get { return this.session.IsAutoAcknowledge; }
 		}
 
         protected bool IsIndividualAcknowledge

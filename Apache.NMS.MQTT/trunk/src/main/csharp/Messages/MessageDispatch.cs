@@ -49,12 +49,6 @@ namespace Apache.NMS.MQTT.Messages
                 "Message = " + Message + " ]";
         }
 
-        public Exception RollbackCause
-        {
-            get { return this.rollbackCause; }
-            set { this.rollbackCause = value; }
-        }
-
         public Topic Destination
         {
             get { return destination; }

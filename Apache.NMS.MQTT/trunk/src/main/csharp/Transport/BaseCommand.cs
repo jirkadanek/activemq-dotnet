@@ -116,6 +116,11 @@ namespace Apache.NMS.MQTT.Transport
 			get { return false; }
         }
 
+        public virtual bool IsPUBCOMP
+		{
+			get { return false; }
+        }
+
         public virtual bool IsSUBACK
         {
 			get { return false; }

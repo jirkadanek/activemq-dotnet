@@ -15,25 +15,27 @@
 // limitations under the License.
 //
 using System;
+using Apache.NMS.MQTT.Transport;
 
 namespace Apache.NMS.MQTT.Commands
 {
-	public class DISCONNECT
+	public class DISCONNECT : BaseCommand
 	{
 		public const byte TYPE = 14;
-
-		public DISCONNECT()
-		{
-		}
 
 		public int CommandType
 		{
 			get { return TYPE; }
 		}
 
-		public int CommandName
+		public string CommandName
 		{
 			get { return "DISCONNECT"; }
+		}
+
+		public override bool IsDISCONNECT
+		{
+			get { return true; }
 		}
 	}
 }

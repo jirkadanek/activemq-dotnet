@@ -53,6 +53,7 @@ namespace Apache.NMS.MQTT
         private readonly MessageTransformation messageTransformation;
         private readonly ThreadPoolExecutor executor = new ThreadPoolExecutor();
 		private readonly IdGenerator clientIdGenerator;
+		private IRedeliveryPolicy redeliveryPolicy;
 
 		public Connection(Uri connectionUri, ITransport transport, IdGenerator clientIdGenerator)
 		{
@@ -193,6 +194,15 @@ namespace Apache.NMS.MQTT
 		internal MessageTransformation MessageTransformation
 		{
 			get { return this.messageTransformation; }
+		}
+
+		/// <summary>
+		/// Get/or set the redelivery policy for this connection.
+		/// </summary>
+		public IRedeliveryPolicy RedeliveryPolicy
+		{
+			get { return this.redeliveryPolicy; }
+			set { this.redeliveryPolicy = value; }
 		}
 
 		#endregion
@@ -357,6 +367,11 @@ namespace Apache.NMS.MQTT
 			disposed = true;
 		}
 
+		public void PurgeTempDestinations()
+		{
+			throw new NotSupportedException("MQTT does not support temp destinations.");
+		}
+
 		protected void OnCommand(ITransport commandTransport, Command command)
 		{
 		}
@@ -435,34 +450,34 @@ namespace Apache.NMS.MQTT
 
 										// Send the connection and see if an ack/nak is returned.
 										Response response = transport.Request(this.info, this.RequestTimeout);
-										if(!(response is ExceptionResponse))
+										if(!response.IsErrorResponse)
 										{
 											connected.Value = true;
 										}
 										else
 										{
-											ExceptionResponse error = response as ExceptionResponse;
-											NMSException exception = CreateExceptionFromBrokerError(error.Exception);
-											if(exception is InvalidClientIDException)
-											{
-												// This is non-recoverable.
-												// Shutdown the transport connection, and re-create it, but don't start it.
-												// It will be started if the connection is re-attempted.
-												this.transport.Stop();
-												ITransport newTransport = TransportFactory.CreateTransport(this.brokerUri);
-												SetTransport(newTransport);
-												throw exception;
-											}
+											// TODO figure out correct error to throw.
+//											NMSException exception = CreateExceptionFromBrokerError(error.Exception);
+//											if(exception is InvalidClientIDException)
+//											{
+//												// This is non-recoverable.
+//												// Shutdown the transport connection, and re-create it, but don't start it.
+//												// It will be started if the connection is re-attempted.
+//												this.transport.Stop();
+//												ITransport newTransport = TransportFactory.CreateTransport(this.brokerUri);
+//												SetTransport(newTransport);
+//												throw exception;
+//											}
 										}
 									}
-								}
-								catch(BrokerException)
-								{
-									// We Swallow the generic version and throw ConnectionClosedException
 								}
 								catch(NMSException)
 								{
 									throw;
+								}
+								catch(Exception)
+								{
+									// We Swallow the generic version and throw ConnectionClosedException
 								}
 							}
 						}

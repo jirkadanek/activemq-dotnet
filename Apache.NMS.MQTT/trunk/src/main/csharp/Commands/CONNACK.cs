@@ -15,10 +15,11 @@
 // limitations under the License.
 //
 using System;
+using Apache.NMS.MQTT.Transport;
 
 namespace Apache.NMS.MQTT.Commands
 {
-	public class CONNACK
+	public class CONNACK : BaseCommand
 	{
 		public const byte TYPE = 2;
 
@@ -29,20 +30,20 @@ namespace Apache.NMS.MQTT.Commands
 			set { this.returnCode = value; }
 		}
 
-		public CONNACK()
-		{
-		}
-
 		public int CommandType
 		{
 			get { return TYPE; }
 		}
 
-		public int CommandName
+		public string CommandName
 		{
 			get { return "CONNACK"; }
 		}
 
+		public override bool IsCONNACK
+		{
+			get { return true; }
+		}
 	}
 }
 

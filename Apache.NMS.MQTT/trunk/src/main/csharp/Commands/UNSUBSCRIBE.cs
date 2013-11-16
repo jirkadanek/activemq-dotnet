@@ -15,25 +15,34 @@
 // limitations under the License.
 //
 using System;
+using Apache.NMS.MQTT.Transport;
 
 namespace Apache.NMS.MQTT.Commands
 {
-	public class UNSUBSCRIBE
+	public class UNSUBSCRIBE : BaseCommand
 	{
 		public const byte TYPE = 9;
-
-		public UNSUBSCRIBE()
-		{
-		}
 
 		public int CommandType
 		{
 			get { return TYPE; }
 		}
 
-		public int CommandName
+		public string CommandName
 		{
 			get { return "UNSUBSCRIBE"; }
+		}
+
+		public override bool IsUNSUBSCRIBE
+		{
+			get { return true; }
+		}
+
+		private string[] topics;
+		public string[] Topics
+		{
+			get { return this.topics; }
+			set { this.topics = value; }
 		}
 	}
 }

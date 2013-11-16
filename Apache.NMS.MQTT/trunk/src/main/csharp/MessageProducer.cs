@@ -31,6 +31,7 @@ namespace Apache.NMS.MQTT
 		private MsgDeliveryMode msgDeliveryMode = NMSConstants.defaultDeliveryMode;
 		private TimeSpan requestTimeout;
 		protected bool disposed = false;
+		private int producerId;
 
 		private readonly MessageTransformation messageTransformation;
 
@@ -45,6 +46,21 @@ namespace Apache.NMS.MQTT
 		{
 			Dispose(false);
 		}
+
+		#region MessageProducer Property Accessors
+
+		public int ProducerId
+		{
+			get { return this.producerId; }
+		}
+
+		public TimeSpan RequestTimeout
+		{
+			get { return requestTimeout; }
+			set { this.requestTimeout = value; }
+		}
+
+		#endregion
 
 		public void Dispose()
 		{

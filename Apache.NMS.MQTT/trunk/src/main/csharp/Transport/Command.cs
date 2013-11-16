@@ -99,6 +99,11 @@ namespace Apache.NMS.MQTT.Transport
 			get;
         }
 
+        bool IsPUBCOMP
+        {
+			get;
+        }
+
         bool IsSUBACK
         {
 			get;

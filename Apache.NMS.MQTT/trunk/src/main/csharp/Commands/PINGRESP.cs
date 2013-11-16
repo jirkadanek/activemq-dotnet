@@ -15,25 +15,27 @@
 // limitations under the License.
 //
 using System;
+using Apache.NMS.MQTT.Transport;
 
 namespace Apache.NMS.MQTT.Commands
 {
-	public class PINGRESP
+	public class PINGRESP : BaseCommand
 	{
 		public const byte TYPE = 13;
-
-		public PINGRESP()
-		{
-		}
 
 		public int CommandType
 		{
 			get { return TYPE; }
 		}
 
-		public int CommandName
+		public string CommandName
 		{
 			get { return "PINGRESP"; }
+		}
+
+		public override bool IsPINGRESP
+		{
+			get { return true; }
 		}
 	}
 }

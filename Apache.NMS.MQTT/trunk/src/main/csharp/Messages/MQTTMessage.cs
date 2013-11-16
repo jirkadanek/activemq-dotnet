@@ -23,12 +23,13 @@ namespace Apache.NMS.MQTT.Messages
 {
 	public delegate void AcknowledgeHandler(MQTTMessage message);
 
-	public class MQTTMessage : IMessage
+	public class MQTTMessage : IMessage, ICloneable
 	{
 		private readonly PUBLISH publish = new PUBLISH();
 		private MessagePropertyIntercepter propertyHelper;
 		private PrimitiveMap properties;
 		private Connection connection;
+		private Topic destination;
 
 		public event AcknowledgeHandler Acknowledger;
 
@@ -39,7 +40,6 @@ namespace Apache.NMS.MQTT.Messages
 
 		public MQTTMessage() : base()
 		{
-			Timestamp = DateUtils.ToJavaTimeUtc(DateTime.UtcNow);
 		}
 
         public override int GetHashCode()
@@ -133,12 +133,6 @@ namespace Apache.NMS.MQTT.Messages
 			}
 		}
 
-		public IDestination FromDestination
-		{
-			get { return Destination; }
-			set { this.Destination = ActiveMQDestination.Transform(value); }
-		}
-		
 		public Connection Connection
 		{
 			get { return this.connection; }
@@ -301,59 +295,8 @@ namespace Apache.NMS.MQTT.Messages
 		/// </summary>
 		public string NMSType
 		{
-			get { return Type; }
-			set { Type = value; }
-		}
-
-		#endregion
-
-		#region NMS Extension headers
-
-		/// <summary>
-		/// Returns the number of times this message has been redelivered to other consumers without being acknowledged successfully.
-		/// </summary>
-		public int NMSXDeliveryCount
-		{
-			get { return RedeliveryCounter + 1; }
-		}
-
-		/// <summary>
-		/// The Message Group ID used to group messages together to the same consumer for the same group ID value
-		/// </summary>
-		public string NMSXGroupID
-		{
-			get { return GroupID; }
-			set { GroupID = value; }
-		}
-		/// <summary>
-		/// The Message Group Sequence counter to indicate the position in a group
-		/// </summary>
-		public int NMSXGroupSeq
-		{
-			get { return GroupSequence; }
-			set { GroupSequence = value; }
-		}
-
-		/// <summary>
-		/// Returns the ID of the producers transaction
-		/// </summary>
-		public string NMSXProducerTXID
-		{
-			get
-			{
-				TransactionId txnId = OriginalTransactionId;
-				if(null == txnId)
-				{
-					txnId = TransactionId;
-				}
-
-				if(null != txnId)
-				{
-					return BaseDataStreamMarshaller.ToString(txnId);
-				}
-
-				return String.Empty;
-			}
+			get { return publish.CommandName; }
+			set {  }
 		}
 
 		#endregion

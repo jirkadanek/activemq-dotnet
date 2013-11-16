@@ -55,6 +55,11 @@ namespace Apache.NMS.MQTT.Transport
             get { return true; }
         }
 
+        public bool IsErrorResponse
+        {
+            get { return false; }
+        }
+
     };
 }
 

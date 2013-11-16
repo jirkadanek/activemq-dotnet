@@ -15,6 +15,7 @@
 // limitations under the License.
 //
 using System;
+using Apache.NMS.MQTT.Transport;
 
 namespace Apache.NMS.MQTT.Commands
 {
@@ -27,7 +28,7 @@ namespace Apache.NMS.MQTT.Commands
     /// in the application the appropriate payload flag fields to handle the compression details.
     /// You cannot define application-specific flags in the fixed or variable headers.
 	/// </summary>
-	public class PUBLISH
+	public class PUBLISH : BaseCommand
 	{
 		public const byte TYPE = 3;
 
@@ -36,9 +37,14 @@ namespace Apache.NMS.MQTT.Commands
 			get { return TYPE; }
 		}
 
-		public int CommandName
+		public string CommandName
 		{
 			get { return "PUBLISH"; }
+		}
+
+		public override bool IsPUBLISH
+		{
+			get { return true; }
 		}
 
 		private byte qosLevel;
@@ -81,10 +87,6 @@ namespace Apache.NMS.MQTT.Commands
 		{
 			get { return this.payload; }
 			set { this.payload = value; }
-		}
-
-		public PUBLISH()
-		{
 		}
 	}
 }

@@ -39,8 +39,11 @@ namespace Apache.NMS.MQTT
         protected bool disposed = false;
         protected bool closed = false;
         protected bool closing = false;
+		private int sessionId;
 
         private readonly AcknowledgementMode acknowledgementMode;
+        private TimeSpan disposeStopTimeout = TimeSpan.FromMilliseconds(30000);
+        private TimeSpan requestTimeout;
 
 		public Session(Connection connection, AcknowledgementMode acknowledgementMode)
 		{
@@ -64,6 +67,31 @@ namespace Apache.NMS.MQTT
         {
             Dispose(false);
         }
+
+        #region Session Transaction Events
+
+        // We delegate the events to the TransactionContext since it knows
+        // what the state is for both Local and DTC transactions.
+
+        public event SessionTxEventDelegate TransactionStartedListener
+        {
+			add { throw new NotSupportedException("MQTT Does not implement transactions"); }
+            remove { throw new NotSupportedException("MQTT Does not implement transactions"); }
+        }
+
+        public event SessionTxEventDelegate TransactionCommittedListener
+        {
+            add { throw new NotSupportedException("MQTT Does not implement transactions"); }
+            remove { throw new NotSupportedException("MQTT Does not implement transactions"); }
+        }
+
+        public event SessionTxEventDelegate TransactionRolledBackListener
+        {
+            add { throw new NotSupportedException("MQTT Does not implement transactions"); }
+            remove { throw new NotSupportedException("MQTT Does not implement transactions"); }
+        }
+
+        #endregion
 
         #region Property Accessors
 
@@ -97,9 +125,25 @@ namespace Apache.NMS.MQTT
             get{ return this.acknowledgementMode == AcknowledgementMode.Transactional; }
         }
 
+        public Connection Connection
+        {
+            get { return this.connection; }
+        }
+
+        public bool Transacted
+        {
+            get { return this.IsTransacted; }
+        }
+
         public SessionExecutor Executor
         {
             get { return this.executor; }
+        }
+
+        public TimeSpan RequestTimeout
+        {
+            get { return this.requestTimeout; }
+            set { this.requestTimeout = value; }
         }
 
         private ConsumerTransformerDelegate consumerTransformer;
@@ -164,9 +208,9 @@ namespace Apache.NMS.MQTT
             {
                 try
                 {
-                    Tracer.InfoFormat("Closing The Session with Id {0}", this.info.SessionId);
+                    Tracer.InfoFormat("Closing The Session with Id {0}", this.sessionId);
                     DoClose();
-                    Tracer.InfoFormat("Closed The Session with Id {0}", this.info.SessionId);
+                    Tracer.InfoFormat("Closed The Session with Id {0}", this.sessionId);
                 }
                 catch (Exception ex)
                 {
@@ -174,6 +218,10 @@ namespace Apache.NMS.MQTT
                 }
             }
         }
+
+		internal void DoClose()
+		{
+		}
 
         public IMessageProducer CreateProducer()
         {
@@ -247,6 +295,11 @@ namespace Apache.NMS.MQTT
         public ITemporaryTopic CreateTemporaryTopic()
         {
             throw new NotSupportedException("Not supported with MQTT Protocol");
+        }
+
+        public void DeleteDurableConsumer(string name)
+        {
+            throw new NotSupportedException("MQTT Cannot delete Durable Consumers");
         }
 
         /// <summary>
@@ -356,17 +409,17 @@ namespace Apache.NMS.MQTT
         {
             if(!this.closing)
             {
-                ConsumerId id = consumer.ConsumerId;
+                int id = consumer.ConsumerId;
 
                 // Registered with Connection before we register at the broker.
                 consumers[id] = consumer;
-                connection.AddDispatcher(id, this);
+                //connection.AddDispatcher(id, this);
             }
         }
 
         public void RemoveConsumer(MessageConsumer consumer)
         {
-            connection.RemoveDispatcher(consumer.ConsumerId);
+            //connection.RemoveDispatcher(consumer.ConsumerId);
             if(!this.closing)
             {
                 consumers.Remove(consumer.ConsumerId);
@@ -378,10 +431,10 @@ namespace Apache.NMS.MQTT
         {
             if(!this.closing)
             {
-                ProducerId id = producer.ProducerId;
+                int id = producer.ProducerId;
 
                 this.producers[id] = producer;
-                this.connection.AddProducer(id, producer);
+                //this.connection.AddProducer(id, producer);
             }
         }
 
@@ -393,6 +446,14 @@ namespace Apache.NMS.MQTT
 //                producers.Remove(objectId);
 //            }
 //        }
+
+        public void Dispatch(MessageDispatch dispatch)
+        {
+            if(this.executor != null)
+            {
+                this.executor.Execute(dispatch);
+            }
+        }
 
         private MQTTMessage ConfigureMessage(MQTTMessage message)
         {

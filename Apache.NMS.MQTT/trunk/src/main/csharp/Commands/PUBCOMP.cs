@@ -19,11 +19,7 @@ using Apache.NMS.MQTT.Transport;
 
 namespace Apache.NMS.MQTT.Commands
 {
-	/// <summary>
-	/// The payload contains a list of topic names to which the client can subscribe, and
-    /// the QoS level. These strings are UTF-encoded.
-	/// </summary>
-	public class SUBSCRIBE : BaseCommand
+	public class PUBCOMP : BaseCommand
 	{
 		public const byte TYPE = 7;
 
@@ -34,10 +30,10 @@ namespace Apache.NMS.MQTT.Commands
 
 		public string CommandName
 		{
-			get { return "SUBSCRIBE"; }
+			get { return "PUBCOMP"; }
 		}
 
-		public override bool IsSUBSCRIBE
+		public override bool IsPUBCOMP
 		{
 			get { return true; }
 		}

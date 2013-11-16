@@ -15,6 +15,7 @@
 // limitations under the License.
 // 
 using System;
+using Apache.NMS.MQTT.Transport;
 
 namespace Apache.NMS.MQTT.Commands
 {
@@ -26,7 +27,7 @@ namespace Apache.NMS.MQTT.Commands
     /// to use. All but the first are optional and their presence is determined based on flags
     /// in the variable header.
 	/// </summary>
-	public class CONNECT
+	public class CONNECT : BaseCommand
 	{
 		public const byte TYPE = 1;
 		public const String PROTOCOL_NAME = "MQIsdp";
@@ -36,9 +37,14 @@ namespace Apache.NMS.MQTT.Commands
 			get { return TYPE; }
 		}
 
-		public int CommandName
+		public string CommandName
 		{
 			get { return "CONNECT"; }
+		}
+
+		public override bool IsCONNECT
+		{
+			get { return true; }
 		}
 
 		private byte version = 3;
@@ -91,7 +97,7 @@ namespace Apache.NMS.MQTT.Commands
 		}
 
 		private short keepAliveTimer = 10;
-		public bool KeepAliveTimer
+		public short KeepAliveTimer
 		{
 			get { return this.keepAliveTimer; }
 			set { this.keepAliveTimer = value; }
@@ -109,10 +115,6 @@ namespace Apache.NMS.MQTT.Commands
 		{
 			get { return this.willMessage; }
 			set { this.willMessage = value; }
-		}
-
-		public CONNECT()
-		{
 		}
 	}
 }

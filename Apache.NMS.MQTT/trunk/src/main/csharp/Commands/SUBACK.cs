@@ -15,6 +15,7 @@
 // limitations under the License.
 //
 using System;
+using Apache.NMS.MQTT.Transport;
 
 namespace Apache.NMS.MQTT.Commands
 {
@@ -24,22 +25,23 @@ namespace Apache.NMS.MQTT.Commands
     /// particular Topic Name. Granted QoS levels are listed in the same order as the topic
     /// names in the corresponding SUBSCRIBE message.
 	/// </summary>
-	public class SUBACK
+	public class SUBACK : BaseCommand
 	{
 		public const byte TYPE = 8;
-
-		public SUBACK()
-		{
-		}
 
 		public int CommandType
 		{
 			get { return TYPE; }
 		}
 
-		public int CommandName
+		public string CommandName
 		{
 			get { return "SUBACK"; }
+		}
+
+		public override bool IsSUBACK
+		{
+			get { return true; }
 		}
 	}
 }

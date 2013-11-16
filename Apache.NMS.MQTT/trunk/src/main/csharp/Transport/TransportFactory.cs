@@ -27,7 +27,7 @@ namespace Apache.NMS.MQTT.Transport
         public static event ExceptionListener OnException;
 
         private static readonly FactoryFinder<MQTTTransportFactoryAttribute, ITransportFactory> FACTORY_FINDER =
-            new FactoryFinder<ActiveMQTransportFactoryAttribute, ITransportFactory>();
+            new FactoryFinder<MQTTTransportFactoryAttribute, ITransportFactory>();
 
         private readonly static object TRANSPORT_FACTORY_TYPES_LOCK = new object();
         private readonly static IDictionary<String, Type> TRANSPORT_FACTORY_TYPES = new Dictionary<String, Type>();

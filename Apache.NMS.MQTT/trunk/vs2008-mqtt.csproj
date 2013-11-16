@@ -89,6 +89,8 @@
     <Compile Include="src\main\csharp\Util\MQTTDestination.cs" />
     <Compile Include="src\main\csharp\Transport\TransportFactory.cs" />
     <Compile Include="src\main\csharp\Transport\MQTTTransportFactoryAttribute.cs" />
+    <Compile Include="src\main\csharp\Commands\PUBCOMP.cs" />
+    <Compile Include="src\main\csharp\RequestTimedOutException.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="keyfile\" />
