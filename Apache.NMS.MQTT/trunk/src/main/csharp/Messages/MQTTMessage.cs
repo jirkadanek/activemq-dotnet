@@ -30,6 +30,7 @@ namespace Apache.NMS.MQTT.Messages
 		private PrimitiveMap properties;
 		private Connection connection;
 		private Topic destination;
+		private short messageId;
 
 		public event AcknowledgeHandler Acknowledger;
 
@@ -92,9 +93,6 @@ namespace Apache.NMS.MQTT.Messages
 
 		public virtual void ClearProperties()
 		{
-			this.MarshalledProperties = null;
-			this.ReadOnlyProperties = false;
-			this.Properties.Clear();
 		}
 
 		protected void FailIfReadOnlyBody()
@@ -297,6 +295,12 @@ namespace Apache.NMS.MQTT.Messages
 		{
 			get { return publish.CommandName; }
 			set {  }
+		}
+
+		public int MessageId
+		{
+			get { return this.messageId; }
+			set { this.messageId = value; }
 		}
 
 		#endregion

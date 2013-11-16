@@ -438,14 +438,14 @@ namespace Apache.NMS.MQTT
             }
         }
 
-//        public void RemoveProducer(ProducerId objectId)
-//        {
-//            connection.RemoveProducer(objectId);
-//            if(!this.closing)
-//            {
-//                producers.Remove(objectId);
-//            }
-//        }
+        public void RemoveProducer(int producerId)
+        {
+            connection.RemoveProducer(producerId);
+            if(!this.closing)
+            {
+                producers.Remove(producerId);
+            }
+        }
 
         public void Dispatch(MessageDispatch dispatch)
         {

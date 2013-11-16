@@ -35,15 +35,7 @@ namespace Apache.NMS.MQTT
         {
             this.session = session;
             this.consumers = consumers;
-
-            if(this.session.Connection != null && this.session.Connection.MessagePrioritySupported)
-            {
-               this.messageQueue = new SimplePriorityMessageDispatchChannel();
-            }
-            else
-            {
-                this.messageQueue = new FifoMessageDispatchChannel();
-            }
+            this.messageQueue = new FifoMessageDispatchChannel();
         }
 
         ~SessionExecutor()
@@ -146,10 +138,10 @@ namespace Apache.NMS.MQTT
 
                 lock(this.consumers.SyncRoot)
                 {
-                    if(this.consumers.Contains(dispatch.ConsumerId))
-                    {
-                        consumer = this.consumers[dispatch.ConsumerId] as MessageConsumer;
-                    }
+//                    if(this.consumers.Contains(dispatch.ConsumerId))
+//                    {
+//                        consumer = this.consumers[dispatch.ConsumerId] as MessageConsumer;
+//                    }
                 }
 				
                 // If the consumer is not available, just ignore the message.

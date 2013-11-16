@@ -32,6 +32,7 @@ namespace Apache.NMS.MQTT
 		private TimeSpan requestTimeout;
 		protected bool disposed = false;
 		private int producerId;
+		private Topic destination;
 
 		private readonly MessageTransformation messageTransformation;
 
@@ -58,6 +59,41 @@ namespace Apache.NMS.MQTT
 		{
 			get { return requestTimeout; }
 			set { this.requestTimeout = value; }
+		}
+
+		public MsgDeliveryMode DeliveryMode
+		{
+			get { return msgDeliveryMode; }
+			set { this.msgDeliveryMode = value; }
+		}
+
+		public TimeSpan TimeToLive
+		{
+			get { return TimeSpan.MaxValue; }
+			set {}
+		}
+
+		public MsgPriority Priority
+		{
+			get { return MsgPriority.Normal; }
+			set {}
+		}
+
+		public bool DisableMessageID
+		{
+			get { return false; }
+			set {}
+		}
+
+		public bool DisableMessageTimestamp
+		{
+			get { return false; }
+			set {}
+		}
+
+		public Topic Destination
+		{
+			get { return this.destination; }
 		}
 
 		#endregion
@@ -119,7 +155,7 @@ namespace Apache.NMS.MQTT
 
 				try
 				{
-					session.RemoveProducer(info.ProducerId);
+					session.RemoveProducer(ProducerId);
 				}
 				catch(Exception ex)
 				{
@@ -132,25 +168,25 @@ namespace Apache.NMS.MQTT
 
 		public void Send(IMessage message)
 		{
-			Send(info.Destination, message, this.msgDeliveryMode, this.msgPriority, this.msgTimeToLive, false);
+			Send(Destination, message, this.msgDeliveryMode);
 		}
 
 		public void Send(IDestination destination, IMessage message)
 		{
-			Send(destination, message, this.msgDeliveryMode, this.msgPriority, this.msgTimeToLive, false);
+			Send(destination, message, this.msgDeliveryMode);
 		}
 
 		public void Send(IMessage message, MsgDeliveryMode deliveryMode, MsgPriority priority, TimeSpan timeToLive)
 		{
-			Send(info.Destination, message, deliveryMode, priority, timeToLive, true);
+			Send(Destination, message, deliveryMode);
 		}
 
 		public void Send(IDestination destination, IMessage message, MsgDeliveryMode deliveryMode, MsgPriority priority, TimeSpan timeToLive)
 		{
-			Send(destination, message, deliveryMode, priority, timeToLive, true);
+			Send(destination, message, deliveryMode);
 		}
 
-		protected void Send(IDestination destination, IMessage message, MsgDeliveryMode deliveryMode, MsgPriority priority, TimeSpan timeToLive, bool specifiedTimeToLive)
+		protected void Send(IDestination destination, IMessage message, MsgDeliveryMode deliveryMode)
 		{
 		}
 

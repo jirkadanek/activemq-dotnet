@@ -37,6 +37,7 @@ namespace Apache.NMS.MQTT
 		private readonly Uri brokerUri;
         private readonly IList sessions = ArrayList.Synchronized(new ArrayList());
         private readonly IDictionary dispatchers = Hashtable.Synchronized(new Hashtable());
+		private readonly IDictionary producers = Hashtable.Synchronized(new Hashtable());
         private readonly object myLock = new object();
         private readonly Atomic<bool> connected = new Atomic<bool>(false);
         private readonly Atomic<bool> closed = new Atomic<bool>(false);
@@ -324,14 +325,14 @@ namespace Apache.NMS.MQTT
 //				this.producers.Add(id, producer);
 //			}
 //		}
-//
-//		internal void RemoveProducer(ProducerId id)
-//		{
-//			if(!this.closing.Value)
-//			{
-//				this.producers.Remove(id);
-//			}
-//		}
+
+		internal void RemoveProducer(int id)
+		{
+			if(!this.closing.Value)
+			{
+				this.producers.Remove(id);
+			}
+		}
 
 	    internal void RemoveDispatcher(IDispatcher dispatcher) 
 		{
@@ -386,6 +387,21 @@ namespace Apache.NMS.MQTT
 
 		protected void OnTransportResumed(ITransport sender)
 		{
+		}
+
+		internal void OnSessionException(Session sender, Exception exception)
+		{
+			if(ExceptionListener != null)
+			{
+				try
+				{
+					ExceptionListener(exception);
+				}
+				catch
+				{
+					sender.Close();
+				}
+			}
 		}
 
 		protected void CheckClosedOrFailed()
