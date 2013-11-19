@@ -30,12 +30,12 @@ namespace Apache.NMS.MQTT.Commands
 			set { this.returnCode = value; }
 		}
 
-		public int CommandType
+		public override int CommandType
 		{
 			get { return TYPE; }
 		}
 
-		public string CommandName
+		public override string CommandName
 		{
 			get { return "CONNACK"; }
 		}

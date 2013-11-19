@@ -17,7 +17,7 @@
 
 using System;
 using Apache.NMS.Util;
-using Apache.NMS.MQTT.Commands;
+using Apache.NMS.MQTT.Messages;
 
 namespace Apache.NMS.MQTT.Util
 {
@@ -39,7 +39,9 @@ namespace Apache.NMS.MQTT.Util
 
         protected override IBytesMessage DoCreateBytesMessage()
         {
-			return null;
+			BytesMessage message = new BytesMessage();
+			message.Connection = connection;
+			return message;
         }
 
         protected override ITextMessage DoCreateTextMessage()

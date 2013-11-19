@@ -38,11 +38,39 @@ namespace Apache.NMS.MQTT
 		private ThreadPoolExecutor executor;
 		private int consumerId;
 		protected bool disposed = false;
+		private Topic destination = null;
 
 		private event MessageListener listener;
 
-		public MessageConsumer()
+		public MessageConsumer(Session session, Topic destination, int consumerId)
 		{
+			if(destination == null)
+			{
+				throw new InvalidDestinationException("Consumer cannot receive on Null Destinations.");
+            }
+            else if(destination.TopicName == null)
+            {
+                throw new InvalidDestinationException("The destination object was not given a physical name.");
+            }
+
+			this.session = session;
+			this.consumerId = consumerId;
+			this.destination = destination;
+			this.messageTransformation = this.session.Connection.MessageTransformation;
+			this.unconsumedMessages = new FifoMessageDispatchChannel();
+
+			// If the destination contained a URI query, then use it to set public properties
+			// on the ConsumerInfo
+			if(destination.Options != null)
+			{
+				// Get options prefixed with "consumer.*"
+				StringDictionary options = URISupport.GetProperties(destination.Options, "consumer.");
+				// Extract out custom extension options "consumer.nms.*"
+				StringDictionary customConsumerOptions = URISupport.ExtractProperties(options, "nms.");
+
+				URISupport.SetProperties(this, options);
+				URISupport.SetProperties(this, customConsumerOptions, "nms.");
+			}
 		}
 
 		#region Property Accessors
@@ -92,6 +120,11 @@ namespace Apache.NMS.MQTT
 		public int ConsumerId
 		{
 			get { return this.consumerId; }
+		}
+
+		public Topic Destination
+		{
+			get { return this.destination; }
 		}
 
 		#endregion

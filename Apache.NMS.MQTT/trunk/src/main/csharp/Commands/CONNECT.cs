@@ -32,12 +32,12 @@ namespace Apache.NMS.MQTT.Commands
 		public const byte TYPE = 1;
 		public const String PROTOCOL_NAME = "MQIsdp";
 
-		public int CommandType
+		public override int CommandType
 		{
 			get { return TYPE; }
 		}
 
-		public string CommandName
+		public override string CommandName
 		{
 			get { return "CONNECT"; }
 		}

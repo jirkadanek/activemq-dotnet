@@ -36,11 +36,20 @@ namespace Apache.NMS.MQTT
 
 		private readonly MessageTransformation messageTransformation;
 
-		public MessageProducer(Session session, TimeSpan requestTimeout)
+		public MessageProducer(Session session, Topic destination, TimeSpan requestTimeout, int producerId)
 		{
 			this.session = session;
 			this.RequestTimeout = requestTimeout;
+			this.producerId = producerId;
+			this.destination = destination;
 			this.messageTransformation = session.Connection.MessageTransformation;
+
+			// If the destination contained a URI query, then use it to set public
+			// properties on the ProducerInfo
+			if (destination != null && destination.Options != null)
+			{
+				URISupport.SetProperties(this, destination.Options, "producer.");
+			}
 		}
 
 		~MessageProducer()

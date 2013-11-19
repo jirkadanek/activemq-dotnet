@@ -15,6 +15,7 @@
 // limitations under the License.
 //
 using System;
+using System.Collections.Specialized;
 
 namespace Apache.NMS.MQTT
 {
@@ -23,7 +24,8 @@ namespace Apache.NMS.MQTT
 	/// </summary>
 	public class Topic : ITopic
 	{
-		string name;
+		private string name;
+		private StringDictionary options = null;
 
 		public Topic(string name)
 		{
@@ -53,6 +55,16 @@ namespace Apache.NMS.MQTT
 		public bool IsTemporary 
 		{ 
 			get { return false; }
+		}
+
+		/// <summary>
+		/// Dictionary of name/value pairs representing option values specified
+		/// in the URI used to create this Destination.  A null value is returned
+		/// if no options were specified.
+		/// </summary>
+		internal StringDictionary Options
+		{
+			get { return this.options; }
 		}
 	}
 }

@@ -28,7 +28,6 @@ namespace Apache.NMS.MQTT
 {
 	public class Connection : IConnection
 	{
-		private static readonly IdGenerator CONNECTION_ID_GENERATOR = new IdGenerator();
 		private static readonly TimeSpan InfiniteTimeSpan = TimeSpan.FromMilliseconds(Timeout.Infinite);
 
 		private AcknowledgementMode acknowledgementMode = AcknowledgementMode.AutoAcknowledge;
@@ -38,14 +37,12 @@ namespace Apache.NMS.MQTT
         private readonly IList sessions = ArrayList.Synchronized(new ArrayList());
         private readonly IDictionary dispatchers = Hashtable.Synchronized(new Hashtable());
 		private readonly IDictionary producers = Hashtable.Synchronized(new Hashtable());
-        private readonly object myLock = new object();
         private readonly Atomic<bool> connected = new Atomic<bool>(false);
         private readonly Atomic<bool> closed = new Atomic<bool>(false);
         private readonly Atomic<bool> closing = new Atomic<bool>(false);
         private readonly Atomic<bool> transportFailed = new Atomic<bool>(false);
 		private readonly object connectedLock = new object();
         private Exception firstFailureError = null;
-		private bool userSpecifiedClientID;
         private int sessionCounter = 0;
         private readonly Atomic<bool> started = new Atomic<bool>(false);
         private ConnectionMetaData metaData = null;
@@ -55,6 +52,8 @@ namespace Apache.NMS.MQTT
         private readonly ThreadPoolExecutor executor = new ThreadPoolExecutor();
 		private readonly IdGenerator clientIdGenerator;
 		private IRedeliveryPolicy redeliveryPolicy;
+		private Scheduler scheduler = null;
+		private bool userSpecifiedClientID;
 
 		public Connection(Uri connectionUri, ITransport transport, IdGenerator clientIdGenerator)
 		{
@@ -63,6 +62,7 @@ namespace Apache.NMS.MQTT
 
 			SetTransport(transport);
 
+			this.messageTransformation = new MQTTMessageTransformation(this);
 			this.info = new CONNECT();
 		}
 
@@ -121,21 +121,21 @@ namespace Apache.NMS.MQTT
             get { return info.ClientId; }
             set
             {
-                if(this.connected.Value)
-                {
-                    throw new NMSException("You cannot change the ClientId once the Connection is connected");
-                }
+				if(this.connected.Value)
+				{
+					throw new NMSException("You cannot change the ClientId once the Connection is connected");
+				}
 
-                this.info.ClientId = value;
-                this.userSpecifiedClientID = true;
-                CheckConnected();
+				this.info.ClientId = value;
+				this.userSpecifiedClientID = true;
+				CheckConnected();
             }
         }
 
 		/// <summary>
 		/// The Default Client Id used if the ClientId property is not set explicity.
 		/// </summary>
-		public string DefaultClientId
+		internal string DefaultClientId
 		{
 			set
 			{
@@ -282,7 +282,8 @@ namespace Apache.NMS.MQTT
 		protected virtual Session CreateMQTTSession(AcknowledgementMode ackMode)
 		{
 			CheckConnected();
-			return new Session(this, ackMode);
+			int sessionId = Interlocked.Increment(ref sessionCounter);
+			return new Session(this, ackMode, sessionId);
 		}
 
 		internal void AddSession(Session session)
@@ -340,7 +341,81 @@ namespace Apache.NMS.MQTT
 
 		public void Close()
 		{
-			// TODO
+			if(!this.closed.Value && !transportFailed.Value)
+			{
+				this.Stop();
+			}
+
+			lock(connectedLock)
+			{
+				if(this.closed.Value)
+				{
+					return;
+				}
+
+				try
+				{
+					Tracer.InfoFormat("Connection[{0}]: Closing Connection Now.", this.ClientId);
+					this.closing.Value = true;
+
+                    Scheduler scheduler = this.scheduler;
+                    if (scheduler != null) 
+					{
+                        try 
+						{
+                            scheduler.Stop();
+                        } 
+						catch (Exception e) 
+						{
+                            throw NMSExceptionSupport.Create(e);
+                        }
+                    }
+
+					lock(sessions.SyncRoot)
+					{
+						foreach(Session session in sessions)
+						{
+							session.Shutdown();
+						}
+					}
+					sessions.Clear();
+
+					// Connected is true only when we've successfully sent our CONNECT
+					// to the broker, so if we haven't announced ourselves there's no need to
+					// inform the broker of a remove, and if the transport is failed, why bother.
+					if(connected.Value && !transportFailed.Value)
+					{
+						DISCONNECT disconnect = new DISCONNECT();
+						transport.Oneway(disconnect);
+					}
+
+					executor.Shutdown();
+					if (!executor.AwaitTermination(TimeSpan.FromMinutes(1)))
+					{
+						Tracer.DebugFormat("Connection[{0}]: Failed to properly shutdown its executor", this.ClientId);
+					}
+
+					Tracer.DebugFormat("Connection[{0}]: Disposing of the Transport.", this.ClientId);
+					transport.Stop();
+					transport.Dispose();
+				}
+				catch(Exception ex)
+				{
+					Tracer.ErrorFormat("Connection[{0}]: Error during connection close: {1}", ClientId, ex);
+				}
+				finally
+				{
+					if(executor != null)
+					{
+						executor.Shutdown();
+					}
+
+					this.transport = null;
+					this.closed.Value = true;
+					this.connected.Value = false;
+					this.closing.Value = false;
+				}
+			}
 		}
 
 		public void Dispose()
@@ -520,6 +595,36 @@ namespace Apache.NMS.MQTT
 				}
 			}
 		}
+
+	    internal Scheduler Scheduler
+		{
+			get
+			{
+		        Scheduler result = this.scheduler;
+		        if (result == null) 
+				{
+		            lock (this) 
+					{
+		                result = scheduler;
+		                if (result == null) 
+						{
+		                    CheckClosed();
+		                    try 
+							{
+		                        result = scheduler = new Scheduler(
+									"MQTTConnection["+this.info.ClientId+"] Scheduler");
+		                        scheduler.Start();
+		                    }
+							catch(Exception e)
+							{
+		                        throw NMSExceptionSupport.Create(e);
+		                    }
+		                }
+		            }
+		        }
+		        return result;
+			}
+	    }
 	}
 }
 

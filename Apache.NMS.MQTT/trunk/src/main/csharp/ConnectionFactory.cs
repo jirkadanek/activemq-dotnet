@@ -107,6 +107,8 @@ namespace Apache.NMS.MQTT
 
                 if(this.clientId != null)
                 {
+					// Set the connection factory version as the default, the user can
+					// still override this via a call to Connection.ClientId = XXX
                     connection.DefaultClientId = this.clientId;
                 }
 

@@ -16,6 +16,7 @@
 //
 using System;
 using System.Collections;
+using System.Threading;
 using Apache.NMS.MQTT.Messages;
 
 namespace Apache.NMS.MQTT
@@ -43,9 +44,10 @@ namespace Apache.NMS.MQTT
 
         private readonly AcknowledgementMode acknowledgementMode;
         private TimeSpan disposeStopTimeout = TimeSpan.FromMilliseconds(30000);
+        private TimeSpan closeStopTimeout = TimeSpan.FromMilliseconds(Timeout.Infinite);
         private TimeSpan requestTimeout;
 
-		public Session(Connection connection, AcknowledgementMode acknowledgementMode)
+		public Session(Connection connection, AcknowledgementMode acknowledgementMode, int sessionId)
 		{
             this.connection = connection;
             this.acknowledgementMode = acknowledgementMode;
@@ -54,6 +56,7 @@ namespace Apache.NMS.MQTT
             this.ProducerTransformer = connection.ProducerTransformer;
 
             this.executor = new SessionExecutor(this, this.consumers);
+			this.sessionId = sessionId;
 
             if(connection.IsStarted)
             {
@@ -146,6 +149,11 @@ namespace Apache.NMS.MQTT
             set { this.requestTimeout = value; }
         }
 
+		public int SessionId
+		{
+			get { return this.sessionId; }
+		}
+
         private ConsumerTransformerDelegate consumerTransformer;
         /// <summary>
         /// A Delegate that is called each time a Message is dispatched to allow the client to do
@@ -221,7 +229,64 @@ namespace Apache.NMS.MQTT
 
 		internal void DoClose()
 		{
+			Shutdown();
 		}
+
+        internal void Shutdown()
+        {
+            Tracer.InfoFormat("Executing Shutdown on Session with Id {0}", this.SessionId);
+
+            if(this.closed)
+            {
+                return;
+            }
+
+            lock(myLock)
+            {
+                if(this.closed || this.closing)
+                {
+                    return;
+                }
+
+                try
+                {
+                    this.closing = true;
+
+                    // Stop all message deliveries from this Session
+                    this.executor.Stop(this.closeStopTimeout);
+
+                    lock(consumers.SyncRoot)
+                    {
+                        foreach(MessageConsumer consumer in consumers.Values)
+                        {
+                            consumer.FailureError = this.connection.FirstFailureError;
+                            consumer.Shutdown();
+                        }
+                    }
+                    consumers.Clear();
+
+                    lock(producers.SyncRoot)
+                    {
+                        foreach(MessageProducer producer in producers.Values)
+                        {
+                            producer.Shutdown();
+                        }
+                    }
+                    producers.Clear();
+
+                    Connection.RemoveSession(this);
+                }
+                catch(Exception ex)
+                {
+                    Tracer.ErrorFormat("Error during session close: {0}", ex);
+                }
+                finally
+                {
+                    this.closed = true;
+                    this.closing = false;
+                }
+            }
+        }
 
         public IMessageProducer CreateProducer()
         {
@@ -476,11 +541,21 @@ namespace Apache.NMS.MQTT
         /// if the message is in a transaction.
         /// </summary>
         /// <param name="message">
-        /// A <see cref="ActiveMQMessage"/>
+        /// A <see cref="MQTTMessage"/>
         /// </param>
         private static void DoNothingAcknowledge(MQTTMessage message)
         {
         }
+
+		private int NextConsumerId
+		{
+			get { return Interlocked.Increment(ref this.consumerCounter); }
+		}
+
+		private int NextProducerId
+		{
+			get { return Interlocked.Increment(ref this.producerCounter); }
+		}
 
 	}
 }
