@@ -35,22 +35,22 @@ namespace Apache.NMS.MQTT
 			get { return this.name; }
 		}
 
-		DestinationType DestinationType 
+		public DestinationType DestinationType 
 		{ 
 			get { return DestinationType.Topic; }
 		}
 		
-		bool IsTopic
+		public bool IsTopic
 		{ 
 			get { return true; }
 		}
 		
-		bool IsQueue 
+		public bool IsQueue 
 		{ 
 			get { return false; }
 		}
 		
-		bool IsTemporary 
+		public bool IsTemporary 
 		{ 
 			get { return false; }
 		}

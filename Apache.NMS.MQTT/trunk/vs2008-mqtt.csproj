@@ -91,6 +91,8 @@
     <Compile Include="src\main\csharp\Transport\MQTTTransportFactoryAttribute.cs" />
     <Compile Include="src\main\csharp\Commands\PUBCOMP.cs" />
     <Compile Include="src\main\csharp\RequestTimedOutException.cs" />
+    <Compile Include="src\main\csharp\Threads\DefaultThreadPools.cs" />
+    <Compile Include="src\main\csharp\Threads\PooledTaskRunner.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="keyfile\" />

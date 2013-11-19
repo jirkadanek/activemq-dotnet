@@ -36,7 +36,6 @@ namespace Apache.NMS.MQTT.Messages
 
 		public virtual void OnSend()
 		{
-			base.OnSend();
 			StoreContent();
 		}
 
@@ -491,7 +490,8 @@ namespace Apache.NMS.MQTT.Messages
                     EndianBinaryReader reader = new EndianBinaryReader(target);
                     this.length = reader.ReadInt32();
                     
-                    target = this.Connection.CompressionPolicy.CreateDecompressionStream(target);
+					// TODO we could compress from 
+                    // target = this.Connection.CompressionPolicy.CreateDecompressionStream(target);
                 }
                 else
                 {
@@ -510,14 +510,14 @@ namespace Apache.NMS.MQTT.Messages
 				this.outputBuffer = new MemoryStream();
                 Stream target = this.outputBuffer;
 
-                if(this.Connection != null && this.Connection.UseCompression)
-                {
-                    this.length = 0;
-					this.Compressed = true;
-
-                    target = this.Connection.CompressionPolicy.CreateCompressionStream(target);                    
-                    target = new LengthTrackerStream(target, this);
-                }
+//                if(this.Connection != null && this.Connection.UseCompression)
+//                {
+//                    this.length = 0;
+//					this.Compressed = true;
+//
+//                    target = this.Connection.CompressionPolicy.CreateCompressionStream(target);                    
+//                    target = new LengthTrackerStream(target, this);
+//                }
                 
 				this.dataOut = new EndianBinaryWriter(target);
 			}

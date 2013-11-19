@@ -302,29 +302,29 @@ namespace Apache.NMS.MQTT
 			}
 		}
 
-//		internal void AddDispatcher(ConsumerId id, IDispatcher dispatcher)
-//		{
-//			if(!this.closing.Value)
-//			{
-//				this.dispatchers.Add(id, dispatcher);
-//			}
-//		}
-//
-//		internal void RemoveDispatcher(ConsumerId id)
-//		{
-//			if(!this.closing.Value)
-//			{
-//				this.dispatchers.Remove(id);
-//			}
-//		}
-//
-//		internal void AddProducer(ProducerId id, MessageProducer producer)
-//		{
-//			if(!this.closing.Value)
-//			{
-//				this.producers.Add(id, producer);
-//			}
-//		}
+		internal void AddDispatcher(int id, IDispatcher dispatcher)
+		{
+			if(!this.closing.Value)
+			{
+				this.dispatchers.Add(id, dispatcher);
+			}
+		}
+
+		internal void RemoveDispatcher(int id)
+		{
+			if(!this.closing.Value)
+			{
+				this.dispatchers.Remove(id);
+			}
+		}
+
+		internal void AddProducer(int id, MessageProducer producer)
+		{
+			if(!this.closing.Value)
+			{
+				this.producers.Add(id, producer);
+			}
+		}
 
 		internal void RemoveProducer(int id)
 		{
@@ -520,7 +520,6 @@ namespace Apache.NMS.MQTT
 				}
 			}
 		}
-
 	}
 }
 

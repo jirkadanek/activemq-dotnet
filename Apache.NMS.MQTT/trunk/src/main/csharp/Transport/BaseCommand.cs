@@ -29,6 +29,16 @@ namespace Apache.NMS.MQTT.Transport
             set { this.commandId = value; }
         }
 
+		public virtual int CommandType
+		{
+			get { return 0; }
+		}
+
+		public virtual string CommandName
+		{
+			get { return this.GetType().Name; }
+		}
+
         public override int GetHashCode()
         {
             return (CommandId * 37) + CommandType;
@@ -143,14 +153,20 @@ namespace Apache.NMS.MQTT.Transport
 
         public virtual Object Clone()
         {
-            // Since we are a derived class use the base's Clone()
-            // to perform the shallow copy. Since it is shallow it
-            // will include our derived class. Since we are derived,
-            // this method is an override.
-            BaseCommand o = (BaseCommand) base.Clone();
-
-            return o;
+            return this.MemberwiseClone();
         }
+
+		public int HashCode(object value)
+		{
+			if(value != null)
+			{
+				return value.GetHashCode();
+			}
+			else
+			{
+				return -1;
+			}
+		}
     }
 }
 

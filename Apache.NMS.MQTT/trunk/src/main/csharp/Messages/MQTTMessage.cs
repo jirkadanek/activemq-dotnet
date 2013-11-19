@@ -26,13 +26,18 @@ namespace Apache.NMS.MQTT.Messages
 	public class MQTTMessage : IMessage, ICloneable
 	{
 		private readonly PUBLISH publish = new PUBLISH();
-		private MessagePropertyIntercepter propertyHelper;
-		private PrimitiveMap properties;
 		private Connection connection;
 		private Topic destination;
 		private short messageId;
+		private byte[] content;
+        private bool compressed;
+		private int redeliveryCounter;
+        private bool persistent;
 
 		public event AcknowledgeHandler Acknowledger;
+
+        private bool readOnlyMsgProperties;
+        private bool readOnlyMsgBody;
 
 		public static MQTTMessage Transform(IMessage message)
 		{
@@ -45,17 +50,12 @@ namespace Apache.NMS.MQTT.Messages
 
         public override int GetHashCode()
         {
-            MessageId id = this.MessageId;
-
-            return id != null ? id.GetHashCode() : base.GetHashCode();
+            return messageId != 0 ? messageId : base.GetHashCode();
         }
 
 		public virtual object Clone()
 		{
-			MQTTMessage cloneMessage = (MQTTMessage) base.Clone();
-
-			cloneMessage.propertyHelper = new MessagePropertyIntercepter(cloneMessage, cloneMessage.properties, this.ReadOnlyProperties) { AllowByteArrays = false };
-			return cloneMessage;
+			return this.MemberwiseClone();
 		}
 
         public override bool Equals(object that)
@@ -69,10 +69,10 @@ namespace Apache.NMS.MQTT.Messages
 
         public virtual bool Equals(MQTTMessage that)
         {
-            MessageId oMsg = that.MessageId;
-            MessageId thisMsg = this.MessageId;
+            short oMsg = that.MessageId;
+            short thisMsg = this.MessageId;
             
-            return thisMsg != null && oMsg != null && oMsg.Equals(thisMsg);
+            return thisMsg != 0 && oMsg != 0 && oMsg == thisMsg;
         }
         
 		public void Acknowledge()
@@ -113,21 +113,35 @@ namespace Apache.NMS.MQTT.Messages
 
 		#region Properties
 
+        public byte[] Content
+        {
+            get { return content; }
+            set { this.content = value; }
+        }
+
+        public bool Compressed
+        {
+            get { return compressed; }
+            set { this.compressed = value; }
+        }
+
+        public virtual bool ReadOnlyProperties
+        {
+            get { return this.readOnlyMsgProperties; }
+            set { this.readOnlyMsgProperties = value; }
+        }
+
+        public virtual bool ReadOnlyBody
+        {
+            get { return this.readOnlyMsgBody; }
+            set { this.readOnlyMsgBody = value; }
+        }
+
 		public IPrimitiveMap Properties
 		{
 			get
 			{
-				if(null == properties)
-				{
-					properties = PrimitiveMap.Unmarshal(MarshalledProperties);
-					propertyHelper = new MessagePropertyIntercepter(this, properties, this.ReadOnlyProperties)
-					                     {AllowByteArrays = false};
-					
-					// Since JMS doesn't define a Byte array interface for properties we
-					// disable them here to prevent sending invalid data to the broker.
-				}
-
-				return propertyHelper;
+				throw new NotSupportedException("MQTT does not support Message properties.");
 			}
 		}
 
@@ -142,8 +156,8 @@ namespace Apache.NMS.MQTT.Messages
 		/// </summary>
 		public string NMSCorrelationID
 		{
-			get { return CorrelationId; }
-			set { CorrelationId = value; }
+			get { return String.Empty; }
+			set {}
 		}
 
 		/// <summary>
@@ -151,38 +165,17 @@ namespace Apache.NMS.MQTT.Messages
 		/// </summary>
 		public IDestination NMSDestination
 		{
-			get { return Destination; }
-            set { Destination = value as ActiveMQDestination; }
+			get { return destination; }
+            set { this.destination = value as Topic; }
 		}
 
-		private TimeSpan timeToLive = TimeSpan.FromMilliseconds(0);
 		/// <summary>
 		/// The time in milliseconds that this message should expire in
 		/// </summary>
 		public TimeSpan NMSTimeToLive
 		{
-			get
-			{
-				if(Expiration > 0 && timeToLive.TotalMilliseconds <= 0.0)
-				{
-					timeToLive = TimeSpan.FromMilliseconds(Expiration - Timestamp);
-				}
-
-				return timeToLive;
-			}
-
-			set
-			{
-				timeToLive = value;
-				if(timeToLive.TotalMilliseconds > 0)
-				{
-					Expiration = Timestamp + (long) timeToLive.TotalMilliseconds;
-				}
-				else
-				{
-					Expiration = 0;
-				}
-			}
+			get { return TimeSpan.MaxValue; }
+			set {}
 		}
 
 		/// <summary>
@@ -190,33 +183,8 @@ namespace Apache.NMS.MQTT.Messages
 		/// </summary>
 		public string NMSMessageId
 		{
-			get
-			{
-			    return null != MessageId ? BaseDataStreamMarshaller.ToString(MessageId) : String.Empty;
-			}
-
-		    set
-            {
-                if(value != null) 
-                {
-                    try 
-                    {
-                        MessageId id = new MessageId(value);
-                        this.MessageId = id;
-                    } 
-                    catch(FormatException) 
-                    {
-                        // we must be some foreign JMS provider or strange user-supplied
-                        // String so lets set the IDs to be 1
-                        MessageId id = new MessageId();
-                        this.MessageId = id;
-                    }
-                } 
-                else
-                {
-                    this.MessageId = null;
-                }
-            }
+			get { return this.messageId.ToString(); }
+			set { this.messageId = Int16.Parse(value); }
 		}
 
 		/// <summary>
@@ -224,8 +192,8 @@ namespace Apache.NMS.MQTT.Messages
 		/// </summary>
 		public MsgDeliveryMode NMSDeliveryMode
 		{
-			get { return (Persistent ? MsgDeliveryMode.Persistent : MsgDeliveryMode.NonPersistent); }
-			set { Persistent = (MsgDeliveryMode.Persistent == value); }
+			get { return (persistent ? MsgDeliveryMode.Persistent : MsgDeliveryMode.NonPersistent); }
+			set { persistent = (MsgDeliveryMode.Persistent == value); }
 		}
 
 		/// <summary>
@@ -233,8 +201,8 @@ namespace Apache.NMS.MQTT.Messages
 		/// </summary>
 		public MsgPriority NMSPriority
 		{
-			get { return (MsgPriority) Priority; }
-			set { Priority = (byte) value; }
+			get { return MsgPriority.Normal; }
+			set {}
 		}
 
 		/// <summary>
@@ -242,22 +210,22 @@ namespace Apache.NMS.MQTT.Messages
 		/// </summary>
 		public bool NMSRedelivered
 		{
-			get { return (RedeliveryCounter > 0); }
+			get { return (redeliveryCounter > 0); }
 
             set
             {
                 if(value == true)
                 {
-                    if(this.RedeliveryCounter <= 0)
+                    if(this.redeliveryCounter <= 0)
                     {
-                        this.RedeliveryCounter = 1;
+                        this.redeliveryCounter = 1;
                     }
                 }
                 else
                 {
-                    if(this.RedeliveryCounter > 0)
+                    if(this.redeliveryCounter > 0)
                     {
-                        this.RedeliveryCounter = 0;
+                        this.redeliveryCounter = 0;
                     }
                 }
             }
@@ -268,8 +236,8 @@ namespace Apache.NMS.MQTT.Messages
 		/// </summary>
 		public IDestination NMSReplyTo
 		{
-			get { return ReplyTo; }
-			set { ReplyTo = ActiveMQDestination.Transform(value); }
+			get { return null; }
+			set { }
 		}
 
 		/// <summary>
@@ -277,15 +245,8 @@ namespace Apache.NMS.MQTT.Messages
 		/// </summary>
 		public DateTime NMSTimestamp
 		{
-			get { return DateUtils.ToDateTime(Timestamp); }
-			set
-			{
-				Timestamp = DateUtils.ToJavaTimeUtc(value);
-				if(timeToLive.TotalMilliseconds > 0)
-				{
-					Expiration = Timestamp + (long) timeToLive.TotalMilliseconds;
-				}
-			}
+			get { return DateTime.Now; }
+			set {}
 		}
 
 		/// <summary>
@@ -297,7 +258,7 @@ namespace Apache.NMS.MQTT.Messages
 			set {  }
 		}
 
-		public int MessageId
+		public short MessageId
 		{
 			get { return this.messageId; }
 			set { this.messageId = value; }
@@ -305,15 +266,6 @@ namespace Apache.NMS.MQTT.Messages
 
 		#endregion
 
-		public object GetObjectProperty(string name)
-		{
-			return Properties[name];
-		}
-
-		public void SetObjectProperty(string name, object value)
-		{
-			Properties[name] = value;
-		}
 	}
 }
 
