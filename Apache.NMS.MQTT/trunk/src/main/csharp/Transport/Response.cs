@@ -23,7 +23,7 @@ namespace Apache.NMS.MQTT.Transport
 	/// </summary>
     public class Response : BaseCommand
     {
-        int correlationId;
+        short correlationId;
 
         ///
         /// <summery>
@@ -39,7 +39,7 @@ namespace Apache.NMS.MQTT.Transport
                 "CorrelationId = " + CorrelationId + " ]";
         }
 
-        public int CorrelationId
+        public short CorrelationId
         {
             get { return correlationId; }
             set { this.correlationId = value; }
@@ -55,7 +55,7 @@ namespace Apache.NMS.MQTT.Transport
             get { return true; }
         }
 
-        public bool IsErrorResponse
+        public virtual bool IsErrorResponse
         {
             get { return false; }
         }

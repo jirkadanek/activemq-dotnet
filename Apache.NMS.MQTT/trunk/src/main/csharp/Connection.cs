@@ -547,18 +547,15 @@ namespace Apache.NMS.MQTT
 										}
 										else
 										{
-											// TODO figure out correct error to throw.
-//											NMSException exception = CreateExceptionFromBrokerError(error.Exception);
-//											if(exception is InvalidClientIDException)
-//											{
-//												// This is non-recoverable.
-//												// Shutdown the transport connection, and re-create it, but don't start it.
-//												// It will be started if the connection is re-attempted.
-//												this.transport.Stop();
-//												ITransport newTransport = TransportFactory.CreateTransport(this.brokerUri);
-//												SetTransport(newTransport);
-//												throw exception;
-//											}
+											ErrorResponse error = response as ErrorResponse;
+											NMSException exception = error.Error;
+											// This is non-recoverable.
+											// Shutdown the transport connection, and re-create it, but don't start it.
+											// It will be started if the connection is re-attempted.
+											this.transport.Stop();
+											ITransport newTransport = TransportFactory.CreateTransport(this.brokerUri);
+											SetTransport(newTransport);
+											throw exception;
 										}
 									}
 								}
