@@ -15,12 +15,36 @@
 // limitations under the License.
 //
 using System;
+using Apache.NMS.MQTT.Commands;
 
 namespace Apache.NMS.MQTT.Transport
 {
-	public interface ITransportFactory
-	{
-		ITransport CreateTransport(Uri location);
-		ITransport CompositeConnect(Uri location);
-	}
+	/// <summary>
+	/// A Transport filter that is used to log the commands sent and received.
+	/// </summary>
+	public class LoggingTransport : TransportFilter
+    {
+		public LoggingTransport(ITransport next) : base(next) 
+		{
+		}
+		
+		protected override void OnCommand(ITransport sender, Command command) 
+		{
+			Tracer.Info("RECEIVED: " + command);
+			this.commandHandler(sender, command);
+		}
+		
+		protected override void OnException(ITransport sender, Exception error)
+		{
+			Tracer.Error("RECEIVED Exception: " + error);
+			this.exceptionHandler(sender, error);
+		}
+		
+		public override void Oneway(Command command)
+		{
+			Tracer.Info("SENDING: " + command);
+			this.next.Oneway(command);
+		}
+    }
 }
+

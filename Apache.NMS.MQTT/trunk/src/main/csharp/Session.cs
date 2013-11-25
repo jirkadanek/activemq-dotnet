@@ -18,6 +18,7 @@ using System;
 using System.Collections;
 using System.Threading;
 using Apache.NMS.MQTT.Messages;
+using Apache.NMS.MQTT.Util;
 
 namespace Apache.NMS.MQTT
 {
@@ -509,6 +510,17 @@ namespace Apache.NMS.MQTT
             if(!this.closing)
             {
                 producers.Remove(producerId);
+            }
+        }
+
+        internal void Redispatch(MessageDispatchChannel channel)
+        {
+            MessageDispatch[] messages = channel.RemoveAll();
+            System.Array.Reverse(messages);
+
+            foreach(MessageDispatch message in messages)
+            {
+                this.executor.ExecuteFirst(message);
             }
         }
 

@@ -34,6 +34,7 @@
     <Reference Include="Apache.NMS">
       <HintPath>lib\Apache.NMS\mono-2.0\Apache.NMS.dll</HintPath>
     </Reference>
+    <Reference Include="System.Web" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -93,6 +94,16 @@
     <Compile Include="src\main\csharp\RequestTimedOutException.cs" />
     <Compile Include="src\main\csharp\Threads\DefaultThreadPools.cs" />
     <Compile Include="src\main\csharp\Threads\PooledTaskRunner.cs" />
+    <Compile Include="src\main\csharp\Transport\Tcp\SslTransport.cs" />
+    <Compile Include="src\main\csharp\Transport\Tcp\SslTransportFactory.cs" />
+    <Compile Include="src\main\csharp\Transport\Tcp\TcpTransport.cs" />
+    <Compile Include="src\main\csharp\Transport\Tcp\TcpTransportFactory.cs" />
+    <Compile Include="src\main\csharp\Transport\IWireFormat.cs" />
+    <Compile Include="src\main\csharp\Transport\TransportFilter.cs" />
+    <Compile Include="src\main\csharp\Protocol\MQTTWireFormat.cs" />
+    <Compile Include="src\main\csharp\Transport\LoggingTransport.cs" />
+    <Compile Include="src\main\csharp\Transport\MutexTransport.cs" />
+    <Compile Include="src\main\csharp\Transport\ResponseCorrelator.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="keyfile\" />

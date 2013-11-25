@@ -15,12 +15,33 @@
 // limitations under the License.
 //
 using System;
+using System.IO;
+using Apache.NMS.MQTT.Transport;
 
-namespace Apache.NMS.MQTT.Transport
+namespace Apache.NMS.MQTT.Protocol
 {
-	public interface ITransportFactory
+	public class MQTTWireFormat : IWireFormat
 	{
-		ITransport CreateTransport(Uri location);
-		ITransport CompositeConnect(Uri location);
+		private ITransport transport;
+
+		public MQTTWireFormat()
+		{
+		}
+
+        public void Marshal(Object o, BinaryWriter ds)
+		{
+		}
+
+        public Object Unmarshal(BinaryReader dis)
+		{
+			return null;
+		}
+
+		public ITransport Transport
+		{
+			get { return this.transport; }
+			set { this.transport = value; }
+		}
 	}
 }
+

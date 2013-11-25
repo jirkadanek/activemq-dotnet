@@ -15,12 +15,28 @@
 // limitations under the License.
 //
 using System;
+using System.IO;
 
 namespace Apache.NMS.MQTT.Transport
 {
-	public interface ITransportFactory
-	{
-		ITransport CreateTransport(Uri location);
-		ITransport CompositeConnect(Uri location);
-	}
+    /// <summary>
+    /// Represents the marshalling of commands to and from an IO stream
+    /// </summary>
+    public interface IWireFormat
+    {
+        /// <summary>
+        /// Marshalls the given command object onto the stream
+        /// </summary>
+        void Marshal(Object o, BinaryWriter ds);
+
+        /// <summary>
+        /// Unmarshalls the next command object from the stream
+        /// </summary>
+        Object Unmarshal(BinaryReader dis);
+
+        ITransport Transport {
+            get; set;
+        }
+    }
 }
+

@@ -107,7 +107,7 @@ namespace Apache.NMS.MQTT
 				}
 
 				listener += value;
-				//this.session.Redispatch(this.unconsumedMessages);
+				this.session.Redispatch(this.unconsumedMessages);
 
 				if(wasStarted)
 				{
@@ -219,7 +219,7 @@ namespace Apache.NMS.MQTT
 				MessageDispatch dispatch = this.unconsumedMessages.DequeueNoWait();
 				if(dispatch != null)
 				{
-					//this.Dispatch(dispatch);
+					this.Dispatch(dispatch);
 					return true;
 				}
 			}
