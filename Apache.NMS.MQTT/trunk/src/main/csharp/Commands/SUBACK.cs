@@ -15,7 +15,9 @@
 // limitations under the License.
 //
 using System;
+using System.IO;
 using Apache.NMS.MQTT.Transport;
+using Apache.NMS.MQTT.Protocol;
 
 namespace Apache.NMS.MQTT.Commands
 {
@@ -27,16 +29,20 @@ namespace Apache.NMS.MQTT.Commands
 	/// </summary>
 	public class SUBACK : BaseCommand
 	{
-		public const byte TYPE = 8;
+		public const byte TYPE = 9;
+		public const byte DEFAULT_HEADER = 0x90;
+
+		public SUBACK() : base(new Header(DEFAULT_HEADER))
+		{
+		}
+
+		public SUBACK(Header header) : base(header)
+		{
+		}
 
 		public override int CommandType
 		{
 			get { return TYPE; }
-		}
-
-		public override string CommandName
-		{
-			get { return "SUBACK"; }
 		}
 
 		public override bool IsSUBACK

@@ -15,6 +15,7 @@
 // limitations under the License.
 //
 using System;
+using System.IO;
 
 namespace Apache.NMS.MQTT.Transport
 {
@@ -24,6 +25,11 @@ namespace Apache.NMS.MQTT.Transport
     /// </summary>
     public interface Command : ICloneable
     {
+		byte Header
+		{
+			get;
+		}
+
 		int CommandType
 		{
 			get;
@@ -34,7 +40,7 @@ namespace Apache.NMS.MQTT.Transport
 			get;
 		}
 
-        int CommandId
+        short CommandId
         {
 			get;
         }
@@ -45,6 +51,11 @@ namespace Apache.NMS.MQTT.Transport
         }
 
 		bool IsResponse
+		{
+			get; 
+		}
+
+		bool IsErrorResponse
 		{
 			get; 
 		}
@@ -123,6 +134,11 @@ namespace Apache.NMS.MQTT.Transport
         {
 			get;
         }
+
+		void Encode(BinaryWriter writer);
+
+		void Decode(BinaryReader reader);
+
     }
 }
 

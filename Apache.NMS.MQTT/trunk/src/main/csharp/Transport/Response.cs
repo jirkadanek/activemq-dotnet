@@ -15,15 +15,20 @@
 // limitations under the License.
 //
 using System;
+using Apache.NMS.MQTT.Protocol;
 
 namespace Apache.NMS.MQTT.Transport
 {
 	/// <summary>
 	/// Response type.
 	/// </summary>
-    public class Response : BaseCommand
+    public abstract class Response : BaseCommand
     {
         short correlationId;
+
+		public Response(Header header) : base(header)
+		{
+		}
 
         ///
         /// <summery>
@@ -53,11 +58,6 @@ namespace Apache.NMS.MQTT.Transport
         public override bool IsResponse
         {
             get { return true; }
-        }
-
-        public virtual bool IsErrorResponse
-        {
-            get { return false; }
         }
 
     };

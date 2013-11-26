@@ -28,12 +28,13 @@ namespace Apache.NMS.MQTT.Transport
 			set { this.error = value; }
 		}
 
+		public ErrorResponse() : base(null)
+		{
+		}
+
 		public override bool IsErrorResponse 
 		{
-			get 
-			{
-				return true;
-			}
+			get { return true; }
 		}
 	}
 }

@@ -16,7 +16,7 @@
 //
 using System;
 
-namespace Apache.NMS.MQTT.Commands
+namespace Apache.NMS.MQTT.Protocol
 {
 	public class Header
 	{

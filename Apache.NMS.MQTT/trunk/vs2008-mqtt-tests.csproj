@@ -46,6 +46,9 @@
   <ItemGroup>
     <Compile Include="src\test\csharp\CommonAssemblyInfo.cs" />
     <Compile Include="src\test\csharp\Protocol\HeaderTest.cs" />
+    <Compile Include="src\test\csharp\NMSConnectionFactoryTest.cs" />
+    <Compile Include="src\test\csharp\NmsConsoleTracer.cs" />
+    <Compile Include="src\test\csharp\ConnectionFactoryTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="LICENSE.txt" />

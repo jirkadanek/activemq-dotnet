@@ -15,22 +15,28 @@
 // limitations under the License.
 //
 using System;
+using System.IO;
 using Apache.NMS.MQTT.Transport;
+using Apache.NMS.MQTT.Protocol;
 
 namespace Apache.NMS.MQTT.Commands
 {
 	public class PUBACK : BaseCommand
 	{
 		public const byte TYPE = 4;
+		public const byte DEFAULT_HEADER = 0x40;
+
+		public PUBACK() : base(new Header(DEFAULT_HEADER))
+		{
+		}
+
+		public PUBACK(Header header) : base(header)
+		{
+		}
 
 		public override int CommandType
 		{
 			get { return TYPE; }
-		}
-
-		public override string CommandName
-		{
-			get { return "PUBACK"; }
 		}
 
 		public override bool IsPUBACK

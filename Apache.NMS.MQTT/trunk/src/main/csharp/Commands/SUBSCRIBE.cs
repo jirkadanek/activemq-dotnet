@@ -15,7 +15,9 @@
 // limitations under the License.
 //
 using System;
+using System.IO;
 using Apache.NMS.MQTT.Transport;
+using Apache.NMS.MQTT.Protocol;
 
 namespace Apache.NMS.MQTT.Commands
 {
@@ -25,16 +27,20 @@ namespace Apache.NMS.MQTT.Commands
 	/// </summary>
 	public class SUBSCRIBE : BaseCommand
 	{
-		public const byte TYPE = 7;
+		public const byte TYPE = 8;
+		public const byte DEFAULT_HEADER = 0x82;
+
+		public SUBSCRIBE() : base(new Header(DEFAULT_HEADER))
+		{
+		}
+
+		public SUBSCRIBE(Header header) : base(header)
+		{
+		}
 
 		public override int CommandType
 		{
 			get { return TYPE; }
-		}
-
-		public override string CommandName
-		{
-			get { return "SUBSCRIBE"; }
 		}
 
 		public override bool IsSUBSCRIBE

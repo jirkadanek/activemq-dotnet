@@ -15,7 +15,11 @@
 // limitations under the License.
 // 
 using System;
+using System.IO;
+using System.Text;
+using Apache.NMS.Util;
 using Apache.NMS.MQTT.Transport;
+using Apache.NMS.MQTT.Protocol;
 
 namespace Apache.NMS.MQTT.Commands
 {
@@ -30,16 +34,36 @@ namespace Apache.NMS.MQTT.Commands
 	public class CONNECT : BaseCommand
 	{
 		public const byte TYPE = 1;
+		public const byte DEFAULT_HEADER = 0x10;
 		public const String PROTOCOL_NAME = "MQIsdp";
+		private static byte[] PROTOCOL_NAME_ENCODED;
+
+		/// <summary>
+		/// Static init of properly encoded UTF8 bytes for the Protocol Name, this saves
+		/// us the work of encoding the same value for every message send.
+		/// </summary>
+		static CONNECT()
+		{
+			MemoryStream stream = new MemoryStream();
+			EndianBinaryWriter writer = new EndianBinaryWriter(stream);
+			short value = (short) Encoding.UTF8.GetByteCount(PROTOCOL_NAME);
+			writer.Write(value);
+			writer.Write(Encoding.UTF8.GetBytes(PROTOCOL_NAME));
+
+			PROTOCOL_NAME_ENCODED = stream.ToArray();
+		}
+
+		public CONNECT() : base(new Header(DEFAULT_HEADER))
+		{
+		}
+
+		public CONNECT(Header header) : base(header)
+		{
+		}
 
 		public override int CommandType
 		{
 			get { return TYPE; }
-		}
-
-		public override string CommandName
-		{
-			get { return "CONNECT"; }
 		}
 
 		public override bool IsCONNECT
@@ -115,6 +139,90 @@ namespace Apache.NMS.MQTT.Commands
 		{
 			get { return this.willMessage; }
 			set { this.willMessage = value; }
+		}
+
+		public override void Encode(BinaryWriter writer)
+		{
+			writer.Write(PROTOCOL_NAME_ENCODED);
+			writer.Write(Version);
+
+			byte contentFlags = 0;
+
+			if (!String.IsNullOrEmpty(username))
+			{
+				contentFlags |= 0x80;
+			}
+			if (!String.IsNullOrEmpty(username))
+			{
+				contentFlags |= 0x40;
+			}
+			if (!String.IsNullOrEmpty(WillTopic) && !String.IsNullOrEmpty(WillMessage))
+			{
+				contentFlags |= 0x04;
+				if (WillRetain)
+				{
+					contentFlags |= 0x20;
+				}
+				contentFlags |= (byte)((WillQoS << 3) & 0x18);
+			}
+			if (CleanSession)
+			{
+				contentFlags |= 0x02;
+			}
+
+			writer.Write(contentFlags);
+			writer.Write(KeepAliveTimer);
+			writer.Write(ClientId);
+
+			if (!String.IsNullOrEmpty(WillTopic) && !String.IsNullOrEmpty(WillMessage))
+			{
+				writer.Write(WillTopic);
+				writer.Write(WillMessage);
+			}
+			if (!String.IsNullOrEmpty(username))
+			{
+				writer.Write(UserName);
+			}
+			if (!String.IsNullOrEmpty(username))
+			{
+				writer.Write(Password);
+			}
+		}
+
+		public override void Decode(BinaryReader reader)
+		{
+			String protocolName = reader.ReadString();
+			if (!PROTOCOL_NAME.Equals(protocolName))
+			{
+				throw new IOException("Invalid Protocol Name: " + protocolName);
+			}
+
+			this.version = reader.ReadByte();
+			byte contentFlags = reader.ReadByte();
+
+			bool hasUsername = (contentFlags & 0x80) != 0;
+			bool hasPassword = (contentFlags & 0x40) != 0;
+			bool hasWillTopic = (contentFlags & 0x04) != 0;
+
+			WillRetain = (contentFlags & 0x20) != 0;
+			WillQoS = (byte)((contentFlags & 0x18) >> 3);
+			CleanSession = (contentFlags & 0x02) != 0;
+
+			KeepAliveTimer = reader.ReadInt16();
+			ClientId = reader.ReadString();
+			if (hasWillTopic)
+			{
+				WillTopic = reader.ReadString();
+				WillMessage = reader.ReadString();
+			}
+			if (hasUsername)
+			{
+				UserName = reader.ReadString();
+			}
+			if (hasPassword)
+			{
+				Password = reader.ReadString();
+			}
 		}
 	}
 }

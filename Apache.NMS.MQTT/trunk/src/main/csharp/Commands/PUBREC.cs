@@ -15,22 +15,28 @@
 // limitations under the License.
 //
 using System;
+using System.IO;
 using Apache.NMS.MQTT.Transport;
+using Apache.NMS.MQTT.Protocol;
 
 namespace Apache.NMS.MQTT.Commands
 {
 	public class PUBREC : BaseCommand
 	{
 		public const byte TYPE = 5;
+		public const byte DEFAULT_HEADER = 0x50;
+
+		public PUBREC() : base(new Header(DEFAULT_HEADER))
+		{
+		}
+
+		public PUBREC(Header header) : base(header)
+		{
+		}
 
 		public override int CommandType
 		{
 			get { return TYPE; }
-		}
-
-		public override string CommandName
-		{
-			get { return "PUBREC"; }
 		}
 
 		public override bool IsPUBREC

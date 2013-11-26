@@ -15,7 +15,9 @@
 // limitations under the License.
 //
 using System;
+using System.IO;
 using Apache.NMS.MQTT.Transport;
+using Apache.NMS.MQTT.Protocol;
 
 namespace Apache.NMS.MQTT.Commands
 {
@@ -31,15 +33,19 @@ namespace Apache.NMS.MQTT.Commands
 	public class PUBLISH : BaseCommand
 	{
 		public const byte TYPE = 3;
+		public const byte DEFAULT_HEADER = 0x30;
+
+		public PUBLISH() : base(new Header(DEFAULT_HEADER))
+		{
+		}
+
+		public PUBLISH(Header header) : base(header)
+		{
+		}
 
 		public override int CommandType
 		{
 			get { return TYPE; }
-		}
-
-		public override string CommandName
-		{
-			get { return "PUBLISH"; }
 		}
 
 		public override bool IsPUBLISH

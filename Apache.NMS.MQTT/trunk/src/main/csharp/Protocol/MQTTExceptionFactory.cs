@@ -26,7 +26,7 @@ namespace Apache.NMS.MQTT.Protocol
 		{
 		}
 
-		static NMSException CreateConnectionException(short errorCode)
+		public static NMSException CreateConnectionException(short errorCode)
 		{
 			NMSException result = null;
 

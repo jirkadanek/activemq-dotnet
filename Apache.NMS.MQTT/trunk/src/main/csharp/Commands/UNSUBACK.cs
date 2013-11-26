@@ -15,22 +15,28 @@
 // limitations under the License.
 //
 using System;
+using System.IO;
 using Apache.NMS.MQTT.Transport;
+using Apache.NMS.MQTT.Protocol;
 
 namespace Apache.NMS.MQTT.Commands
 {
 	public class UNSUBACK : BaseCommand
 	{
-		public const byte TYPE = 10;
+		public const byte TYPE = 11;
+		public const byte DEFAULT_HEADER = 0xB0;
+
+		public UNSUBACK() : base(new Header(DEFAULT_HEADER))
+		{
+		}
+
+		public UNSUBACK(Header header) : base(header)
+		{
+		}
 
 		public override int CommandType
 		{
 			get { return TYPE; }
-		}
-
-		public override string CommandName
-		{
-			get { return "UNSUBACK"; }
 		}
 
 		public override bool IsUNSUBACK

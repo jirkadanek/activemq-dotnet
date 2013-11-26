@@ -15,13 +15,25 @@
 // limitations under the License.
 //
 using System;
+using System.IO;
 using Apache.NMS.MQTT.Transport;
+using Apache.NMS.MQTT.Protocol;
 
 namespace Apache.NMS.MQTT.Commands
 {
-	public class CONNACK : BaseCommand
+	public class CONNACK : Response
 	{
 		public const byte TYPE = 2;
+		public const byte DEFAULT_HEADER = 0x20;
+		public const String PROTOCOL_NAME = "MQIsdp";
+
+		public CONNACK() : base(new Header(DEFAULT_HEADER))
+		{
+		}
+
+		public CONNACK(Header header) : base(header)
+		{
+		}
 
 		private byte returnCode;
 		public byte ReturnCode
@@ -35,14 +47,26 @@ namespace Apache.NMS.MQTT.Commands
 			get { return TYPE; }
 		}
 
-		public override string CommandName
-		{
-			get { return "CONNACK"; }
-		}
-
 		public override bool IsCONNACK
 		{
 			get { return true; }
+		}
+
+        public override bool IsErrorResponse
+        {
+            get { return ReturnCode != 0; }
+        }
+
+		public override void Encode(BinaryWriter writer)
+		{
+			writer.Write((byte) 0);
+			writer.Write(ReturnCode);
+		}
+
+		public override void Decode(BinaryReader reader)
+		{
+			reader.ReadByte();
+			ReturnCode = reader.ReadByte();
 		}
 	}
 }

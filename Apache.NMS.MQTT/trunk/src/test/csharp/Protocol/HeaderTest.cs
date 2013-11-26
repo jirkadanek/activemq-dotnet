@@ -16,7 +16,7 @@
 //
 using System;
 using Apache.NMS.Test;
-using Apache.NMS.MQTT.Commands;
+using Apache.NMS.MQTT.Protocol;
 using NUnit.Framework;
 
 namespace Apache.NMS.MQTT.Test.Protocol

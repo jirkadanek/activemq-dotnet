@@ -15,15 +15,29 @@
 // limitations under the License.
 //
 using System;
+using System.IO;
+using Apache.NMS.MQTT.Protocol;
 
 namespace Apache.NMS.MQTT.Transport
 {
     public abstract class BaseCommand : Command, ICloneable
     {
-        private int commandId;
+		private Header header;
+        private short commandId;
         private bool responseRequired = false;
 
-        public int CommandId
+		public BaseCommand(Header header)
+		{
+			this.header = header;
+		}
+
+		public byte Header
+		{
+			get { return this.header.RawValue; }
+			set { this.header.RawValue = value; }
+		}
+
+        public short CommandId
         {
             get { return commandId; }
             set { this.commandId = value; }
@@ -31,7 +45,7 @@ namespace Apache.NMS.MQTT.Transport
 
 		public virtual int CommandType
 		{
-			get { return 0; }
+			get { return -1; }
 		}
 
 		public virtual string CommandName
@@ -72,6 +86,11 @@ namespace Apache.NMS.MQTT.Transport
         }
 
 		public virtual bool IsResponse
+		{
+			get { return false; }
+		}
+
+		public virtual bool IsErrorResponse
 		{
 			get { return false; }
 		}
@@ -166,6 +185,16 @@ namespace Apache.NMS.MQTT.Transport
 			{
 				return -1;
 			}
+		}
+
+		public virtual void Encode(BinaryWriter writer)
+		{
+			throw new NotImplementedException("Command doesn't implement Encode");
+		}
+
+		public virtual void Decode(BinaryReader reader)
+		{
+			throw new NotImplementedException("Command doesn't implement Decode");
 		}
     }
 }

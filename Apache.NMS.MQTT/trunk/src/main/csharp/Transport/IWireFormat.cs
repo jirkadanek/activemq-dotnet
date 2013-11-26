@@ -27,14 +27,15 @@ namespace Apache.NMS.MQTT.Transport
         /// <summary>
         /// Marshalls the given command object onto the stream
         /// </summary>
-        void Marshal(Object o, BinaryWriter ds);
+        void Marshal(Command o, BinaryWriter ds);
 
         /// <summary>
         /// Unmarshalls the next command object from the stream
         /// </summary>
-        Object Unmarshal(BinaryReader dis);
+        Command Unmarshal(BinaryReader dis);
 
-        ITransport Transport {
+        ITransport Transport 
+		{
             get; set;
         }
     }

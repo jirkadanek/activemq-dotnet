@@ -15,22 +15,28 @@
 // limitations under the License.
 //
 using System;
+using System.IO;
 using Apache.NMS.MQTT.Transport;
+using Apache.NMS.MQTT.Protocol;
 
 namespace Apache.NMS.MQTT.Commands
 {
 	public class PUBCOMP : BaseCommand
 	{
 		public const byte TYPE = 7;
+		public const byte DEFAULT_HEADER = 0x70;
+
+		public PUBCOMP() : base(new Header(DEFAULT_HEADER))
+		{
+		}
+
+		public PUBCOMP(Header header) : base(header)
+		{
+		}
 
 		public override int CommandType
 		{
 			get { return TYPE; }
-		}
-
-		public override string CommandName
-		{
-			get { return "PUBCOMP"; }
 		}
 
 		public override bool IsPUBCOMP

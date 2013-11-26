@@ -15,22 +15,28 @@
 // limitations under the License.
 //
 using System;
+using System.IO;
 using Apache.NMS.MQTT.Transport;
+using Apache.NMS.MQTT.Protocol;
 
 namespace Apache.NMS.MQTT.Commands
 {
 	public class PINGREQ : BaseCommand
 	{
-		public const byte TYPE = 11;
+		public const byte TYPE = 12;
+		public const byte DEFAULT_HEADER = 0xC0;
+
+		public PINGREQ() : base(new Header(DEFAULT_HEADER))
+		{
+		}
+
+		public PINGREQ(Header header) : base(header)
+		{
+		}
 
 		public override int CommandType
 		{
 			get { return TYPE; }
-		}
-
-		public override string CommandName
-		{
-			get { return "PINGREQ"; }
 		}
 
 		public override bool IsPINGREQ

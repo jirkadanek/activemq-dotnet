@@ -106,7 +106,8 @@
     <Compile Include="src\main\csharp\Transport\ResponseCorrelator.cs" />
     <Compile Include="src\main\csharp\Transport\ErrorResponse.cs" />
     <Compile Include="src\main\csharp\Protocol\MQTTExceptionFactory.cs" />
-    <Compile Include="src\main\csharp\Commands\Header.cs" />
+    <Compile Include="src\main\csharp\Protocol\Header.cs" />
+    <Compile Include="src\main\csharp\Protocol\MQTTCommandFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="keyfile\" />

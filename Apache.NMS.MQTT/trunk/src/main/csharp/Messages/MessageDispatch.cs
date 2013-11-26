@@ -29,7 +29,7 @@ namespace Apache.NMS.MQTT.Messages
      *         in the nms-activemq-openwire-generator module
      *
      */
-    public class MessageDispatch : BaseCommand
+    public class MessageDispatch
     {
         Topic destination;
         MQTTMessage message;
@@ -43,8 +43,6 @@ namespace Apache.NMS.MQTT.Messages
         public override string ToString()
         {
             return GetType().Name + "[ " + 
-                "commandId = " + this.CommandId + ", " + 
-                "responseRequired = " + this.ResponseRequired + ", " + 
                 "Destination = " + Destination + ", " + 
                 "Message = " + Message + " ]";
         }
@@ -65,8 +63,8 @@ namespace Apache.NMS.MQTT.Messages
         {
             int answer = 0;
 
-            answer = (answer * 37) + HashCode(Destination);
-            answer = (answer * 37) + HashCode(Message);
+            answer = (answer * 37) + Destination.GetHashCode();
+            answer = (answer * 37) + Message.GetHashCode();
 
             return answer;
         }
@@ -94,12 +92,13 @@ namespace Apache.NMS.MQTT.Messages
 
             return true;
         }
+
         ///
         /// <summery>
         ///  Return an answer of true to the isMessageDispatch() query.
         /// </summery>
         ///
-        public override bool IsMessageDispatch
+        public bool IsMessageDispatch
         {
             get { return true; }
         }
