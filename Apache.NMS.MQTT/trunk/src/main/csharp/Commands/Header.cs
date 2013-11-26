@@ -16,23 +16,38 @@
 //
 using System;
 
-namespace vs2008mqtt
+namespace Apache.NMS.MQTT.Commands
 {
 	public class Header
 	{
 		private byte value;
 
+		public Header(int commandType, int qos, bool dup, bool retain)
+		{
+			Type = commandType;
+			QoS = qos;
+			Dup = dup;
+			Retain = retain;
+		}
+
 		public Header(byte value)
 		{
+			this.value = value;
+		}
+
+		public byte RawValue
+		{
+			get { return this.value; }
+			set { this.value = value; }
 		}
 
 		public int Type
 		{
-			get { return (this.value & 0x0F) >> 4; }
+			get { return (this.value & 0xF0) >> 4; }
 			set
 			{
-				this.value &= 0xF0;
-				this.value |= (byte)((value << 4) & 0x0F);
+				this.value &= 0x0F;
+				this.value |= (byte)((value << 4) & 0xF0);
 			}
 		}
 
@@ -41,14 +56,14 @@ namespace vs2008mqtt
 			get { return (this.value & 0x06) >> 1; }
 			set
 			{
-				this.value &= 0x06;
+				this.value &= 0xF9;
 				this.value |= (byte)((value << 1) & 0x06);
 			}
 		}
 
 		public bool Dup
 		{
-			get { return (this.value & 0x80) > 0; }
+			get { return (this.value & 0x08) > 0; }
 			set
 			{
 				if (value)

@@ -32,6 +32,30 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="Apache.NMS">
+      <HintPath>build\mono-2.0\debug\Apache.NMS.dll</HintPath>
+    </Reference>
+    <Reference Include="Apache.NMS.Test">
+      <HintPath>build\mono-2.0\debug\Apache.NMS.Test.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>build\mono-2.0\debug\nunit.framework.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Compile Include="src\test\csharp\CommonAssemblyInfo.cs" />
+    <Compile Include="src\test\csharp\Protocol\HeaderTest.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="LICENSE.txt" />
+    <None Include="Apache.NMS.MQTT.Test.nunit" />
+    <None Include="nmsprovider-test.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="vs2008-mqtt.csproj">
+      <Project>{AEBC857B-D693-4833-9F1E-F6A22787D0C9}</Project>
+      <Name>vs2008-mqtt</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>
