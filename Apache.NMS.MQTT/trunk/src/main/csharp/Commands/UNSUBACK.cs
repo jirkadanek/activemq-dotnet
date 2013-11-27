@@ -21,7 +21,7 @@ using Apache.NMS.MQTT.Protocol;
 
 namespace Apache.NMS.MQTT.Commands
 {
-	public class UNSUBACK : BaseCommand
+	public class UNSUBACK : Response
 	{
 		public const byte TYPE = 11;
 		public const byte DEFAULT_HEADER = 0xB0;
@@ -43,6 +43,16 @@ namespace Apache.NMS.MQTT.Commands
 		{
 			get { return true; }
 		}
+
+        public override void Encode(BinaryWriter writer)
+        {
+            writer.Write(CommandId);
+        }
+
+        public override void Decode(BinaryReader reader)
+        {
+            CorrelationId = reader.ReadInt16();
+        }
 	}
 }
 

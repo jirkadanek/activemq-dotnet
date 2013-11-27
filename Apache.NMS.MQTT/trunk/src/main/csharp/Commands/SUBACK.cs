@@ -27,7 +27,7 @@ namespace Apache.NMS.MQTT.Commands
     /// particular Topic Name. Granted QoS levels are listed in the same order as the topic
     /// names in the corresponding SUBSCRIBE message.
 	/// </summary>
-	public class SUBACK : BaseCommand
+	public class SUBACK : Response
 	{
 		public const byte TYPE = 9;
 		public const byte DEFAULT_HEADER = 0x90;
@@ -49,6 +49,16 @@ namespace Apache.NMS.MQTT.Commands
 		{
 			get { return true; }
 		}
+
+        public override void Encode(BinaryWriter writer)
+        {
+            writer.Write(CommandId);
+        }
+
+        public override void Decode(BinaryReader reader)
+        {
+            CorrelationId = reader.ReadInt16();
+        }
 	}
 }
 
