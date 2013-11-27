@@ -548,7 +548,11 @@ namespace Apache.NMS.MQTT
 										else
 										{
 											ErrorResponse error = response as ErrorResponse;
-											NMSException exception = error.Error;
+											Exception exception = error.Error;
+											if (!(exception is NMSException)) 
+											{
+												exception = new NMSException(exception.Message);
+											}
 											// This is non-recoverable.
 											// Shutdown the transport connection, and re-create it, but don't start it.
 											// It will be started if the connection is re-attempted.

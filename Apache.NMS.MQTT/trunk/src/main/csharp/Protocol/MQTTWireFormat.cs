@@ -32,6 +32,10 @@ namespace Apache.NMS.MQTT.Protocol
 
         public void Marshal(Command cmd, BinaryWriter ds)
 		{
+			Tracer.DebugFormat("MQTT Command being sent: {0}", cmd);
+
+			Console.WriteLine("MQTT Command being sent: {0}", cmd);
+
 			MemoryStream buffer = new MemoryStream();
 			EndianBinaryWriter writer = new EndianBinaryWriter(buffer);
 
@@ -41,6 +45,7 @@ namespace Apache.NMS.MQTT.Protocol
 			ds.Write(fixedHeader);
 			WriteLength((int)buffer.Length, ds);
             ds.Write(buffer.GetBuffer(), 0, (int) buffer.Length);
+			ds.Flush();
 		}
 
         public Command Unmarshal(BinaryReader dis)
@@ -67,16 +72,24 @@ namespace Apache.NMS.MQTT.Protocol
 				cmd.Decode(reader);
 			}
 
-			// A CONNACK is a response, but if it has an error code, then we create a suitable
-			// ErrorResponse here with the correct NMSException in its payload.
-			if (cmd.IsCONNACK && cmd.IsErrorResponse)
+			// A CONNACK is a response and it's correlationId is always 1, but if it has an 
+            // error code, then we create a suitable ErrorResponse here with the correct 
+            // NMSException in its payload.
+			if (cmd.IsCONNACK) 
 			{
-				CONNACK connAck = cmd as CONNACK;
-				ErrorResponse error = new ErrorResponse();
-				error.Error = MQTTExceptionFactory.CreateConnectionException(connAck.ReturnCode);
-				cmd = error;
-			}
+    		    CONNACK connAck = cmd as CONNACK;
+                connAck.CorrelationId = 1;
+				if (cmd.IsErrorResponse)
+				{
+					ErrorResponse error = new ErrorResponse();
+					error.Error = MQTTExceptionFactory.CreateConnectionException(connAck.ReturnCode);
+					cmd = error;
+				}
+			} 
 
+			Tracer.DebugFormat("MQTT Command received: {0}", cmd);
+			Console.WriteLine("MQTT Command recieved: {0}", cmd);
+           
 			return cmd;
 		}
 

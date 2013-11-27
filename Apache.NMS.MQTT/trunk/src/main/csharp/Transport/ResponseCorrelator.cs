@@ -27,7 +27,7 @@ namespace Apache.NMS.MQTT.Transport
     public class ResponseCorrelator : TransportFilter
     {
         private readonly IDictionary requestMap = Hashtable.Synchronized(new Hashtable());
-        private int nextCommandId;
+        private int nextCommandId = 1;  // 1 is always CONNECT -> CONNACK
 		private Exception error;
 
         public ResponseCorrelator(ITransport next) : base(next)
@@ -40,24 +40,34 @@ namespace Apache.NMS.MQTT.Transport
             base.OnException(sender, command);
         }
 
-        internal int GetNextCommandId()
+        internal short GetNextCommandId()
         {
-            return Interlocked.Increment(ref nextCommandId);
+			if (nextCommandId == UInt16.MaxValue)
+			{
+				nextCommandId = 1;
+			}
+            return (short) Interlocked.Increment(ref nextCommandId);
         }
 
         public override void Oneway(Command command)
         {
-//            command.CommandId = GetNextCommandId();
-//			command.ResponseRequired = false;
+            command.CommandId = GetNextCommandId();
+			command.ResponseRequired = false;
             next.Oneway(command);
         }
 
         public override FutureResponse AsyncRequest(Command command)
         {
-            int commandId = GetNextCommandId();
-
-//            command.CommandId = commandId;
-//            command.ResponseRequired = true;
+			Tracer.DebugFormat("ResponseCorrelator requesting: {0}", command);
+			if (command.IsCONNECT)
+			{
+				command.CommandId = 1;
+			}
+			else
+			{
+            	command.CommandId = GetNextCommandId();
+			}
+            command.ResponseRequired = true;
             FutureResponse future = new FutureResponse();
 	        Exception priorError = null;
 	        lock(requestMap.SyncRoot) 
@@ -65,17 +75,15 @@ namespace Apache.NMS.MQTT.Transport
 	            priorError = this.error;
 	            if(priorError == null) 
 				{
-		            requestMap[commandId] = future;
+		            requestMap[command.CommandId] = future;
 	            }
 	        }
 	
 	        if(priorError != null) 
 			{
-//				BrokerError brError = new BrokerError();
-//				brError.Message = priorError.Message;
-//				ExceptionResponse response = new ExceptionResponse();
-//				response.Exception = brError;
-//	            future.Response = response;
+				ErrorResponse response = new ErrorResponse();
+				response.Error = priorError;
+	            future.Response = response;
                 return future;
 	        }
 			
@@ -143,11 +151,9 @@ namespace Apache.NMS.MQTT.Transport
 			{
 				foreach(FutureResponse future in requests)
 				{
-//					BrokerError brError = new BrokerError();
-//					brError.Message = error.Message;
-//					ExceptionResponse response = new ExceptionResponse();
-//					response.Exception = brError;
-//		            future.Response = response;
+					ErrorResponse response = new ErrorResponse();
+					response.Error = error;
+		            future.Response = response;
 				}
 	        }
 		}

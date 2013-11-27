@@ -21,8 +21,8 @@ namespace Apache.NMS.MQTT.Transport
 {
 	public class ErrorResponse : Response
 	{
-		private NMSException error;
-		public NMSException Error
+		private Exception error;
+		public Exception Error
 		{
 			get { return error; }
 			set { this.error = value; }

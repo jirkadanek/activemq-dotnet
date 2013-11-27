@@ -43,11 +43,13 @@ namespace Apache.NMS.MQTT.Transport
         short CommandId
         {
 			get;
+			set;
         }
 
         bool ResponseRequired
         {
 			get;
+			set;
         }
 
 		bool IsResponse
