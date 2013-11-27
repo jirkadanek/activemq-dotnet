@@ -152,7 +152,7 @@ namespace Apache.NMS.MQTT
             get { return brokerUri; }
             set
             {
-                brokerUri = new Uri(URISupport.StripPrefix(value.OriginalString, "stomp:"));
+                brokerUri = new Uri(URISupport.StripPrefix(value.OriginalString, "mqtt:"));
 
                 if(!String.IsNullOrEmpty(brokerUri.Query) && !brokerUri.OriginalString.EndsWith(")"))
                 {

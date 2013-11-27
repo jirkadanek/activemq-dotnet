@@ -43,6 +43,16 @@ namespace Apache.NMS.MQTT.Commands
 		{
 			get { return true; }
 		}
+
+        public override void Encode(BinaryWriter writer)
+        {
+            // This command has no body. 
+        }
+
+        public override void Decode(BinaryReader reader)
+        {
+            // This command has no body. 
+        }
 	}
 }
 

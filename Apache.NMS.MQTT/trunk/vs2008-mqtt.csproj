@@ -117,5 +117,7 @@
     <None Include="NOTICE.txt" />
     <None Include="README.txt" />
     <None Include="keyfile\NMSKey.snk" />
+    <None Include="nant.build" />
+    <None Include="nant-common.xml" />
   </ItemGroup>
 </Project>
