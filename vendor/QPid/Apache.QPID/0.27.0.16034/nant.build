@@ -28,7 +28,7 @@
 	<property name="project.short_description" value="Apache Qpid/Proton Messaging Library"/>
 	<property name="project.description"       value="Apache Qpid/Proton Messaging Library"/>
 	<property name="compile.skip"              value="true"/>
-	<property name="build.framework.strings"   value="net-4.0" />
+	<property name="build.framework.strings"   value="net-2.0,net-4.0" />
 
 	<!-- Repository organized as: organization/module/version/plaform/artifact, platform might be something like 'all' or 'net-2.0/release' -->
 	<target name="vendor-init" description="Initializes Vendor library from local repository.">
@@ -42,33 +42,7 @@
 
 	<target name="dependency-init" description="Initializes build dependencies">
 		<fileset id="install.filenames">
-            <!--
-                Nant copies only files that exist and ignores those that do not.
-                Attempt to copy both debug and release and only pick up what is there.
-            -->
-			<include name="${basedir}/${current.build.framework}/${current.build.config}/org.apache.qpid.messaging.dll"/>
-
-			<include name="${basedir}/${current.build.framework}/${current.build.config}/boost_date_time-vc90-mt-gd-1_47.dll"/>
-			<include name="${basedir}/${current.build.framework}/${current.build.config}/boost_program_options-vc90-mt-gd-1_47.dll"/>
-			<include name="${basedir}/${current.build.framework}/${current.build.config}/boost_regex-vc90-mt-gd-1_47.dll"/>
-			<include name="${basedir}/${current.build.framework}/${current.build.config}/boost_system-vc90-mt-gd-1_47.dll"/>
-			<include name="${basedir}/${current.build.framework}/${current.build.config}/boost_thread-vc90-mt-gd-1_47.dll"/>
-			<include name="${basedir}/${current.build.framework}/${current.build.config}/qpid-protond.dll"/>
-			<include name="${basedir}/${current.build.framework}/${current.build.config}/qpidclientd.dll"/>
-			<include name="${basedir}/${current.build.framework}/${current.build.config}/qpidcommond.dll"/>
-			<include name="${basedir}/${current.build.framework}/${current.build.config}/qpidmessagingd.dll"/>
-			<include name="${basedir}/${current.build.framework}/${current.build.config}/qpidtypesd.dll"/>
-            
-			<include name="${basedir}/${current.build.framework}/${current.build.config}/boost_date_time-vc90-mt-1_47.dll"/>
-			<include name="${basedir}/${current.build.framework}/${current.build.config}/boost_program_options-vc90-mt-1_47.dll"/>
-			<include name="${basedir}/${current.build.framework}/${current.build.config}/boost_regex-vc90-mt-1_47.dll"/>
-			<include name="${basedir}/${current.build.framework}/${current.build.config}/boost_system-vc90-mt-1_47.dll"/>
-			<include name="${basedir}/${current.build.framework}/${current.build.config}/boost_thread-vc90-mt-1_47.dll"/>
-			<include name="${basedir}/${current.build.framework}/${current.build.config}/qpid-proton.dll"/>
-			<include name="${basedir}/${current.build.framework}/${current.build.config}/qpidclient.dll"/>
-			<include name="${basedir}/${current.build.framework}/${current.build.config}/qpidcommon.dll"/>
-			<include name="${basedir}/${current.build.framework}/${current.build.config}/qpidmessaging.dll"/>
-			<include name="${basedir}/${current.build.framework}/${current.build.config}/qpidtypes.dll"/>
+			<include name="${basedir}/${current.build.framework}/${current.build.config}/*.dll"/>
 		</fileset>"/>
 
 	</target>
