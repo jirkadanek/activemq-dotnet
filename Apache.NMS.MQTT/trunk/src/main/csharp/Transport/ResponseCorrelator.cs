@@ -58,10 +58,9 @@ namespace Apache.NMS.MQTT.Transport
 
         public override FutureResponse AsyncRequest(Command command)
         {
-			Tracer.DebugFormat("ResponseCorrelator requesting: {0}", command);
 			if (command.IsCONNECT)
 			{
-				command.CommandId = 1;
+				command.CommandId = (short) 1;
 			}
 			else
 			{
@@ -105,7 +104,7 @@ namespace Apache.NMS.MQTT.Transport
             if(command.IsResponse)
             {
                 Response response = (Response) command;
-                int correlationId = response.CorrelationId;
+                short correlationId = response.CorrelationId;
                 FutureResponse future = (FutureResponse) requestMap[correlationId];
 
                 if(future != null)
@@ -115,10 +114,8 @@ namespace Apache.NMS.MQTT.Transport
                 }
                 else
                 {
-                    if(Tracer.IsDebugEnabled)
-                    {
-                        Tracer.Debug("Unknown response ID: " + response.CorrelationId + " for response: " + response);
-                    }
+                    Tracer.DebugFormat("Unknown response ID: {0} for response: {1}",
+                                       response.CorrelationId, response);
                 }
             }
             else

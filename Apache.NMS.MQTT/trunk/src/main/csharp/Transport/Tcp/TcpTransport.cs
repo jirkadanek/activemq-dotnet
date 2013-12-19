@@ -237,23 +237,23 @@ namespace Apache.NMS.MQTT.Transport.Tcp
 					catch
 					{
 					}
-
-					if(null != readThread)
-					{
-						if(Thread.CurrentThread != readThread && readThread.IsAlive)
-						{
-							if(!readThread.Join((int) MAX_THREAD_WAIT.TotalMilliseconds))
-							{
-								readThread.Abort();
-							}
-						}
-
-						readThread = null;
-					}
-
-					started = false;
-				}
+                }
 			}
+
+            if(null != readThread)
+            {
+                if(Thread.CurrentThread != readThread && readThread.IsAlive)
+                {
+                    if(!readThread.Join((int) MAX_THREAD_WAIT.TotalMilliseconds))
+                    {
+                        readThread.Abort();
+                    }
+                }
+
+                readThread = null;
+            }
+
+            started = false;
 		}
 
 		public void Dispose()

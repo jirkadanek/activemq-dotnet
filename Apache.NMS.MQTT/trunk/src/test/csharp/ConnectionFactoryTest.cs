@@ -25,6 +25,12 @@ namespace Apache.NMS.MQTT.Test
 	[TestFixture]
 	public class ConnectionFactoryTest
 	{
+        [SetUp]
+        public void SetUp()
+        {
+            Apache.NMS.Tracer.Trace = new NmsConsoleTracer();
+        }
+
         [Test]
         [TestCase("tcp://${activemqhost}:1883")]
 //      [TestCase("stomp:failover:(tcp://${activemqhost}:1883?keepAlive=false&wireFormat.maxInactivityDuration=1000)")]
