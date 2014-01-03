@@ -90,7 +90,7 @@ namespace Apache.NMS.WCF
 		/// </summary>
 		/// <param name="bindingElement">A binding element.</param>
 		/// <exception cref="T:System.ArgumentNullException">
-		/// 	<paramref name="transportElement"/> is null.</exception>
+		/// 	<paramref name="bindingElement"/> is null.</exception>
 		public override void ApplyConfiguration(BindingElement bindingElement)
 		{
 			base.ApplyConfiguration(bindingElement);

@@ -185,7 +185,7 @@ namespace Apache.NMS.WCF
 		/// Completes an asynchronous operation on the open of a communication object.
 		/// </summary>
 		/// <param name="result">The <see cref="T:System.IAsyncResult"/> that is returned by a call to the <see cref="M:System.ServiceModel.Channels.CommunicationObject.OnEndOpen(System.IAsyncResult)"/> method.</param>
-		/// <exception cref="T:System.TimeoutException">The interval of time specified by <paramref name="timeout"/> that was allotted for the operation was exceeded before the operation was completed.</exception>
+		/// <exception cref="T:System.TimeoutException">The interval of time specified by timeout passed to OnBeginOpen() that was allotted for the operation was exceeded before the operation was completed.</exception>
 		protected override void OnEndOpen(IAsyncResult result)
 		{
 			CompletedAsyncResult.End(result);
@@ -227,7 +227,7 @@ namespace Apache.NMS.WCF
 		/// Completes an asynchronous operation on the close of a communication object.
 		/// </summary>
 		/// <param name="result">The <see cref="T:System.IAsyncResult"/> that is returned by a call to the <see cref="M:System.ServiceModel.Channels.CommunicationObject.OnEndClose(System.IAsyncResult)"/> method.</param>
-		/// <exception cref="T:System.TimeoutException">The interval of time specified by <paramref name="timeout"/> that was allotted for the operation was exceeded before the operation was completed.</exception>
+		/// <exception cref="T:System.TimeoutException">The interval of time specified by timeout in OnBeginClose() that was allotted for the operation was exceeded before the operation was completed.</exception>
 		protected override void OnEndClose(IAsyncResult result)
 		{
 			CompletedAsyncResult.End(result);

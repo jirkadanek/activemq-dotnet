@@ -183,7 +183,7 @@ namespace Apache.NMS.WCF
 		/// </summary>
 		/// <param name="result">The <see cref="T:System.IAsyncResult"/> that identifies the <see cref="M:System.ServiceModel.Channels.IInputChannel.BeginWaitForMessage(System.TimeSpan,System.AsyncCallback,System.Object)"/> operation to finish, and from which to retrieve an end result.</param>
 		/// <returns>
-		/// true if a message has arrived before the <paramref name="timeout"/> has been exceeded; otherwise false.
+		/// true if a message has arrived before the timeout parameter to BeginWaitForMessage() has been exceeded; otherwise false.
 		/// </returns>
 		public bool EndWaitForMessage(IAsyncResult result)
 		{
