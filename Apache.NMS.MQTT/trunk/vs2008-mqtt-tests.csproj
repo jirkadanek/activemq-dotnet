@@ -49,6 +49,7 @@
     <Compile Include="src\test\csharp\NMSConnectionFactoryTest.cs" />
     <Compile Include="src\test\csharp\NmsConsoleTracer.cs" />
     <Compile Include="src\test\csharp\ConnectionFactoryTest.cs" />
+    <Compile Include="src\test\csharp\MQTTSessionTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="LICENSE.txt" />

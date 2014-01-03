@@ -21,7 +21,7 @@ using Apache.NMS.MQTT.Protocol;
 
 namespace Apache.NMS.MQTT.Commands
 {
-	public class PUBCOMP : BaseCommand
+	public class PUBCOMP : Response
 	{
 		public const byte TYPE = 7;
 		public const byte DEFAULT_HEADER = 0x70;
@@ -43,6 +43,16 @@ namespace Apache.NMS.MQTT.Commands
 		{
 			get { return true; }
 		}
+
+        public override void Encode(BinaryWriter writer)
+        {
+            writer.Write(CommandId);
+        }
+
+        public override void Decode(BinaryReader reader)
+        {
+            CorrelationId = reader.ReadInt16();
+        }
 	}
 }
 
