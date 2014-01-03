@@ -16,6 +16,7 @@
 //
 using System;
 using System.IO;
+using System.Text;
 using Apache.NMS.MQTT.Transport;
 using Apache.NMS.MQTT.Protocol;
 
@@ -32,11 +33,19 @@ namespace Apache.NMS.MQTT.Commands
 	/// </summary>
 	public class PUBLISH : BaseCommand
 	{
+        public enum QOS
+        {
+            QOS_AT_MOST_ONCE,
+            QOS_AT_LEAST_ONCE,
+            QOS_EXACTLY_ONCE
+        };
+
 		public const byte TYPE = 3;
 		public const byte DEFAULT_HEADER = 0x30;
 
 		public PUBLISH() : base(new Header(DEFAULT_HEADER))
 		{
+            QoSLevel = (int)QOS.QOS_AT_LEAST_ONCE;
 		}
 
 		public PUBLISH(Header header) : base(header)
@@ -94,6 +103,41 @@ namespace Apache.NMS.MQTT.Commands
 			get { return this.payload; }
 			set { this.payload = value; }
 		}
+
+        public override void Encode(BinaryWriter writer)
+        {
+            writer.Write(topicName);
+
+            if (QoSLevel == (int)QOS.QOS_AT_MOST_ONCE)
+            {
+                writer.Write(messageId);
+            }
+
+            if (payload != null && payload.Length != 0)
+            {
+                writer.Write(payload);
+            }
+        }
+
+        public override void Decode(BinaryReader reader)
+        {
+            TopicName = reader.ReadString();
+
+            if (QoSLevel == (int)QOS.QOS_AT_MOST_ONCE)
+            {
+                MessageId = reader.ReadInt16();
+            }
+
+            MemoryStream stream = reader.BaseStream as MemoryStream;
+
+            long size = stream.Length - stream.Position;
+
+            byte[] buffer = new byte[size];
+            for (long i = 0; i < size; ++i)
+            {
+                buffer[i] = (byte)stream.ReadByte();
+            }
+        }
 	}
 }
 
