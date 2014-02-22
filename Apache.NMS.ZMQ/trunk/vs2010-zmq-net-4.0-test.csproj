@@ -57,7 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="vs2010-zmq-net-4.0.csproj">
-      <Project>{5AA5A595-FF56-444D-A7BD-988001619FDC}</Project>
+      <Project>{624AA430-2EEF-4251-8700-B71A6D770A3B}</Project>
       <Name>vs2010-zmq-net-4.0</Name>
     </ProjectReference>
   </ItemGroup>

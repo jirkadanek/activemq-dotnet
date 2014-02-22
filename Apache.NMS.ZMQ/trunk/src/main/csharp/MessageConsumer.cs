@@ -19,9 +19,9 @@ using System;
 using System.Text;
 using System.Threading;
 using Apache.NMS.Util;
-using ZSendRecvOpt = ZMQ.SendRecvOpt;
-using ZSocket = ZMQ.Socket;
-using ZSocketType = ZMQ.SocketType;
+using ZeroMQ;
+//using ZSendRecvOpt = ZMQ.SendRecvOpt;
+//using ZSocketType = ZeroMQ.SocketType;
 
 namespace Apache.NMS.ZMQ
 {
@@ -37,7 +37,7 @@ namespace Apache.NMS.ZMQ
 		/// <summary>
 		/// Socket object
 		/// </summary>
-		private ZSocket messageSubscriber = null;
+		private ZmqSocket messageSubscriber = null;
 		/// <summary>
 		/// Context binding string
 		/// </summary>
@@ -58,14 +58,14 @@ namespace Apache.NMS.ZMQ
 
 		public MessageConsumer(Session session, AcknowledgementMode acknowledgementMode, IDestination destination, string selector)
 		{
-			if(null == Connection.Context)
+			if(null == session.Connection.Context)
 			{
 				throw new NMSConnectionException();
 			}
 
 			this.session = session;
 			this.acknowledgementMode = acknowledgementMode;
-			this.messageSubscriber = Connection.Context.Socket(ZSocketType.SUB);
+			this.messageSubscriber = session.Connection.Context.CreateSocket(SocketType.SUB);
 			if(null == this.messageSubscriber)
 			{
 				throw new ResourceAllocationException();
@@ -77,11 +77,18 @@ namespace Apache.NMS.ZMQ
 			this.destination = new Queue(this.contextBinding);
 			if(!string.IsNullOrEmpty(clientId))
 			{
-				this.messageSubscriber.StringToIdentity(clientId, Encoding.Unicode);
+				this.messageSubscriber.Identity = Encoding.Unicode.GetBytes(clientId);
 			}
 
 			this.messageSubscriber.Connect(contextBinding);
-			this.messageSubscriber.Subscribe(selector ?? string.Empty, Encoding.ASCII);
+			byte[] prefix = null;
+
+			if(!string.IsNullOrWhiteSpace(selector))
+			{
+				prefix = Encoding.ASCII.GetBytes(selector);
+			}
+
+			this.messageSubscriber.Subscribe(prefix);
 		}
 
 		public event MessageListener Listener
@@ -117,7 +124,7 @@ namespace Apache.NMS.ZMQ
 		public IMessage Receive()
 		{
 			// TODO: Support decoding of all message types + all meta data (e.g., headers and properties)
-			return ToNmsMessage(messageSubscriber.Recv(Encoding.ASCII, ZSendRecvOpt.NONE));
+			return ToNmsMessage(messageSubscriber.Receive(Encoding.ASCII));
 		}
 
 		/// <summary>
@@ -129,7 +136,7 @@ namespace Apache.NMS.ZMQ
 		public IMessage Receive(TimeSpan timeout)
 		{
 			// TODO: Support decoding of all message types + all meta data (e.g., headers and properties)
-			return ToNmsMessage(messageSubscriber.Recv(Encoding.ASCII, timeout.Milliseconds));
+			return ToNmsMessage(messageSubscriber.Receive(Encoding.ASCII, timeout));
 		}
 
 		/// <summary>

@@ -195,9 +195,12 @@ namespace Apache.NMS.ZMQ
 
         #region Transaction State Events
 
+		// The following delegates are not used, but are required to exist.
+		#pragma warning disable 0067
         public event SessionTxEventDelegate TransactionStartedListener;
         public event SessionTxEventDelegate TransactionCommittedListener;
         public event SessionTxEventDelegate TransactionRolledBackListener;
+		#pragma warning restore 0067
 
         #endregion
 

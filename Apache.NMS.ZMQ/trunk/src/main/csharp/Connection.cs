@@ -16,7 +16,7 @@
  */
 
 using System;
-using ZContext = ZMQ.Context;
+using ZeroMQ;
 
 namespace Apache.NMS.ZMQ
 {
@@ -36,7 +36,7 @@ namespace Apache.NMS.ZMQ
         /// <summary>
         /// ZMQ context
         /// </summary>
-        static private ZContext _context = new ZContext(1);
+		private ZmqContext _context = ZmqContext.Create();
 
         /// <summary>
         /// Starts message delivery for this connection.
@@ -152,7 +152,7 @@ namespace Apache.NMS.ZMQ
         /// <summary>
         /// Gets ZMQ connection context
         /// </summary>
-        static internal ZContext Context
+        internal ZmqContext Context
         {
             get { return _context; }
         }

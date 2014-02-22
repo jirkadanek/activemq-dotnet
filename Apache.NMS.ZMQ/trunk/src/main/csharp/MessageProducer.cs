@@ -16,9 +16,8 @@
  */
 
 using System;
-using ZSocket = ZMQ.Socket;
-using ZSocketType = ZMQ.SocketType;
 using System.Text;
+using ZeroMQ;
 
 namespace Apache.NMS.ZMQ
 {
@@ -33,7 +32,7 @@ namespace Apache.NMS.ZMQ
 		/// <summary>
 		/// Socket object
 		/// </summary>
-		private ZSocket messageProducer = null;
+		private ZmqSocket messageProducer = null;
 		private MsgDeliveryMode deliveryMode;
 		private TimeSpan timeToLive;
 		private MsgPriority priority;
@@ -49,19 +48,19 @@ namespace Apache.NMS.ZMQ
 
 		public MessageProducer(Connection connection, Session session, IDestination destination)
 		{
-			if(null == Connection.Context)
+			if(null == connection.Context)
 			{
 				throw new NMSConnectionException();
 			}
 
 			this.session = session;
 			this.destination = destination;
-			this.messageProducer = Connection.Context.Socket(ZSocketType.SUB);
+			this.messageProducer = connection.Context.CreateSocket(SocketType.SUB);
 
 			string clientId = connection.ClientId;
 			if(!string.IsNullOrEmpty(clientId))
 			{
-				this.messageProducer.StringToIdentity(clientId, Encoding.Unicode);
+				this.messageProducer.Identity = Encoding.Unicode.GetBytes(clientId);
 			}
 
 			this.messageProducer.Connect(connection.BrokerUri.LocalPath);

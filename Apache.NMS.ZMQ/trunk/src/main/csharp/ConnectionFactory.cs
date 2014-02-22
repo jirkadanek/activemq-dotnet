@@ -28,11 +28,49 @@ namespace Apache.NMS.ZMQ
 		private string clientID;
 		private IRedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
 
+		private const string DEFAULT_BROKER_URL = "tcp://localhost:5556";
+		private const string ENV_BROKER_URL = "ZMQ_BROKER_URL";
+
+		public ConnectionFactory()
+			: this(GetDefaultBrokerUrl())
+		{
+		}
+
+		public ConnectionFactory(string brokerUri)
+			: this(brokerUri, null)
+		{
+		}
+
+		public ConnectionFactory(string brokerUri, string clientID)
+			: this(new Uri(brokerUri), clientID)
+		{
+		}
+
 		public ConnectionFactory(Uri brokerUri, string clientID)
 		{
 			this.brokerUri = brokerUri;
 			this.clientID = clientID;
 		}
+
+		/// <summary>
+		/// Get the default connection Uri if none is specified.
+		/// The environment variable is checked first.
+		/// </summary>
+		/// <returns></returns>
+		private static string GetDefaultBrokerUrl()
+		{
+			string brokerUrl = Environment.GetEnvironmentVariable(ENV_BROKER_URL);
+
+			if(string.IsNullOrEmpty(brokerUrl))
+			{
+				brokerUrl = DEFAULT_BROKER_URL;
+			}
+
+			return brokerUrl;
+		}
+
+		#region IConnectionFactory Members
+
 
 		/// <summary>
 		/// Creates a new connection to ZMQ.
@@ -106,5 +144,7 @@ namespace Apache.NMS.ZMQ
 			get { return this.producerTransformer; }
 			set { this.producerTransformer = value; }
 		}
+
+		#endregion
 	}
 }

@@ -16,10 +16,9 @@
  */
 
 using System;
-using System.Messaging;
-using NUnit.Framework;
-using System.Threading;
 using System.IO;
+using System.Threading;
+using NUnit.Framework;
 
 namespace Apache.NMS.ZMQ
 {
@@ -52,10 +51,12 @@ namespace Apache.NMS.ZMQ
 			string libFolder = System.Environment.CurrentDirectory;
 			string libFileName;
 
-			libFileName = Path.Combine(libFolder, "libzmq.dll");
-			Assert.IsTrue(File.Exists(libFileName), "Missing zmq library file: {0}", libFileName);
 			libFileName = Path.Combine(libFolder, "clrzmq.dll");
 			Assert.IsTrue(File.Exists(libFileName), "Missing zmq wrapper file: {0}", libFileName);
+			libFileName = Path.Combine(libFolder, "libzmq.dll");
+			Assert.IsTrue(File.Exists(libFileName), "Missing zmq library file: {0}", libFileName);
+			libFileName = Path.Combine(libFolder, "libzmq64.dll");
+			Assert.IsTrue(File.Exists(libFileName), "Missing 64-bit zmq library file: {0}", libFileName);
 			libFileName = Path.Combine(libFolder, "Apache.NMS.dll");
 			Assert.IsTrue(File.Exists(libFileName), "Missing Apache.NMS library file: {0}", libFileName);
 			libFileName = Path.Combine(libFolder, "Apache.NMS.ZMQ.dll");

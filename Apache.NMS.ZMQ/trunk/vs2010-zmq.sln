@@ -1,21 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vs2010-zmq-net-4.0x64", "vs2010-zmq-net-4.0x64.csproj", "{A5FCA129-991B-4CB2-987A-B25E43B0F5EC}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vs2010-zmq-net-4.0-test", "vs2010-zmq-net-4.0-test.csproj", "{2F31ED5C-44A2-464A-BD55-2B5B010654E8}"
 	ProjectSection(ProjectDependencies) = postProject
-		{A5FCA129-991B-4CB2-987A-B25E43B0F5EC} = {A5FCA129-991B-4CB2-987A-B25E43B0F5EC}
 		{624AA430-2EEF-4251-8700-B71A6D770A3B} = {624AA430-2EEF-4251-8700-B71A6D770A3B}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vs2010-zmq-net-4.0", "vs2010-zmq-net-4.0.csproj", "{5AA5A595-FF56-444D-A7BD-988001619FDC}"
-	ProjectSection(ProjectDependencies) = postProject
-		{A5FCA129-991B-4CB2-987A-B25E43B0F5EC} = {A5FCA129-991B-4CB2-987A-B25E43B0F5EC}
-		{624AA430-2EEF-4251-8700-B71A6D770A3B} = {624AA430-2EEF-4251-8700-B71A6D770A3B}
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vs2010-zmq-net-4.0x86", "vs2010-zmq-net-4.0x86.csproj", "{624AA430-2EEF-4251-8700-B71A6D770A3B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vs2010-zmq-net-4.0", "vs2010-zmq-net-4.0.csproj", "{624AA430-2EEF-4251-8700-B71A6D770A3B}"
 EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
@@ -27,18 +18,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A5FCA129-991B-4CB2-987A-B25E43B0F5EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A5FCA129-991B-4CB2-987A-B25E43B0F5EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A5FCA129-991B-4CB2-987A-B25E43B0F5EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A5FCA129-991B-4CB2-987A-B25E43B0F5EC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2F31ED5C-44A2-464A-BD55-2B5B010654E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2F31ED5C-44A2-464A-BD55-2B5B010654E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F31ED5C-44A2-464A-BD55-2B5B010654E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2F31ED5C-44A2-464A-BD55-2B5B010654E8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5AA5A595-FF56-444D-A7BD-988001619FDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5AA5A595-FF56-444D-A7BD-988001619FDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5AA5A595-FF56-444D-A7BD-988001619FDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5AA5A595-FF56-444D-A7BD-988001619FDC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{624AA430-2EEF-4251-8700-B71A6D770A3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{624AA430-2EEF-4251-8700-B71A6D770A3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{624AA430-2EEF-4251-8700-B71A6D770A3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
