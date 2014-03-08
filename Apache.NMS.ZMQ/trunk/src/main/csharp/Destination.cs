@@ -16,6 +16,8 @@
  */
 
 using System;
+using System.Text;
+using ZeroMQ;
 
 namespace Apache.NMS.ZMQ
 {
@@ -24,38 +26,43 @@ namespace Apache.NMS.ZMQ
 	/// </summary>
 	public abstract class Destination : IDestination
 	{
-
-		private String name = "";
-
+		protected Session session;
 		/// <summary>
-		/// The Default Constructor
+		/// Socket object
 		/// </summary>
-		protected Destination()
-		{
-		}
+		protected ZmqSocket producerEndpoint = null;
+		protected ZmqSocket consumerEndpoint = null;
+		protected string destinationName;
 
 		/// <summary>
 		/// Construct the Destination with a defined physical name.
 		/// </summary>
 		/// <param name="name"></param>
-		protected Destination(String destName)
+		protected Destination(Session session, string destName)
 		{
-			Name = destName;
+			this.session = session;
+			this.destinationName = destName;
 		}
 
-		public String Name
+		~Destination()
 		{
-			get { return this.name; }
-			set
+			// TODO: Implement IDisposable pattern
+			if(null != this.producerEndpoint)
 			{
-				this.name = value;
-				if(!this.name.Contains("\\"))
-				{
-					// Destinations must have paths in them.  If no path specified, then
-					// default to local machine.
-					this.name = ".\\" + this.name;
-				}
+				this.session.Connection.ReleaseProducer(this.producerEndpoint);
+				this.producerEndpoint = null;
 			}
+
+			if(null != this.consumerEndpoint)
+			{
+				this.session.Connection.ReleaseConsumer(this.consumerEndpoint);
+				this.consumerEndpoint = null;
+			}
+		}
+
+		public string Name
+		{
+			get { return this.destinationName; }
 		}
 
 		public bool IsTopic
@@ -88,21 +95,26 @@ namespace Apache.NMS.ZMQ
 		/// <summary>
 		/// </summary>
 		/// <returns>string representation of this instance</returns>
-		public override String ToString()
+		public override string ToString()
+		{
+			return MakeUriString(this.destinationName);
+		}
+
+		private string MakeUriString(string destName)
 		{
 			switch(DestinationType)
 			{
 			case DestinationType.Topic:
-				return "topic://" + Name;
+				return "topic://" + destName;
 
 			case DestinationType.TemporaryTopic:
-				return "temp-topic://" + Name;
+				return "temp-topic://" + destName;
 
 			case DestinationType.TemporaryQueue:
-				return "temp-queue://" + Name;
+				return "temp-queue://" + destName;
 
 			default:
-				return "queue://" + Name;
+				return "queue://" + destName;
 			}
 		}
 
@@ -114,10 +126,7 @@ namespace Apache.NMS.ZMQ
 		{
 			int answer = 37;
 
-			if(this.name != null)
-			{
-				answer = name.GetHashCode();
-			}
+			answer = this.Name.GetHashCode();
 
 			if(IsTopic)
 			{
@@ -140,7 +149,7 @@ namespace Apache.NMS.ZMQ
 			{
 				Destination other = (Destination) obj;
 				result = (this.DestinationType == other.DestinationType
-							&& this.name.Equals(other.name));
+							&& this.Name.Equals(other.Name));
 			}
 
 			return result;
@@ -149,6 +158,38 @@ namespace Apache.NMS.ZMQ
 		public abstract DestinationType DestinationType
 		{
 			get;
+		}
+
+		internal int Send(byte[] buffer, TimeSpan timeout)
+		{
+			if(null == this.producerEndpoint)
+			{
+				this.producerEndpoint = this.session.Connection.GetProducer();
+			}
+
+			return this.producerEndpoint.Send(buffer, buffer.Length, SocketFlags.None, timeout);
+		}
+
+		internal string Receive(Encoding encoding, TimeSpan timeout)
+		{
+			if(null == this.consumerEndpoint)
+			{
+				this.consumerEndpoint = this.session.Connection.GetConsumer(encoding, this.destinationName);
+			}
+
+			return consumerEndpoint.Receive(encoding, timeout);
+		}
+
+		internal Frame ReceiveFrame()
+		{
+			// TODO: Implement
+			return null;
+		}
+
+		internal ZmqMessage ReceiveMessage()
+		{
+			// TODO: Implement
+			return null;
 		}
 	}
 }

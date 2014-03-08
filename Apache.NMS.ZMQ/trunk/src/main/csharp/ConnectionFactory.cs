@@ -16,6 +16,7 @@
  */
 using System;
 using Apache.NMS.Policies;
+using Apache.NMS.Util;
 
 namespace Apache.NMS.ZMQ
 {
@@ -25,7 +26,7 @@ namespace Apache.NMS.ZMQ
 	public class ConnectionFactory : IConnectionFactory
 	{
 		private Uri brokerUri;
-		private string clientID;
+		private string clientId;
 		private IRedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
 
 		private const string DEFAULT_BROKER_URL = "tcp://localhost:5556";
@@ -36,20 +37,35 @@ namespace Apache.NMS.ZMQ
 		{
 		}
 
-		public ConnectionFactory(string brokerUri)
-			: this(brokerUri, null)
+		public ConnectionFactory(string rawBrokerUri)
+			: this(rawBrokerUri, null)
 		{
 		}
 
-		public ConnectionFactory(string brokerUri, string clientID)
-			: this(new Uri(brokerUri), clientID)
+		public ConnectionFactory(string rawBrokerUri, string clientID)
+			: this(URISupport.CreateCompatibleUri(rawBrokerUri), clientID)
 		{
 		}
 
-		public ConnectionFactory(Uri brokerUri, string clientID)
+		public ConnectionFactory(Uri rawBrokerUri)
+			: this(rawBrokerUri, null)
 		{
-			this.brokerUri = brokerUri;
-			this.clientID = clientID;
+		}
+
+		public ConnectionFactory(Uri rawBrokerUri, string clientID)
+		{
+			this.BrokerUri = rawBrokerUri;
+			if(this.BrokerUri.Port < 1)
+			{
+				throw new NMSConnectionException("Missing connection port number.");
+			}
+
+			if(null == clientID)
+			{
+				clientID = Guid.NewGuid().ToString();
+			}
+
+			this.ClientId = clientID;
 		}
 
 		/// <summary>
@@ -93,17 +109,13 @@ namespace Apache.NMS.ZMQ
 		/// </summary>
 		public IConnection CreateConnection(string userName, string password, bool useLogging)
 		{
-			IConnection ReturnValue = null;
-			Connection connection = new Connection();
+			Connection connection = new Connection(this.BrokerUri);
 
 			connection.RedeliveryPolicy = this.redeliveryPolicy.Clone() as IRedeliveryPolicy;
 			connection.ConsumerTransformer = this.consumerTransformer;
 			connection.ProducerTransformer = this.producerTransformer;
-			connection.BrokerUri = this.BrokerUri;
-			connection.ClientId = this.clientID;
-			ReturnValue = connection;
-
-			return ReturnValue;
+			connection.ClientId = this.ClientId;
+			return connection;
 		}
 
 		/// <summary>
@@ -111,8 +123,18 @@ namespace Apache.NMS.ZMQ
 		/// </summary>
 		public Uri BrokerUri
 		{
-			get { return brokerUri; }
-			set { brokerUri = value; }
+			get { return this.brokerUri; }
+			set
+			{
+				Tracer.InfoFormat("BrokerUri set {0}", value.OriginalString);
+				this.brokerUri = new Uri(URISupport.StripPrefix(value.OriginalString, "zmq:"));
+			}
+		}
+
+		public string ClientId
+		{
+			get { return this.clientId; }
+			set { this.clientId = value; }
 		}
 
 		/// <summary>

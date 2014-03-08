@@ -24,13 +24,8 @@ namespace Apache.NMS.ZMQ
 	/// </summary>
 	public class Topic : Destination, ITopic
 	{
-		public Topic()
-			: base()
-		{
-		}
-
-		public Topic(String name)
-			: base(name)
+		public Topic(Session session, String name)
+			: base(session, name)
 		{
 		}
 

@@ -17,6 +17,8 @@
 
 using System;
 using ZeroMQ;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Apache.NMS.ZMQ
 {
@@ -26,19 +28,43 @@ namespace Apache.NMS.ZMQ
     ///
     public class Connection : IConnection
     {
+		private class ProducerRef
+		{
+			public ZmqSocket producer = null;
+			public int refCount = 1;
+		}
+
         private AcknowledgementMode acknowledgementMode = AcknowledgementMode.AutoAcknowledge;
         private IRedeliveryPolicy redeliveryPolicy;
         private ConnectionMetaData metaData = null;
         private bool closed = true;
         private string clientId;
         private Uri brokerUri;
+		private string producerContextBinding;
+		private string consumerContextBinding;
 
         /// <summary>
         /// ZMQ context
         /// </summary>
-		private ZmqContext _context = ZmqContext.Create();
+		private static ZmqContext _context;
+		private static Dictionary<string, ProducerRef> producerCache;
+		private static object producerCacheLock;
 
-        /// <summary>
+		static Connection()
+		{
+			Connection._context = ZmqContext.Create();
+			Connection.producerCache = new Dictionary<string, ProducerRef>();
+			Connection.producerCacheLock = new object();
+		}
+
+		public Connection(Uri connectionUri)
+		{
+			this.brokerUri = connectionUri;
+			this.producerContextBinding = string.Format("{0}://*:{1}", this.brokerUri.Scheme, this.brokerUri.Port);
+			this.consumerContextBinding = string.Format("{0}://{1}:{2}", brokerUri.Scheme, brokerUri.Host, this.brokerUri.Port);
+		}
+
+		/// <summary>
         /// Starts message delivery for this connection.
         /// </summary>
         public void Start()
@@ -79,7 +105,83 @@ namespace Apache.NMS.ZMQ
             return new Session(this, mode);
         }
 
-        public void Dispose()
+		internal ZmqSocket GetProducer()
+		{
+			ProducerRef producerRef;
+			string contextBinding = GetProducerContextBinding();
+
+			lock(producerCacheLock)
+			{
+				if(!producerCache.TryGetValue(contextBinding, out producerRef))
+				{
+					producerRef = new ProducerRef();
+					producerRef.producer = this.Context.CreateSocket(SocketType.PUB);
+					if(null == producerRef.producer)
+					{
+						throw new ResourceAllocationException();
+					}
+					producerRef.producer.Bind(contextBinding);
+					producerCache.Add(contextBinding, producerRef);
+				}
+				else
+				{
+					producerRef.refCount++;
+				}
+			}
+
+			return producerRef.producer;
+		}
+
+		internal void ReleaseProducer(ZmqSocket endpoint)
+		{
+			// UNREFERENCED_PARAM(endpoint);
+			ProducerRef producerRef;
+			string contextBinding = GetProducerContextBinding();
+
+			lock(producerCacheLock)
+			{
+				if(producerCache.TryGetValue(contextBinding, out producerRef))
+				{
+					producerRef.refCount--;
+					if(producerRef.refCount < 1)
+					{
+						producerCache.Remove(contextBinding);
+						producerRef.producer.Unbind(contextBinding);
+					}
+				}
+			}
+		}
+
+		internal ZmqSocket GetConsumer(Encoding encoding, string destinationName)
+		{
+			ZmqSocket endpoint = this.Context.CreateSocket(SocketType.SUB);
+
+			if(null == endpoint)
+			{
+				throw new ResourceAllocationException();
+			}
+			endpoint.Subscribe(encoding.GetBytes(destinationName));
+			endpoint.Connect(GetConsumerBindingPath());
+
+			return endpoint;
+		}
+
+		internal void ReleaseConsumer(ZmqSocket endpoint)
+		{
+			endpoint.Disconnect(GetConsumerBindingPath());
+		}
+
+		internal string GetProducerContextBinding()
+		{
+			return this.producerContextBinding;
+		}
+
+		private string GetConsumerBindingPath()
+		{
+			return this.consumerContextBinding;
+		}
+
+		public void Dispose()
         {
             Close();
         }
@@ -87,7 +189,17 @@ namespace Apache.NMS.ZMQ
         public void Close()
         {
             Stop();
-        }
+
+			lock(producerCacheLock)
+			{
+				foreach(KeyValuePair<string, ProducerRef> cacheItem in producerCache)
+				{
+					cacheItem.Value.producer.Unbind(cacheItem.Key);
+				}
+
+				producerCache.Clear();
+			}
+		}
 
         public void PurgeTempDestinations()
         {
@@ -114,7 +226,6 @@ namespace Apache.NMS.ZMQ
         public Uri BrokerUri
         {
             get { return brokerUri; }
-            set { brokerUri = value; }
         }
 
         /// <summary>
@@ -154,7 +265,7 @@ namespace Apache.NMS.ZMQ
         /// </summary>
         internal ZmqContext Context
         {
-            get { return _context; }
+            get { return Connection._context; }
         }
 
         /// <summary>

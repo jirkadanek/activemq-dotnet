@@ -61,7 +61,7 @@ namespace Apache.NMS.ZMQ
 
         public IMessageProducer CreateProducer(IDestination destination)
         {
-            return new MessageProducer(connection, this, destination);
+            return new MessageProducer(this, destination);
         }
         #endregion
 
@@ -106,22 +106,22 @@ namespace Apache.NMS.ZMQ
 
         public IQueue GetQueue(string name)
         {
-            return new Queue(name);
+            return new Queue(this, name);
         }
 
         public ITopic GetTopic(string name)
         {
-            return new Topic(name);
+			return new Topic(this, name);
         }
 
         public ITemporaryQueue CreateTemporaryQueue()
         {
-            return new TemporaryQueue();
+            return new TemporaryQueue(this);
         }
 
         public ITemporaryTopic CreateTemporaryTopic()
         {
-            return new TemporaryTopic();
+            return new TemporaryTopic(this);
         }
 
         /// <summary>

@@ -15,13 +15,14 @@
  * limitations under the License.
  */
 
+#define PUBSUB
+
 using System;
 using System.Text;
 using System.Threading;
 using Apache.NMS.Util;
 using ZeroMQ;
-//using ZSendRecvOpt = ZMQ.SendRecvOpt;
-//using ZSocketType = ZeroMQ.SocketType;
+using System.Diagnostics;
 
 namespace Apache.NMS.ZMQ
 {
@@ -34,20 +35,12 @@ namespace Apache.NMS.ZMQ
 
 		private readonly Session session;
 		private readonly AcknowledgementMode acknowledgementMode;
-		/// <summary>
-		/// Socket object
-		/// </summary>
-		private ZmqSocket messageSubscriber = null;
-		/// <summary>
-		/// Context binding string
-		/// </summary>
-		private string contextBinding;
-		private Queue destination;
+		private Destination destination;
 		private event MessageListener listener;
 		private int listenerCount = 0;
 		private Thread asyncDeliveryThread = null;
-		private AutoResetEvent pause = new AutoResetEvent(false);
-		private Atomic<bool> asyncDelivery = new Atomic<bool>(false);
+		private object asyncDeliveryLock = new object();
+		private bool asyncDelivery = false;
 
 		private ConsumerTransformerDelegate consumerTransformer;
 		public ConsumerTransformerDelegate ConsumerTransformer
@@ -56,39 +49,18 @@ namespace Apache.NMS.ZMQ
 			set { this.consumerTransformer = value; }
 		}
 
-		public MessageConsumer(Session session, AcknowledgementMode acknowledgementMode, IDestination destination, string selector)
+		public MessageConsumer(Session session, AcknowledgementMode acknowledgementMode, IDestination dest, string selector)
 		{
+			// UNUSED_PARAM(selector);		// Selectors are not currently supported
+
 			if(null == session.Connection.Context)
 			{
 				throw new NMSConnectionException();
 			}
 
 			this.session = session;
+			this.destination = (Destination) dest;
 			this.acknowledgementMode = acknowledgementMode;
-			this.messageSubscriber = session.Connection.Context.CreateSocket(SocketType.SUB);
-			if(null == this.messageSubscriber)
-			{
-				throw new ResourceAllocationException();
-			}
-
-			string clientId = session.Connection.ClientId;
-
-			this.contextBinding = session.Connection.BrokerUri.LocalPath;
-			this.destination = new Queue(this.contextBinding);
-			if(!string.IsNullOrEmpty(clientId))
-			{
-				this.messageSubscriber.Identity = Encoding.Unicode.GetBytes(clientId);
-			}
-
-			this.messageSubscriber.Connect(contextBinding);
-			byte[] prefix = null;
-
-			if(!string.IsNullOrWhiteSpace(selector))
-			{
-				prefix = Encoding.ASCII.GetBytes(selector);
-			}
-
-			this.messageSubscriber.Subscribe(prefix);
 		}
 
 		public event MessageListener Listener
@@ -123,8 +95,7 @@ namespace Apache.NMS.ZMQ
 		/// </returns>
 		public IMessage Receive()
 		{
-			// TODO: Support decoding of all message types + all meta data (e.g., headers and properties)
-			return ToNmsMessage(messageSubscriber.Receive(Encoding.ASCII));
+			return Receive(TimeSpan.MaxValue);
 		}
 
 		/// <summary>
@@ -136,7 +107,17 @@ namespace Apache.NMS.ZMQ
 		public IMessage Receive(TimeSpan timeout)
 		{
 			// TODO: Support decoding of all message types + all meta data (e.g., headers and properties)
-			return ToNmsMessage(messageSubscriber.Receive(Encoding.ASCII, timeout));
+			string msgContent = this.destination.Receive(Encoding.UTF8, timeout);
+
+			if(null != msgContent)
+			{
+				// Strip off the subscribed destination name.
+				string destinationName = this.destination.Name;
+				string messageText = msgContent.Substring(destinationName.Length, msgContent.Length - destinationName.Length);
+				return ToNmsMessage(messageText);
+			}
+
+			return null;
 		}
 
 		/// <summary>
@@ -164,21 +145,18 @@ namespace Apache.NMS.ZMQ
 		public void Close()
 		{
 			StopAsyncDelivery();
-			if(null != messageSubscriber)
-			{
-				messageSubscriber.Dispose();
-				messageSubscriber = null;
-			}
+			this.destination = null;
 		}
 
 		protected virtual void StopAsyncDelivery()
 		{
-			if(asyncDelivery.CompareAndSet(true, false))
+			lock(asyncDeliveryLock)
 			{
+				asyncDelivery = false;
 				if(null != asyncDeliveryThread)
 				{
 					Tracer.Info("Stopping async delivery thread.");
-					pause.Set();
+					asyncDeliveryThread.Interrupt();
 					if(!asyncDeliveryThread.Join(10000))
 					{
 						Tracer.Info("Aborting async delivery thread.");
@@ -193,10 +171,12 @@ namespace Apache.NMS.ZMQ
 
 		protected virtual void StartAsyncDelivery()
 		{
-			if(asyncDelivery.CompareAndSet(false, true))
+			Debug.Assert(null == asyncDeliveryThread);
+			lock(asyncDeliveryLock)
 			{
+				asyncDelivery = true;
 				asyncDeliveryThread = new Thread(new ThreadStart(DispatchLoop));
-				asyncDeliveryThread.Name = "Message Consumer Dispatch: " + contextBinding;
+				asyncDeliveryThread.Name = string.Format("MsgConsumerAsync: {0}", this.destination.Name);
 				asyncDeliveryThread.IsBackground = true;
 				asyncDeliveryThread.Start();
 			}
@@ -205,21 +185,22 @@ namespace Apache.NMS.ZMQ
 		protected virtual void DispatchLoop()
 		{
 			Tracer.Info("Starting dispatcher thread consumer: " + this);
+			TimeSpan receiveWait = TimeSpan.FromSeconds(3);
 
-			while(asyncDelivery.Value)
+			while(asyncDelivery)
 			{
 				try
 				{
-					IMessage message = Receive();
-					if(asyncDelivery.Value && message != null)
+					IMessage message = Receive(receiveWait);
+					if(asyncDelivery && message != null)
 					{
 						try
 						{
 							listener(message);
 						}
-						catch(Exception e)
+						catch(Exception ex)
 						{
-							HandleAsyncException(e);
+							HandleAsyncException(ex);
 						}
 					}
 				}
@@ -233,7 +214,7 @@ namespace Apache.NMS.ZMQ
 					Tracer.ErrorFormat("Exception while receiving message in thread: {0} : {1}", this, ex.Message);
 				}
 			}
-			Tracer.Info("Stopping dispatcher thread consumer: " + this);
+			Tracer.Info("Stopped dispatcher thread consumer: " + this);
 		}
 
 		protected virtual void HandleAsyncException(Exception e)
@@ -252,6 +233,7 @@ namespace Apache.NMS.ZMQ
 		/// </returns>
 		protected virtual IMessage ToNmsMessage(string messageText)
 		{
+			// Strip off the destination name prefix.
 			IMessage nmsMessage = new TextMessage(messageText);
 
 			try

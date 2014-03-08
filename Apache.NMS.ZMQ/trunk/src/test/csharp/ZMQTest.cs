@@ -16,114 +16,156 @@
  */
 
 using System;
-using System.IO;
 using System.Threading;
 using NUnit.Framework;
 
 namespace Apache.NMS.ZMQ
 {
-	/// <summary>
-	/// Use to test and verify ZMQ behavior
-	/// </summary>
 	[TestFixture]
-	public class ZMQTest
+	public class ZMQTest : BaseTest
 	{
 		private bool receivedTestMessage = true;
 
-		[SetUp]
-		public void SetUp()
+		[Test]
+		public void TestConnection()
 		{
-			// Setup before each test
-		}
-
-		[TearDown]
-		public void TearDown()
-		{
-			// Clean up after each test
+			IConnectionFactory factory = NMSConnectionFactory.CreateConnectionFactory(new Uri("zmq:tcp://localhost:5556"));
+			Assert.IsNotNull(factory, "Error creating connection factory.");
+			using(IConnection connection = factory.CreateConnection())
+			{
+				Assert.IsNotNull(connection, "Problem creating connection class. Usually problem with libzmq and clrzmq ");
+				Assert.IsInstanceOf<Connection>(connection, "Wrong connection type.");
+			}
 		}
 
 		[Test]
-		public void TestReceive()
+		public void TestSession()
 		{
-			////////////////////////////
-			// Dependencies check
-			////////////////////////////
-			string libFolder = System.Environment.CurrentDirectory;
-			string libFileName;
-
-			libFileName = Path.Combine(libFolder, "clrzmq.dll");
-			Assert.IsTrue(File.Exists(libFileName), "Missing zmq wrapper file: {0}", libFileName);
-			libFileName = Path.Combine(libFolder, "libzmq.dll");
-			Assert.IsTrue(File.Exists(libFileName), "Missing zmq library file: {0}", libFileName);
-			libFileName = Path.Combine(libFolder, "libzmq64.dll");
-			Assert.IsTrue(File.Exists(libFileName), "Missing 64-bit zmq library file: {0}", libFileName);
-			libFileName = Path.Combine(libFolder, "Apache.NMS.dll");
-			Assert.IsTrue(File.Exists(libFileName), "Missing Apache.NMS library file: {0}", libFileName);
-			libFileName = Path.Combine(libFolder, "Apache.NMS.ZMQ.dll");
-			Assert.IsTrue(File.Exists(libFileName), "Missing Apache.NMS.ZMQ library file: {0}", libFileName);
-
-			////////////////////////////
-			// Factory check
-			////////////////////////////
-			IConnectionFactory factory = new ConnectionFactory("tcp://localhost:5556", "");
+			IConnectionFactory factory = NMSConnectionFactory.CreateConnectionFactory(new Uri("zmq:tcp://localhost:5556"));
 			Assert.IsNotNull(factory, "Error creating connection factory.");
-
-			////////////////////////////
-			// Connection check
-			////////////////////////////
-			IConnection connection = null;
-			try
+			using(IConnection connection = factory.CreateConnection())
 			{
-				connection = factory.CreateConnection();
-				Assert.IsNotNull(connection, "problem creating connection class, usually problem with libzmq and clrzmq ");
-			}
-			catch(System.Exception ex1)
-			{
-				Assert.Fail("Problem creating connection, make sure dependencies are present. Error: {0}", ex1.Message);
-			}
-
-			////////////////////////////
-			// Session check
-			////////////////////////////
-			ISession session = connection.CreateSession();
-			// Is session good?
-			Assert.IsNotNull(session, "Error creating Session.");
-
-			////////////////////////////
-			// Consumer check
-			////////////////////////////
-			IQueue testQueue = session.GetQueue("ZMQTestQueue");
-			Assert.IsNotNull(testQueue, "Error creating test queue.");
-			IMessageConsumer consumer = session.CreateConsumer(testQueue);
-			Assert.IsNotNull(consumer, "Error creating consumer.");
-
-			consumer.Listener += OnMessage;
-
-			////////////////////////////
-			// Producer check
-			////////////////////////////
-			IMessageProducer producer = session.CreateProducer(testQueue);
-			Assert.IsNotNull(consumer, "Error creating producer.");
-
-			ITextMessage testMsg = producer.CreateTextMessage("Zero Message.");
-			Assert.IsNotNull(testMsg, "Error creating test message.");
-
-			producer.Send(testMsg);
-
-			////////////////////////////
-			// Listener check
-			////////////////////////////
-			DateTime startWaitTime = DateTime.Now;
-			TimeSpan maxWaitTime = TimeSpan.FromSeconds(10);
-
-			while(!receivedTestMessage)
-			{
-				if((DateTime.Now - startWaitTime) > maxWaitTime)
+				Assert.IsNotNull(connection, "Problem creating connection class. Usually problem with libzmq and clrzmq ");
+				using(ISession session = connection.CreateSession())
 				{
-					Assert.Fail("Timeout waiting for message receive.");
+					Assert.IsNotNull(session, "Error creating session.");
+					Assert.IsInstanceOf<Session>(session, "Wrong session type.");
 				}
+			}
+		}
 
-				Thread.Sleep(5);
+		[Test, Sequential]
+		public void TestDestinations(
+			[Values("queue://ZMQTestQueue", "topic://ZMQTestTopic", "temp-queue://ZMQTempQueue", "temp-topic://ZMQTempTopic")]
+			string destination,
+			[Values(typeof(Queue), typeof(Topic), typeof(TemporaryQueue), typeof(TemporaryTopic))]
+			Type destinationType)
+		{
+			IConnectionFactory factory = NMSConnectionFactory.CreateConnectionFactory(new Uri("zmq:tcp://localhost:5556"));
+			Assert.IsNotNull(factory, "Error creating connection factory.");
+			using(IConnection connection = factory.CreateConnection())
+			{
+				Assert.IsNotNull(connection, "Problem creating connection class. Usually problem with libzmq and clrzmq ");
+				using(ISession session = connection.CreateSession())
+				{
+					Assert.IsNotNull(session, "Error creating session.");
+					IDestination testDestination = session.GetDestination(destination);
+					Assert.IsNotNull(testDestination, "Error creating test destination: {0}", destination);
+					Assert.IsInstanceOf(destinationType, testDestination, "Wrong destintation type.");
+				}
+			}
+		}
+
+		[Test]
+		public void TestProducers(
+			[Values("queue://ZMQTestQueue", "topic://ZMQTestTopic", "temp-queue://ZMQTempQueue", "temp-topic://ZMQTempTopic")]
+			string destination)
+		{
+			IConnectionFactory factory = NMSConnectionFactory.CreateConnectionFactory(new Uri("zmq:tcp://localhost:5556"));
+			Assert.IsNotNull(factory, "Error creating connection factory.");
+			using(IConnection connection = factory.CreateConnection())
+			{
+				Assert.IsNotNull(connection, "Problem creating connection class. Usually problem with libzmq and clrzmq ");
+				using(ISession session = connection.CreateSession())
+				{
+					Assert.IsNotNull(session, "Error creating session.");
+					IDestination testDestination = session.GetDestination(destination);
+					Assert.IsNotNull(testDestination, "Error creating test destination: {0}", destination);
+					using(IMessageProducer producer = session.CreateProducer(testDestination))
+					{
+						Assert.IsNotNull(producer, "Error creating producer on {0}", destination);
+						Assert.IsInstanceOf<MessageProducer>(producer, "Wrong producer type.");
+					}
+				}
+			}
+		}
+
+		[Test]
+		public void TestConsumers(
+			[Values("queue://ZMQTestQueue:", "topic://ZMQTestTopic", "temp-queue://ZMQTempQueue", "temp-topic://ZMQTempTopic")]
+			string destination)
+		{
+			IConnectionFactory factory = NMSConnectionFactory.CreateConnectionFactory(new Uri("zmq:tcp://localhost:5556"));
+			Assert.IsNotNull(factory, "Error creating connection factory.");
+			using(IConnection connection = factory.CreateConnection())
+			{
+				Assert.IsNotNull(connection, "Problem creating connection class. Usually problem with libzmq and clrzmq ");
+				using(ISession session = connection.CreateSession())
+				{
+					Assert.IsNotNull(session, "Error creating session.");
+					IDestination testDestination = session.GetDestination(destination);
+					Assert.IsNotNull(testDestination, "Error creating test destination: {0}", destination);
+					using(IMessageConsumer consumer = session.CreateConsumer(testDestination))
+					{
+						Assert.IsNotNull(consumer, "Error creating consumer on {0}", destination);
+						Assert.IsInstanceOf<MessageConsumer>(consumer, "Wrong consumer type.");
+					}
+				}
+			}
+		}
+
+		[Test]
+		public void TestSendReceive(
+			[Values("queue://ZMQTestQueue", "topic://ZMQTestTopic", "temp-queue://ZMQTempQueue", "temp-topic://ZMQTempTopic")]
+			string destination)
+		{
+			IConnectionFactory factory = NMSConnectionFactory.CreateConnectionFactory(new Uri("zmq:tcp://localhost:5556"));
+			Assert.IsNotNull(factory, "Error creating connection factory.");
+			using(IConnection connection = factory.CreateConnection())
+			{
+				Assert.IsNotNull(connection, "Problem creating connection class. Usually problem with libzmq and clrzmq ");
+				using(ISession session = connection.CreateSession())
+				{
+					Assert.IsNotNull(session, "Error creating Session.");
+					IDestination testDestination = session.GetDestination(destination);
+					Assert.IsNotNull(testDestination, "Error creating test destination: {0}", destination);
+					using(IMessageConsumer consumer = session.CreateConsumer(testDestination))
+					{
+						Assert.IsNotNull(consumer, "Error creating consumer on {0}", destination);
+						consumer.Listener += OnMessage;
+						using(IMessageProducer producer = session.CreateProducer(testDestination))
+						{
+							Assert.IsNotNull(consumer, "Error creating producer on {0}", destination);
+							ITextMessage testMsg = producer.CreateTextMessage("Zero Message.");
+							Assert.IsNotNull(testMsg, "Error creating test message.");
+							producer.Send(testMsg);
+						}
+
+						// Wait for the message
+						DateTime startWaitTime = DateTime.Now;
+						TimeSpan maxWaitTime = TimeSpan.FromSeconds(10);
+
+						while(!receivedTestMessage)
+						{
+							if((DateTime.Now - startWaitTime) > maxWaitTime)
+							{
+								Assert.Fail("Timeout waiting for message receive.");
+							}
+
+							Thread.Sleep(5);
+						}
+					}
+				}
 			}
 		}
 
@@ -133,13 +175,10 @@ namespace Apache.NMS.ZMQ
 		/// <param name="message"></param>
 		private void OnMessage(IMessage message)
 		{
-			Assert.IsInstanceOf<ITextMessage>(message, "Wrong message type received.");
+			Assert.IsInstanceOf<TextMessage>(message, "Wrong message type received.");
 			ITextMessage textMsg = (ITextMessage) message;
 			Assert.AreEqual(textMsg.Text, "Zero Message.");
 			receivedTestMessage = true;
 		}
 	}
 }
-
-
-

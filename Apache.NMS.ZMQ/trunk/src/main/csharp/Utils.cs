@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -16,41 +16,25 @@
  */
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace Apache.NMS.ZMQ
 {
-	/// <summary>
-	/// Summary description for TemporaryTopic.
-	/// </summary>
-	public class TemporaryTopic : Destination, ITemporaryTopic
+	public class ZMQUtils
 	{
-		public TemporaryTopic(Session session)
-			: base(session, Guid.NewGuid().ToString())
+
+		public static string GetDestinationName(IDestination destination)
 		{
+			switch(destination.DestinationType)
+			{
+			case DestinationType.Topic: return ((Topic) destination).TopicName;
+			case DestinationType.Queue: return ((Queue) destination).QueueName;
+			case DestinationType.TemporaryTopic: return ((TemporaryTopic) destination).TopicName;
+			case DestinationType.TemporaryQueue: return ((TemporaryQueue) destination).QueueName;
+			default: return string.Empty;
+			}
 		}
-
-		override public DestinationType DestinationType
-		{
-			get { return DestinationType.TemporaryTopic; }
-		}
-
-		#region ITopic Members
-
-		public string TopicName
-		{
-			get { return Name; }
-		}
-
-		#endregion
-
-		#region ITemporaryTopic Members
-
-		public void Delete()
-		{
-			// Nothing to delete.  Resources are cleaned up automatically.
-		}
-
-		#endregion
 	}
 }
-

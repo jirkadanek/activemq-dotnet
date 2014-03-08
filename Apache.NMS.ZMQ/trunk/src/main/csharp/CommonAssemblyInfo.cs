@@ -13,7 +13,7 @@ using System.Runtime.InteropServices;
 //------------------------------------------------------------------------------
 
 [assembly: ComVisibleAttribute(false)]
-[assembly: CLSCompliantAttribute(true)]
+[assembly: CLSCompliantAttribute(false)]
 [assembly: AssemblyTitleAttribute("Apache NMS for ZMQ Class Library")]
 [assembly: AssemblyDescriptionAttribute("Apache NMS for ZMQ Class Library (.Net Messaging Library Implementation): An imp" +
     "lementation of the NMS API for ZMQ")]

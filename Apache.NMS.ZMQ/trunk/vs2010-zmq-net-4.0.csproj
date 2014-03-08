@@ -23,6 +23,8 @@
     <RegisterForComInterop>false</RegisterForComInterop>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <NoWarn>
+    </NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -31,6 +33,8 @@
     <DefineConstants>TRACE;NET</DefineConstants>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <DebugType>full</DebugType>
+    <NoWarn>
+    </NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Apache.NMS, Version=1.5.0.2363, Culture=neutral, PublicKeyToken=82756feee3957618, processorArchitecture=MSIL">
@@ -69,6 +73,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="src\main\csharp\TextMessage.cs" />
+    <Compile Include="src\main\csharp\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="lib\clrzmq\net-4.0\libzmq.dll">

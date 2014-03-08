@@ -24,13 +24,8 @@ namespace Apache.NMS.ZMQ
 	/// </summary>
 	public class Queue : Destination, IQueue
 	{
-		public Queue()
-			: base()
-		{
-		}
-
-		public Queue(String name)
-			: base(name)
+		public Queue(Session session, string name)
+			: base(session, name)
 		{
 		}
 

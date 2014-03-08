@@ -15,9 +15,12 @@
  * limitations under the License.
  */
 
+#define PUBSUB
+
 using System;
 using System.Text;
 using ZeroMQ;
+
 
 namespace Apache.NMS.ZMQ
 {
@@ -29,10 +32,6 @@ namespace Apache.NMS.ZMQ
 		private readonly Session session;
 		private IDestination destination;
 
-		/// <summary>
-		/// Socket object
-		/// </summary>
-		private ZmqSocket messageProducer = null;
 		private MsgDeliveryMode deliveryMode;
 		private TimeSpan timeToLive;
 		private MsgPriority priority;
@@ -46,24 +45,15 @@ namespace Apache.NMS.ZMQ
 			set { this.producerTransformer = value; }
 		}
 
-		public MessageProducer(Connection connection, Session session, IDestination destination)
+		public MessageProducer(Session session, IDestination dest)
 		{
-			if(null == connection.Context)
+			if(null == session.Connection.Context)
 			{
 				throw new NMSConnectionException();
 			}
 
 			this.session = session;
-			this.destination = destination;
-			this.messageProducer = connection.Context.CreateSocket(SocketType.SUB);
-
-			string clientId = connection.ClientId;
-			if(!string.IsNullOrEmpty(clientId))
-			{
-				this.messageProducer.Identity = Encoding.Unicode.GetBytes(clientId);
-			}
-
-			this.messageProducer.Connect(connection.BrokerUri.LocalPath);
+			this.destination = dest;
 		}
 
 		public void Send(IMessage message)
@@ -76,13 +66,17 @@ namespace Apache.NMS.ZMQ
 			Send(Destination, message, deliveryMode, priority, timeToLive);
 		}
 
-		public void Send(IDestination destination, IMessage message)
+		public void Send(IDestination dest, IMessage message)
 		{
-			Send(destination, message, DeliveryMode, Priority, TimeToLive);
+			Send(dest, message, DeliveryMode, Priority, TimeToLive);
 		}
 
-		public void Send(IDestination destination, IMessage message, MsgDeliveryMode deliveryMode, MsgPriority priority, TimeSpan timeToLive)
+		public void Send(IDestination dest, IMessage message, MsgDeliveryMode deliveryMode, MsgPriority priority, TimeSpan timeToLive)
 		{
+			// UNUSED_PARAM(deliveryMode);	// No concept of different delivery modes in ZMQ
+			// UNUSED_PARAM(priority);		// No concept of priority messages in ZMQ
+			// UNUSED_PARAM(timeToLive);	// No concept of time-to-live in ZMQ
+
 			if(null != this.ProducerTransformer)
 			{
 				IMessage transformedMessage = ProducerTransformer(this.session, this, message);
@@ -94,7 +88,13 @@ namespace Apache.NMS.ZMQ
 			}
 
 			// TODO: Support encoding of all message types + all meta data (e.g., headers and properties)
-			messageProducer.Send(((ITextMessage) message).Text, Encoding.ASCII);
+
+			// Prefix the message with the destination name. The client will subscribe to this destination name
+			// in order to receive messages.
+			Destination destination = (Destination) dest;
+
+			string msg = destination.Name + ((ITextMessage) message).Text;
+			destination.Send(Encoding.UTF8.GetBytes(msg), this.session.Connection.RequestTimeout);
 		}
 
 		public void Dispose()
@@ -104,11 +104,6 @@ namespace Apache.NMS.ZMQ
 
 		public void Close()
 		{
-			if(null != messageProducer)
-			{
-				messageProducer.Dispose();
-				messageProducer = null;
-			}
 		}
 
 		public IMessage CreateMessage()

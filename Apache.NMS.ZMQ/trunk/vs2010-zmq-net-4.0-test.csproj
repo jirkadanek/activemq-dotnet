@@ -48,6 +48,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\test\csharp\CommonAssemblyInfo.cs" />
+    <Compile Include="src\test\csharp\BaseTest.cs" />
+    <Compile Include="src\test\csharp\FactoryTests.cs" />
+    <Compile Include="src\test\csharp\MultiProducersMultiConsumers.cs" />
     <Compile Include="src\test\csharp\ZMQTest.cs" />
   </ItemGroup>
   <ItemGroup>

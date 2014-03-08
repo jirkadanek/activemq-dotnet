@@ -24,13 +24,8 @@ namespace Apache.NMS.ZMQ
 	/// </summary>
 	public class TemporaryQueue : Destination, ITemporaryQueue
 	{
-		public TemporaryQueue()
-			: base()
-		{
-		}
-
-		public TemporaryQueue(String name)
-			: base(name)
+		public TemporaryQueue(Session session)
+			: base(session, Guid.NewGuid().ToString())
 		{
 		}
 
@@ -39,20 +34,20 @@ namespace Apache.NMS.ZMQ
 			get { return DestinationType.TemporaryQueue; }
 		}
 
-		#region ITemporaryQueue Members
-
-		public void Delete()
-		{
-			// Nothing to delete.  Resources are cleaned up automatically.
-		}
-
-		#endregion
-
 		#region IQueue Members
 
 		public string QueueName
 		{
 			get { return Name; }
+		}
+
+		#endregion
+
+		#region ITemporaryQueue Members
+
+		public void Delete()
+		{
+			// Nothing to delete.  Resources are cleaned up automatically.
 		}
 
 		#endregion
