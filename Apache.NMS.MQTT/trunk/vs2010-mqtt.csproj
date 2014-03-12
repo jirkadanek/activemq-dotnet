@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -30,10 +30,10 @@
     <ConsolePause>false</ConsolePause>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
     <Reference Include="Apache.NMS">
-      <HintPath>lib\Apache.NMS\mono-2.0\Apache.NMS.dll</HintPath>
+      <HintPath>lib\Apache.NMS\net-2.0\Apache.NMS.dll</HintPath>
     </Reference>
+    <Reference Include="System" />
     <Reference Include="System.Web" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
@@ -109,9 +109,7 @@
     <Compile Include="src\main\csharp\Protocol\Header.cs" />
     <Compile Include="src\main\csharp\Protocol\MQTTCommandFactory.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="keyfile\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="LICENSE.txt" />
     <None Include="NOTICE.txt" />

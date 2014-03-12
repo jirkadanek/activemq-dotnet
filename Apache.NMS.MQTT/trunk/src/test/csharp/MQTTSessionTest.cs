@@ -16,7 +16,6 @@
 //
 using System;
 using Apache.NMS.Test;
-using Apache.NMS.MQTT;
 using NUnit.Framework;
 
 namespace Apache.NMS.MQTT.Test
@@ -27,7 +26,7 @@ namespace Apache.NMS.MQTT.Test
         private IConnection connection;
 
         [SetUp]
-        public void SetUp()
+        public override void SetUp()
         {
             Apache.NMS.Tracer.Trace = new NmsConsoleTracer();
             base.SetUp();

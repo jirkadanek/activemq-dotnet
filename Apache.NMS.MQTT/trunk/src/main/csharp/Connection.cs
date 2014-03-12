@@ -82,13 +82,17 @@ namespace Apache.NMS.MQTT
 		/// An asynchronous listener that is notified when a Fault tolerant connection
 		/// has been interrupted.
 		/// </summary>
+		#pragma warning disable 0067
 		public event ConnectionInterruptedListener ConnectionInterruptedListener;
+		#pragma warning restore 0067
 
 		/// <summary>
 		/// An asynchronous listener that is notified when a Fault tolerant connection
 		/// has been resumed.
 		/// </summary>
+		#pragma warning disable 0067
 		public event ConnectionResumedListener ConnectionResumedListener;
+		#pragma warning restore 0067
 
 		private ConsumerTransformerDelegate consumerTransformer;
 		public ConsumerTransformerDelegate ConsumerTransformer

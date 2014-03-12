@@ -32,6 +32,10 @@ namespace Apache.NMS.MQTT
 			this.name = name;
 		}
 
+		public void Dispose()
+		{
+		}
+
 		public string TopicName 
 		{ 
 			get { return this.name; }

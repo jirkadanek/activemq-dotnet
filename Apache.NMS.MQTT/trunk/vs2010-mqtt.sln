@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vs2008-mqtt", "vs2008-mqtt.csproj", "{AEBC857B-D693-4833-9F1E-F6A22787D0C9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vs2010-mqtt", "vs2010-mqtt.csproj", "{AEBC857B-D693-4833-9F1E-F6A22787D0C9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vs2008-mqtt-tests", "vs2008-mqtt-tests.csproj", "{186FAC43-F3B0-4B03-82DA-EEC0169307B7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vs2010-mqtt-tests", "vs2010-mqtt-tests.csproj", "{186FAC43-F3B0-4B03-82DA-EEC0169307B7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,7 +21,7 @@ Global
 		{AEBC857B-D693-4833-9F1E-F6A22787D0C9}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = vs2008-mqtt-tests.csproj
+		StartupItem = vs2010-mqtt-tests.csproj
 		Policies = $0
 		$0.TextStylePolicy = $1
 		$1.inheritsSet = null
