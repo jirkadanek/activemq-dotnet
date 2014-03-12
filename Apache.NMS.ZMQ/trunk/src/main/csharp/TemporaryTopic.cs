@@ -51,6 +51,14 @@ namespace Apache.NMS.ZMQ
 		}
 
 		#endregion
+
+		/// <summary>
+		/// </summary>
+		/// <returns>string representation of this instance</returns>
+		public override string ToString()
+		{
+			return "temp-topic://" + this.destinationName;
+		}
 	}
 }
 

@@ -49,35 +49,35 @@ namespace Apache.NMS.ZMQ
 			set { this.consumerTransformer = value; }
 		}
 
-		public MessageConsumer(Session session, AcknowledgementMode acknowledgementMode, IDestination dest, string selector)
+		public MessageConsumer(Session sess, AcknowledgementMode ackMode, IDestination dest, string selector)
 		{
 			// UNUSED_PARAM(selector);		// Selectors are not currently supported
 
-			if(null == session.Connection.Context)
+			if(null == sess.Connection.Context)
 			{
 				throw new NMSConnectionException();
 			}
 
-			this.session = session;
+			this.session = sess;
 			this.destination = (Destination) dest;
-			this.acknowledgementMode = acknowledgementMode;
+			this.acknowledgementMode = ackMode;
 		}
 
 		public event MessageListener Listener
 		{
 			add
 			{
-				listener += value;
-				listenerCount++;
+				this.listener += value;
+				this.listenerCount++;
 				StartAsyncDelivery();
 			}
 
 			remove
 			{
-				if(listenerCount > 0)
+				if(this.listenerCount > 0)
 				{
-					listener -= value;
-					listenerCount--;
+					this.listener -= value;
+					this.listenerCount--;
 				}
 
 				if(0 == listenerCount)
@@ -152,18 +152,18 @@ namespace Apache.NMS.ZMQ
 		{
 			lock(asyncDeliveryLock)
 			{
-				asyncDelivery = false;
-				if(null != asyncDeliveryThread)
+				this.asyncDelivery = false;
+				if(null != this.asyncDeliveryThread)
 				{
 					Tracer.Info("Stopping async delivery thread.");
-					asyncDeliveryThread.Interrupt();
-					if(!asyncDeliveryThread.Join(10000))
+					this.asyncDeliveryThread.Interrupt();
+					if(!this.asyncDeliveryThread.Join(10000))
 					{
 						Tracer.Info("Aborting async delivery thread.");
-						asyncDeliveryThread.Abort();
+						this.asyncDeliveryThread.Abort();
 					}
 
-					asyncDeliveryThread = null;
+					this.asyncDeliveryThread = null;
 					Tracer.Info("Async delivery thread stopped.");
 				}
 			}
@@ -171,20 +171,20 @@ namespace Apache.NMS.ZMQ
 
 		protected virtual void StartAsyncDelivery()
 		{
-			Debug.Assert(null == asyncDeliveryThread);
-			lock(asyncDeliveryLock)
+			Debug.Assert(null == this.asyncDeliveryThread);
+			lock(this.asyncDeliveryLock)
 			{
-				asyncDelivery = true;
-				asyncDeliveryThread = new Thread(new ThreadStart(DispatchLoop));
-				asyncDeliveryThread.Name = string.Format("MsgConsumerAsync: {0}", this.destination.Name);
-				asyncDeliveryThread.IsBackground = true;
-				asyncDeliveryThread.Start();
+				this.asyncDelivery = true;
+				this.asyncDeliveryThread = new Thread(new ThreadStart(DispatchLoop));
+				this.asyncDeliveryThread.Name = string.Format("MsgConsumerAsync: {0}", this.destination.Name);
+				this.asyncDeliveryThread.IsBackground = true;
+				this.asyncDeliveryThread.Start();
 			}
 		}
 
 		protected virtual void DispatchLoop()
 		{
-			Tracer.Info("Starting dispatcher thread consumer: " + this);
+			Tracer.InfoFormat("Starting dispatcher thread consumer: {0}", this.asyncDeliveryThread.Name);
 			TimeSpan receiveWait = TimeSpan.FromSeconds(3);
 
 			while(asyncDelivery)
@@ -214,12 +214,12 @@ namespace Apache.NMS.ZMQ
 					Tracer.ErrorFormat("Exception while receiving message in thread: {0} : {1}", this, ex.Message);
 				}
 			}
-			Tracer.Info("Stopped dispatcher thread consumer: " + this);
+			Tracer.InfoFormat("Stopped dispatcher thread consumer: {0}", this.asyncDeliveryThread.Name);
 		}
 
 		protected virtual void HandleAsyncException(Exception e)
 		{
-			session.Connection.HandleException(e);
+			this.session.Connection.HandleException(e);
 		}
 
 		/// <summary>

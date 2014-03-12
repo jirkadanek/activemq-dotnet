@@ -34,6 +34,8 @@ namespace Apache.NMS.ZMQ
 		protected ZmqSocket consumerEndpoint = null;
 		protected string destinationName;
 
+		private bool disposed = false;
+
 		/// <summary>
 		/// Construct the Destination with a defined physical name.
 		/// </summary>
@@ -46,16 +48,58 @@ namespace Apache.NMS.ZMQ
 
 		~Destination()
 		{
-			// TODO: Implement IDisposable pattern
+			Dispose(false);
+		}
+
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		private void Dispose(bool disposing)
+		{
+			if(disposed)
+			{
+				return;
+			}
+
+			if(disposing)
+			{
+				try
+				{
+					OnDispose();
+				}
+				catch(Exception ex)
+				{
+					Tracer.ErrorFormat("Exception disposing Destination {0}: {1}", this.Name, ex.Message);
+				}
+			}
+
+			disposed = true;
+		}
+
+		/// <summary>
+		/// Child classes can override this method to perform clean-up logic.
+		/// </summary>
+		protected virtual void OnDispose()
+		{
 			if(null != this.producerEndpoint)
 			{
-				this.session.Connection.ReleaseProducer(this.producerEndpoint);
+				if(null != this.session
+					&& null != this.session.Connection)
+				{
+					this.session.Connection.ReleaseProducer(this.producerEndpoint);
+				}
+
+				this.producerEndpoint.Dispose();
 				this.producerEndpoint = null;
 			}
 
 			if(null != this.consumerEndpoint)
 			{
 				this.session.Connection.ReleaseConsumer(this.consumerEndpoint);
+				this.consumerEndpoint.Dispose();
 				this.consumerEndpoint = null;
 			}
 		}
@@ -69,8 +113,8 @@ namespace Apache.NMS.ZMQ
 		{
 			get
 			{
-				return DestinationType == DestinationType.Topic
-					|| DestinationType == DestinationType.TemporaryTopic;
+				return this.DestinationType == DestinationType.Topic
+					|| this.DestinationType == DestinationType.TemporaryTopic;
 			}
 		}
 
@@ -78,8 +122,8 @@ namespace Apache.NMS.ZMQ
 		{
 			get
 			{
-				return DestinationType == DestinationType.Queue
-					|| DestinationType == DestinationType.TemporaryQueue;
+				return this.DestinationType == DestinationType.Queue
+					|| this.DestinationType == DestinationType.TemporaryQueue;
 			}
 		}
 
@@ -87,34 +131,8 @@ namespace Apache.NMS.ZMQ
 		{
 			get
 			{
-				return DestinationType == DestinationType.TemporaryQueue
-					|| DestinationType == DestinationType.TemporaryTopic;
-			}
-		}
-
-		/// <summary>
-		/// </summary>
-		/// <returns>string representation of this instance</returns>
-		public override string ToString()
-		{
-			return MakeUriString(this.destinationName);
-		}
-
-		private string MakeUriString(string destName)
-		{
-			switch(DestinationType)
-			{
-			case DestinationType.Topic:
-				return "topic://" + destName;
-
-			case DestinationType.TemporaryTopic:
-				return "temp-topic://" + destName;
-
-			case DestinationType.TemporaryQueue:
-				return "temp-queue://" + destName;
-
-			default:
-				return "queue://" + destName;
+				return this.DestinationType == DestinationType.TemporaryQueue
+					|| this.DestinationType == DestinationType.TemporaryTopic;
 			}
 		}
 

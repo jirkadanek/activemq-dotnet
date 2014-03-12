@@ -24,7 +24,7 @@ namespace Apache.NMS.ZMQ
 	[TestFixture]
 	public class ZMQTest : BaseTest
 	{
-		private bool receivedTestMessage = true;
+		private bool receivedTestMessage = false;
 
 		[Test]
 		public void TestConnection()
@@ -69,9 +69,11 @@ namespace Apache.NMS.ZMQ
 				using(ISession session = connection.CreateSession())
 				{
 					Assert.IsNotNull(session, "Error creating session.");
-					IDestination testDestination = session.GetDestination(destination);
-					Assert.IsNotNull(testDestination, "Error creating test destination: {0}", destination);
-					Assert.IsInstanceOf(destinationType, testDestination, "Wrong destintation type.");
+					using(IDestination testDestination = session.GetDestination(destination))
+					{
+						Assert.IsNotNull(testDestination, "Error creating test destination: {0}", destination);
+						Assert.IsInstanceOf(destinationType, testDestination, "Wrong destintation type.");
+					}
 				}
 			}
 		}
@@ -89,12 +91,14 @@ namespace Apache.NMS.ZMQ
 				using(ISession session = connection.CreateSession())
 				{
 					Assert.IsNotNull(session, "Error creating session.");
-					IDestination testDestination = session.GetDestination(destination);
-					Assert.IsNotNull(testDestination, "Error creating test destination: {0}", destination);
-					using(IMessageProducer producer = session.CreateProducer(testDestination))
+					using(IDestination testDestination = session.GetDestination(destination))
 					{
-						Assert.IsNotNull(producer, "Error creating producer on {0}", destination);
-						Assert.IsInstanceOf<MessageProducer>(producer, "Wrong producer type.");
+						Assert.IsNotNull(testDestination, "Error creating test destination: {0}", destination);
+						using(IMessageProducer producer = session.CreateProducer(testDestination))
+						{
+							Assert.IsNotNull(producer, "Error creating producer on {0}", destination);
+							Assert.IsInstanceOf<MessageProducer>(producer, "Wrong producer type.");
+						}
 					}
 				}
 			}
@@ -113,12 +117,14 @@ namespace Apache.NMS.ZMQ
 				using(ISession session = connection.CreateSession())
 				{
 					Assert.IsNotNull(session, "Error creating session.");
-					IDestination testDestination = session.GetDestination(destination);
-					Assert.IsNotNull(testDestination, "Error creating test destination: {0}", destination);
-					using(IMessageConsumer consumer = session.CreateConsumer(testDestination))
+					using(IDestination testDestination = session.GetDestination(destination))
 					{
-						Assert.IsNotNull(consumer, "Error creating consumer on {0}", destination);
-						Assert.IsInstanceOf<MessageConsumer>(consumer, "Wrong consumer type.");
+						Assert.IsNotNull(testDestination, "Error creating test destination: {0}", destination);
+						using(IMessageConsumer consumer = session.CreateConsumer(testDestination))
+						{
+							Assert.IsNotNull(consumer, "Error creating consumer on {0}", destination);
+							Assert.IsInstanceOf<MessageConsumer>(consumer, "Wrong consumer type.");
+						}
 					}
 				}
 			}
@@ -131,38 +137,42 @@ namespace Apache.NMS.ZMQ
 		{
 			IConnectionFactory factory = NMSConnectionFactory.CreateConnectionFactory(new Uri("zmq:tcp://localhost:5556"));
 			Assert.IsNotNull(factory, "Error creating connection factory.");
+
+			this.receivedTestMessage = false;
 			using(IConnection connection = factory.CreateConnection())
 			{
 				Assert.IsNotNull(connection, "Problem creating connection class. Usually problem with libzmq and clrzmq ");
 				using(ISession session = connection.CreateSession())
 				{
 					Assert.IsNotNull(session, "Error creating Session.");
-					IDestination testDestination = session.GetDestination(destination);
-					Assert.IsNotNull(testDestination, "Error creating test destination: {0}", destination);
-					using(IMessageConsumer consumer = session.CreateConsumer(testDestination))
+					using(IDestination testDestination = session.GetDestination(destination))
 					{
-						Assert.IsNotNull(consumer, "Error creating consumer on {0}", destination);
-						consumer.Listener += OnMessage;
-						using(IMessageProducer producer = session.CreateProducer(testDestination))
+						Assert.IsNotNull(testDestination, "Error creating test destination: {0}", destination);
+						using(IMessageConsumer consumer = session.CreateConsumer(testDestination))
 						{
-							Assert.IsNotNull(consumer, "Error creating producer on {0}", destination);
-							ITextMessage testMsg = producer.CreateTextMessage("Zero Message.");
-							Assert.IsNotNull(testMsg, "Error creating test message.");
-							producer.Send(testMsg);
-						}
-
-						// Wait for the message
-						DateTime startWaitTime = DateTime.Now;
-						TimeSpan maxWaitTime = TimeSpan.FromSeconds(10);
-
-						while(!receivedTestMessage)
-						{
-							if((DateTime.Now - startWaitTime) > maxWaitTime)
+							Assert.IsNotNull(consumer, "Error creating consumer on {0}", destination);
+							consumer.Listener += OnMessage;
+							using(IMessageProducer producer = session.CreateProducer(testDestination))
 							{
-								Assert.Fail("Timeout waiting for message receive.");
+								Assert.IsNotNull(consumer, "Error creating producer on {0}", destination);
+								ITextMessage testMsg = producer.CreateTextMessage("Zero Message.");
+								Assert.IsNotNull(testMsg, "Error creating test message.");
+								producer.Send(testMsg);
 							}
 
-							Thread.Sleep(5);
+							// Wait for the message
+							DateTime startWaitTime = DateTime.Now;
+							TimeSpan maxWaitTime = TimeSpan.FromSeconds(5);
+
+							while(!receivedTestMessage)
+							{
+								if((DateTime.Now - startWaitTime) > maxWaitTime)
+								{
+									Assert.Fail("Timeout waiting for message receive.");
+								}
+
+								Thread.Sleep(5);
+							}
 						}
 					}
 				}

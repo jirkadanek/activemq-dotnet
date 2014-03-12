@@ -45,30 +45,30 @@ namespace Apache.NMS.ZMQ
 			set { this.producerTransformer = value; }
 		}
 
-		public MessageProducer(Session session, IDestination dest)
+		public MessageProducer(Session sess, IDestination dest)
 		{
-			if(null == session.Connection.Context)
+			if(null == sess.Connection.Context)
 			{
 				throw new NMSConnectionException();
 			}
 
-			this.session = session;
+			this.session = sess;
 			this.destination = dest;
 		}
 
 		public void Send(IMessage message)
 		{
-			Send(Destination, message);
+			Send(this.Destination, message);
 		}
 
 		public void Send(IMessage message, MsgDeliveryMode deliveryMode, MsgPriority priority, TimeSpan timeToLive)
 		{
-			Send(Destination, message, deliveryMode, priority, timeToLive);
+			Send(this.Destination, message, deliveryMode, priority, timeToLive);
 		}
 
 		public void Send(IDestination dest, IMessage message)
 		{
-			Send(dest, message, DeliveryMode, Priority, TimeToLive);
+			Send(dest, message, this.DeliveryMode, this.Priority, this.TimeToLive);
 		}
 
 		public void Send(IDestination dest, IMessage message, MsgDeliveryMode deliveryMode, MsgPriority priority, TimeSpan timeToLive)
@@ -91,10 +91,10 @@ namespace Apache.NMS.ZMQ
 
 			// Prefix the message with the destination name. The client will subscribe to this destination name
 			// in order to receive messages.
-			Destination destination = (Destination) dest;
+			Destination theDest = (Destination) dest;
 
-			string msg = destination.Name + ((ITextMessage) message).Text;
-			destination.Send(Encoding.UTF8.GetBytes(msg), this.session.Connection.RequestTimeout);
+			string msg = theDest.Name + ((ITextMessage) message).Text;
+			theDest.Send(Encoding.UTF8.GetBytes(msg), this.session.Connection.RequestTimeout);
 		}
 
 		public void Dispose()
@@ -104,58 +104,59 @@ namespace Apache.NMS.ZMQ
 
 		public void Close()
 		{
+			this.destination = null;
 		}
 
 		public IMessage CreateMessage()
 		{
-			return session.CreateMessage();
+			return this.session.CreateMessage();
 		}
 
 		public ITextMessage CreateTextMessage()
 		{
-			return session.CreateTextMessage();
+			return this.session.CreateTextMessage();
 		}
 
 		public ITextMessage CreateTextMessage(String text)
 		{
-			return session.CreateTextMessage(text);
+			return this.session.CreateTextMessage(text);
 		}
 
 		public IMapMessage CreateMapMessage()
 		{
-			return session.CreateMapMessage();
+			return this.session.CreateMapMessage();
 		}
 
 		public IObjectMessage CreateObjectMessage(Object body)
 		{
-			return session.CreateObjectMessage(body);
+			return this.session.CreateObjectMessage(body);
 		}
 
 		public IBytesMessage CreateBytesMessage()
 		{
-			return session.CreateBytesMessage();
+			return this.session.CreateBytesMessage();
 		}
 
 		public IBytesMessage CreateBytesMessage(byte[] body)
 		{
-			return session.CreateBytesMessage(body);
+			return this.session.CreateBytesMessage(body);
 		}
 
 		public IStreamMessage CreateStreamMessage()
 		{
-			return session.CreateStreamMessage();
+			return this.session.CreateStreamMessage();
 		}
 
 		public MsgDeliveryMode DeliveryMode
 		{
-			get { return deliveryMode; }
-			set { deliveryMode = value; }
+			get { return this.deliveryMode; }
+			set { this.deliveryMode = value; }
 		}
 
 		public TimeSpan TimeToLive
 		{
-			get { return timeToLive; }
-			set { timeToLive = value; }
+			get { return this.timeToLive; }
+			set { this.timeToLive = value; }
 		}
 
 		/// <summary>
@@ -169,26 +170,26 @@ namespace Apache.NMS.ZMQ
 
 		public IDestination Destination
 		{
-			get { return destination; }
-			set { destination = value; }
+			get { return this.destination; }
+			set { this.destination = value; }
 		}
 
 		public MsgPriority Priority
 		{
-			get { return priority; }
-			set { priority = value; }
+			get { return this.priority; }
+			set { this.priority = value; }
 		}
 
 		public bool DisableMessageID
 		{
-			get { return disableMessageID; }
-			set { disableMessageID = value; }
+			get { return this.disableMessageID; }
+			set { this.disableMessageID = value; }
 		}
 
 		public bool DisableMessageTimestamp
 		{
-			get { return disableMessageTimestamp; }
-			set { disableMessageTimestamp = value; }
+			get { return this.disableMessageTimestamp; }
+			set { this.disableMessageTimestamp = value; }
 		}
 	}
 }
