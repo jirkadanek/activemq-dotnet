@@ -30,7 +30,11 @@ namespace Apache.NMS.EMS
 		{
 		}
 
-		#region ITopic Members
+        public void Dispose()
+        {
+        }
+        
+        #region ITopic Members
 
 		public string TopicName
 		{

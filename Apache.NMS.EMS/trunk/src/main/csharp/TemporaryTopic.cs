@@ -30,7 +30,7 @@ namespace Apache.NMS.EMS
 		{
 		}
 
-		#region IDestination Members
+        #region IDestination Members
 
 		public new Apache.NMS.DestinationType DestinationType
 		{

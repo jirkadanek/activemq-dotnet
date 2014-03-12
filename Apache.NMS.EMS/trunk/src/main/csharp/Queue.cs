@@ -30,7 +30,11 @@ namespace Apache.NMS.EMS
 		{
 		}
 
-		#region IQueue Members
+        public void Dispose()
+        {
+        }
+        
+        #region IQueue Members
 
 		public string QueueName
 		{
