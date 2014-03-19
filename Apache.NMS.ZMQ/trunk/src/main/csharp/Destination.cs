@@ -18,6 +18,7 @@
 using System;
 using System.Text;
 using ZeroMQ;
+using System.Diagnostics;
 
 namespace Apache.NMS.ZMQ
 {
@@ -26,6 +27,8 @@ namespace Apache.NMS.ZMQ
 	/// </summary>
 	public abstract class Destination : IDestination
 	{
+		public static Encoding encoding = Encoding.UTF8;
+
 		protected Session session;
 		/// <summary>
 		/// Socket object
@@ -92,14 +95,12 @@ namespace Apache.NMS.ZMQ
 					this.session.Connection.ReleaseProducer(this.producerEndpoint);
 				}
 
-				this.producerEndpoint.Dispose();
 				this.producerEndpoint = null;
 			}
 
 			if(null != this.consumerEndpoint)
 			{
 				this.session.Connection.ReleaseConsumer(this.consumerEndpoint);
-				this.consumerEndpoint.Dispose();
 				this.consumerEndpoint = null;
 			}
 		}
@@ -178,35 +179,82 @@ namespace Apache.NMS.ZMQ
 			get;
 		}
 
-		internal int Send(byte[] buffer, TimeSpan timeout)
+		internal void InitSender()
 		{
 			if(null == this.producerEndpoint)
 			{
 				this.producerEndpoint = this.session.Connection.GetProducer();
 			}
-
-			return this.producerEndpoint.Send(buffer, buffer.Length, SocketFlags.None, timeout);
 		}
 
-		internal string Receive(Encoding encoding, TimeSpan timeout)
+		internal void InitReceiver()
 		{
 			if(null == this.consumerEndpoint)
 			{
-				this.consumerEndpoint = this.session.Connection.GetConsumer(encoding, this.destinationName);
-			}
+				Connection connection = this.session.Connection;
 
-			return consumerEndpoint.Receive(encoding, timeout);
+				this.consumerEndpoint = connection.GetConsumer();
+				// Must subscribe first before connecting to the endpoint binding
+				this.consumerEndpoint.Subscribe(Destination.encoding.GetBytes(this.destinationName));
+				this.consumerEndpoint.Connect(connection.GetConsumerBindingPath());
+			}
+		}
+
+		internal void Subscribe(string prefixName)
+		{
+			InitReceiver();
+			this.consumerEndpoint.Subscribe(Destination.encoding.GetBytes(prefixName));
+		}
+
+		internal void Unsubscribe(string prefixName)
+		{
+			if(null != this.consumerEndpoint)
+			{
+				this.consumerEndpoint.Unsubscribe(Destination.encoding.GetBytes(prefixName));
+			}
+		}
+
+		internal SendStatus Send(string msg)
+		{
+			Debug.Assert(null != this.producerEndpoint, "Call InitSender() before calling Send().");
+			return this.producerEndpoint.Send(msg, Destination.encoding);
+		}
+
+		internal SendStatus Send(byte[] buffer)
+		{
+			Debug.Assert(null != this.producerEndpoint, "Call InitSender() before calling Send().");
+			return this.producerEndpoint.Send(buffer);
+		}
+
+		internal string ReceiveString(TimeSpan timeout)
+		{
+			this.InitReceiver();
+			return this.consumerEndpoint.Receive(Destination.encoding, timeout);
+		}
+
+		internal byte[] ReceiveBytes(TimeSpan timeout, out int size)
+		{
+			this.InitReceiver();
+			return this.consumerEndpoint.Receive(null, timeout, out size);
+		}
+
+		internal byte[] ReceiveBytes(SocketFlags flags, out int size)
+		{
+			this.InitReceiver();
+			return this.consumerEndpoint.Receive(null, flags, out size);
 		}
 
 		internal Frame ReceiveFrame()
 		{
 			// TODO: Implement
+			this.InitReceiver();
 			return null;
 		}
 
 		internal ZmqMessage ReceiveMessage()
 		{
 			// TODO: Implement
+			this.InitReceiver();
 			return null;
 		}
 	}

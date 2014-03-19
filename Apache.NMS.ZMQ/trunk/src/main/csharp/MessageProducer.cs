@@ -30,9 +30,9 @@ namespace Apache.NMS.ZMQ
 	public class MessageProducer : IMessageProducer
 	{
 		private readonly Session session;
-		private IDestination destination;
+		private Destination destination;
 
-		private MsgDeliveryMode deliveryMode;
+		private MsgDeliveryMode deliveryMode = MsgDeliveryMode.NonPersistent;
 		private TimeSpan timeToLive;
 		private MsgPriority priority;
 		private bool disableMessageID;
@@ -53,17 +53,18 @@ namespace Apache.NMS.ZMQ
 			}
 
 			this.session = sess;
-			this.destination = dest;
+			this.destination = (Destination) dest;
+			this.destination.InitSender();
 		}
 
 		public void Send(IMessage message)
 		{
-			Send(this.Destination, message);
+			Send(this.destination, message);
 		}
 
 		public void Send(IMessage message, MsgDeliveryMode deliveryMode, MsgPriority priority, TimeSpan timeToLive)
 		{
-			Send(this.Destination, message, deliveryMode, priority, timeToLive);
+			Send(this.destination, message, deliveryMode, priority, timeToLive);
 		}
 
 		public void Send(IDestination dest, IMessage message)
@@ -94,7 +95,7 @@ namespace Apache.NMS.ZMQ
 			Destination theDest = (Destination) dest;
 
 			string msg = theDest.Name + ((ITextMessage) message).Text;
-			theDest.Send(Encoding.UTF8.GetBytes(msg), this.session.Connection.RequestTimeout);
+			theDest.Send(msg);
 		}
 
 		public void Dispose()
@@ -166,12 +167,6 @@ namespace Apache.NMS.ZMQ
 		{
 			get { return NMSConstants.defaultRequestTimeout; }
 			set { }
-		}
-
-		public IDestination Destination
-		{
-			get { return this.destination; }
-			set { this.destination = value; }
 		}
 
 		public MsgPriority Priority

@@ -19,6 +19,7 @@ using System;
 using ZeroMQ;
 using System.Collections.Generic;
 using System.Text;
+using System.Collections;
 
 namespace Apache.NMS.ZMQ
 {
@@ -46,22 +47,85 @@ namespace Apache.NMS.ZMQ
         /// <summary>
         /// ZMQ context
         /// </summary>
+		private static object contextLock = new object();
+		private static int instanceCount = 0;
 		private static ZmqContext _context;
-		private static Dictionary<string, ProducerRef> producerCache;
-		private static object producerCacheLock;
+		private static Dictionary<string, ProducerRef> producerCache = new Dictionary<string, ProducerRef>();
+		private static object producerCacheLock = new object();
+		private TimeSpan zeroTimeout = new TimeSpan(0);
 
-		static Connection()
+		private bool disposed = false;
+
+		private static void InitContext()
 		{
-			Connection._context = ZmqContext.Create();
-			Connection.producerCache = new Dictionary<string, ProducerRef>();
-			Connection.producerCacheLock = new object();
+			lock(contextLock)
+			{
+				if(0 == instanceCount++)
+				{
+					Connection._context = ZmqContext.Create();
+				}
+			}
+		}
+
+		private static void DestroyContext()
+		{
+			lock(contextLock)
+			{
+				if(0 == --instanceCount)
+				{
+					Connection._context.Dispose();
+				}
+			}
 		}
 
 		public Connection(Uri connectionUri)
 		{
+			InitContext();
 			this.brokerUri = connectionUri;
 			this.producerContextBinding = string.Format("{0}://*:{1}", this.brokerUri.Scheme, this.brokerUri.Port);
 			this.consumerContextBinding = string.Format("{0}://{1}:{2}", brokerUri.Scheme, brokerUri.Host, this.brokerUri.Port);
+		}
+
+		~Connection()
+		{
+			Dispose(false);
+		}
+
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		private void Dispose(bool disposing)
+		{
+			if(disposed)
+			{
+				return;
+			}
+
+			if(disposing)
+			{
+				try
+				{
+					OnDispose();
+				}
+				catch(Exception ex)
+				{
+					Tracer.ErrorFormat("Exception disposing Connection {0}: {1}", this.brokerUri.AbsoluteUri, ex.Message);
+				}
+			}
+
+			disposed = true;
+		}
+
+		/// <summary>
+		/// Child classes can override this method to perform clean-up logic.
+		/// </summary>
+		protected virtual void OnDispose()
+		{
+			Close();
+			DestroyContext();
 		}
 
 		/// <summary>
@@ -147,12 +211,13 @@ namespace Apache.NMS.ZMQ
 					{
 						producerCache.Remove(contextBinding);
 						producerRef.producer.Unbind(contextBinding);
+						producerRef.producer.Dispose();
 					}
 				}
 			}
 		}
 
-		internal ZmqSocket GetConsumer(Encoding encoding, string destinationName)
+		internal ZmqSocket GetConsumer()
 		{
 			ZmqSocket endpoint = this.Context.CreateSocket(SocketType.SUB);
 
@@ -160,8 +225,6 @@ namespace Apache.NMS.ZMQ
 			{
 				throw new ResourceAllocationException();
 			}
-			endpoint.Subscribe(encoding.GetBytes(destinationName));
-			endpoint.Connect(GetConsumerBindingPath());
 
 			return endpoint;
 		}
@@ -169,6 +232,7 @@ namespace Apache.NMS.ZMQ
 		internal void ReleaseConsumer(ZmqSocket endpoint)
 		{
 			endpoint.Disconnect(GetConsumerBindingPath());
+			endpoint.Dispose();
 		}
 
 		internal string GetProducerContextBinding()
@@ -176,15 +240,10 @@ namespace Apache.NMS.ZMQ
 			return this.producerContextBinding;
 		}
 
-		private string GetConsumerBindingPath()
+		internal string GetConsumerBindingPath()
 		{
 			return this.consumerContextBinding;
 		}
-
-		public void Dispose()
-        {
-            Close();
-        }
 
         public void Close()
         {

@@ -29,7 +29,7 @@ namespace Apache.NMS.ZMQ
 		private string correlationId;
 		private TimeSpan timeToLive;
 		private string messageId;
-		private MsgDeliveryMode deliveryMode;
+		private MsgDeliveryMode deliveryMode = MsgDeliveryMode.NonPersistent;
 		private MsgPriority priority;
 		private Destination replyTo;
 		private byte[] content;

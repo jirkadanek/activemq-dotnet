@@ -24,7 +24,7 @@ namespace Apache.NMS.ZMQ
 	[TestFixture]
 	public class ZMQTest : BaseTest
 	{
-		private bool receivedTestMessage = false;
+		private int receivedMsgCount = 0;
 
 		[Test]
 		public void TestConnection()
@@ -132,46 +132,62 @@ namespace Apache.NMS.ZMQ
 
 		[Test]
 		public void TestSendReceive(
+			// inproc, ipc, tcp, pgm, or epgm
+			[Values("zmq:tcp://localhost:5556", "zmq:inproc://localhost:5557")]
+			string connectionName,
 			[Values("queue://ZMQTestQueue", "topic://ZMQTestTopic", "temp-queue://ZMQTempQueue", "temp-topic://ZMQTempTopic")]
-			string destination)
+			string destinationName)
 		{
-			IConnectionFactory factory = NMSConnectionFactory.CreateConnectionFactory(new Uri("zmq:tcp://localhost:5556"));
+			IConnectionFactory factory = NMSConnectionFactory.CreateConnectionFactory(new Uri(connectionName));
 			Assert.IsNotNull(factory, "Error creating connection factory.");
 
-			this.receivedTestMessage = false;
+			this.receivedMsgCount = 0;
 			using(IConnection connection = factory.CreateConnection())
 			{
 				Assert.IsNotNull(connection, "Problem creating connection class. Usually problem with libzmq and clrzmq ");
 				using(ISession session = connection.CreateSession())
 				{
 					Assert.IsNotNull(session, "Error creating Session.");
-					using(IDestination testDestination = session.GetDestination(destination))
+					using(IDestination testDestination = session.GetDestination(destinationName))
 					{
-						Assert.IsNotNull(testDestination, "Error creating test destination: {0}", destination);
+						Assert.IsNotNull(testDestination, "Error creating test destination: {0}", destinationName);
 						using(IMessageConsumer consumer = session.CreateConsumer(testDestination))
 						{
-							Assert.IsNotNull(consumer, "Error creating consumer on {0}", destination);
-							consumer.Listener += OnMessage;
-							using(IMessageProducer producer = session.CreateProducer(testDestination))
+							Assert.IsNotNull(consumer, "Error creating consumer on {0}", destinationName);
+							int sendMsgCount = 0;
+							try
 							{
-								Assert.IsNotNull(consumer, "Error creating producer on {0}", destination);
-								ITextMessage testMsg = producer.CreateTextMessage("Zero Message.");
-								Assert.IsNotNull(testMsg, "Error creating test message.");
-								producer.Send(testMsg);
-							}
-
-							// Wait for the message
-							DateTime startWaitTime = DateTime.Now;
-							TimeSpan maxWaitTime = TimeSpan.FromSeconds(5);
-
-							while(!receivedTestMessage)
-							{
-								if((DateTime.Now - startWaitTime) > maxWaitTime)
+								consumer.Listener += OnMessage;
+								using(IMessageProducer producer = session.CreateProducer(testDestination))
 								{
-									Assert.Fail("Timeout waiting for message receive.");
-								}
+									Assert.IsNotNull(consumer, "Error creating producer on {0}", destinationName);
+									ITextMessage testMsg = producer.CreateTextMessage("Zero Message.");
+									Assert.IsNotNull(testMsg, "Error creating test message.");
 
-								Thread.Sleep(5);
+									// Wait for the message
+									DateTime startWaitTime = DateTime.Now;
+									TimeSpan maxWaitTime = TimeSpan.FromSeconds(5);
+
+									// Continually send the message to compensate for the
+									// slow joiner problem inherent to spinning up the
+									// internal dispatching threads in ZeroMQ.
+									while(this.receivedMsgCount < 1)
+									{
+										++sendMsgCount;
+										producer.Send(testMsg);
+										if((DateTime.Now - startWaitTime) > maxWaitTime)
+										{
+											Assert.Fail("Timeout waiting for message receive.");
+										}
+
+										Thread.Sleep(1);
+									}
+								}
+							}
+							finally
+							{
+								consumer.Listener -= OnMessage;
+								Console.WriteLine("Sent {0} msgs.\nReceived {1} msgs", sendMsgCount, this.receivedMsgCount);
 							}
 						}
 					}
@@ -188,7 +204,7 @@ namespace Apache.NMS.ZMQ
 			Assert.IsInstanceOf<TextMessage>(message, "Wrong message type received.");
 			ITextMessage textMsg = (ITextMessage) message;
 			Assert.AreEqual(textMsg.Text, "Zero Message.");
-			receivedTestMessage = true;
+			this.receivedMsgCount++;
 		}
 	}
 }

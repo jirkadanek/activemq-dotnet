@@ -15,14 +15,10 @@
  * limitations under the License.
  */
 
-#define PUBSUB
-
 using System;
+using System.Diagnostics;
 using System.Text;
 using System.Threading;
-using Apache.NMS.Util;
-using ZeroMQ;
-using System.Diagnostics;
 
 namespace Apache.NMS.ZMQ
 {
@@ -31,7 +27,7 @@ namespace Apache.NMS.ZMQ
 	/// </summary>
 	public class MessageConsumer : IMessageConsumer
 	{
-		protected TimeSpan zeroTimeout = new TimeSpan(0);
+		protected static readonly TimeSpan zeroTimeout = new TimeSpan(0);
 
 		private readonly Session session;
 		private readonly AcknowledgementMode acknowledgementMode;
@@ -41,6 +37,8 @@ namespace Apache.NMS.ZMQ
 		private Thread asyncDeliveryThread = null;
 		private object asyncDeliveryLock = new object();
 		private bool asyncDelivery = false;
+		private bool asyncInit = false;
+		private byte[] rawDestinationName;
 
 		private ConsumerTransformerDelegate consumerTransformer;
 		public ConsumerTransformerDelegate ConsumerTransformer
@@ -60,29 +58,40 @@ namespace Apache.NMS.ZMQ
 
 			this.session = sess;
 			this.destination = (Destination) dest;
+			this.rawDestinationName = Destination.encoding.GetBytes(this.destination.Name);
 			this.acknowledgementMode = ackMode;
 		}
 
+		private object listenerLock = new object();
 		public event MessageListener Listener
 		{
 			add
 			{
-				this.listener += value;
-				this.listenerCount++;
-				StartAsyncDelivery();
+				lock(listenerLock)
+				{
+					this.listener += value;
+					if(0 == this.listenerCount)
+					{
+						StartAsyncDelivery();
+					}
+
+					this.listenerCount++;
+				}
 			}
 
 			remove
 			{
-				if(this.listenerCount > 0)
+				lock(listenerLock)
 				{
 					this.listener -= value;
-					this.listenerCount--;
-				}
-
-				if(0 == listenerCount)
-				{
-					StopAsyncDelivery();
+					if(this.listenerCount > 0)
+					{
+						this.listenerCount--;
+						if(0 == this.listenerCount)
+						{
+							StopAsyncDelivery();
+						}
+					}
 				}
 			}
 		}
@@ -106,15 +115,17 @@ namespace Apache.NMS.ZMQ
 		/// </returns>
 		public IMessage Receive(TimeSpan timeout)
 		{
-			// TODO: Support decoding of all message types + all meta data (e.g., headers and properties)
-			string msgContent = this.destination.Receive(Encoding.UTF8, timeout);
+			int size;
+			byte[] receivedMsg = this.destination.ReceiveBytes(timeout, out size);
 
-			if(null != msgContent)
+			if(size > 0)
 			{
 				// Strip off the subscribed destination name.
-				string destinationName = this.destination.Name;
-				string messageText = msgContent.Substring(destinationName.Length, msgContent.Length - destinationName.Length);
-				return ToNmsMessage(messageText);
+				// TODO: Support decoding of all message types + all meta data (e.g., headers and properties)
+				int msgStart = this.rawDestinationName.Length;
+				int msgLength = receivedMsg.Length - msgStart;
+				string msgContent = Encoding.UTF8.GetString(receivedMsg, msgStart, msgLength);
+				return ToNmsMessage(msgContent);
 			}
 
 			return null;
@@ -150,7 +161,7 @@ namespace Apache.NMS.ZMQ
 
 		protected virtual void StopAsyncDelivery()
 		{
-			lock(asyncDeliveryLock)
+			lock(this.asyncDeliveryLock)
 			{
 				this.asyncDelivery = false;
 				if(null != this.asyncDeliveryThread)
@@ -174,33 +185,49 @@ namespace Apache.NMS.ZMQ
 			Debug.Assert(null == this.asyncDeliveryThread);
 			lock(this.asyncDeliveryLock)
 			{
+				this.asyncInit = false;
 				this.asyncDelivery = true;
-				this.asyncDeliveryThread = new Thread(new ThreadStart(DispatchLoop));
+				this.asyncDeliveryThread = new Thread(new ThreadStart(MsgDispatchLoop));
 				this.asyncDeliveryThread.Name = string.Format("MsgConsumerAsync: {0}", this.destination.Name);
 				this.asyncDeliveryThread.IsBackground = true;
 				this.asyncDeliveryThread.Start();
+				while(!asyncInit)
+				{
+					Thread.Sleep(1);
+				}
 			}
 		}
 
-		protected virtual void DispatchLoop()
+		protected virtual void MsgDispatchLoop()
 		{
 			Tracer.InfoFormat("Starting dispatcher thread consumer: {0}", this.asyncDeliveryThread.Name);
-			TimeSpan receiveWait = TimeSpan.FromSeconds(3);
+			TimeSpan receiveWait = TimeSpan.FromSeconds(2);
+
+			// Signal that this thread has started.
+			asyncInit = true;
 
 			while(asyncDelivery)
 			{
 				try
 				{
 					IMessage message = Receive(receiveWait);
-					if(asyncDelivery && message != null)
+
+					if(asyncDelivery)
 					{
-						try
+						if(null != message)
 						{
-							listener(message);
+							try
+							{
+								listener(message);
+							}
+							catch(Exception ex)
+							{
+								HandleAsyncException(ex);
+							}
 						}
-						catch(Exception ex)
+						else
 						{
-							HandleAsyncException(ex);
+							Thread.Sleep(0);
 						}
 					}
 				}
