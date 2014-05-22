@@ -1,6 +1,6 @@
 =======================================================================
 Welcome to:
- * Apache.NMS.ActiveMQ : Apache NMS for MQTT Client Library
+ * Apache.NMS.MQTT : Apache NMS for MQTT Client Library
 =======================================================================
 
 For more information see http://activemq.apache.org/nms
@@ -9,7 +9,7 @@ For more information see http://activemq.apache.org/nms
 Building With NAnt 0.91 see http://nant.sourceforge.net/
 =======================================================================
 
-NAnt version 0.86 91 newer is required to build Apache.NMS.ActiveMQ.  Version 0.90
+NAnt version 0.86 91 newer is required to build Apache.NMS.MQTT.  Version 0.90
 or newer is highly recommended.
 To build the code using NAnt, run:
 
@@ -36,7 +36,7 @@ To generate the documentation, run:
   nant sandcastle-all
 
 =======================================================================
-Building With Visual Studio 2008
+Building With Visual Studio 2010
 =======================================================================
 
 First build the project with nant, this will download and install
