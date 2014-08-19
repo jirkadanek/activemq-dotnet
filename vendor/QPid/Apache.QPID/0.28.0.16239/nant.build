@@ -42,8 +42,8 @@
 
 	<target name="dependency-init" description="Initializes build dependencies">
 		<fileset id="install.filenames">
-			<include name="${basedir}/${current.build.framework}/${current.build.config}/*.dll"/>
-		</fileset>"/>
+			<include name="${basedir}/${current.build.framework}/*.dll"/>
+		</fileset>
 
 	</target>
 
