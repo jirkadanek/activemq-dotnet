@@ -53,13 +53,35 @@ namespace Apache.NMS.ZMQ
 		{
 			// UNUSED_PARAM(selector);		// Selectors are not currently supported
 
-			if(null == sess.Connection.Context)
+			if(null == sess
+				|| null == sess.Connection
+				|| null == sess.Connection.Context)
 			{
 				throw new NMSConnectionException();
 			}
 
+			Destination theDest = dest as Destination;
+
+			if(null == theDest)
+			{
+				throw new InvalidDestinationException("Consumer cannot receive on Null Destinations.");
+			}
+			else if(null == theDest.Name)
+			{
+				throw new InvalidDestinationException("The destination object was not given a physical name.");
+			}
+			else if(theDest.IsTemporary)
+			{
+				String physicalName = theDest.Name;
+
+				if(String.IsNullOrEmpty(physicalName))
+				{
+					throw new InvalidDestinationException("Physical name of Destination should be valid: " + theDest);
+				}
+			}
+
 			this.session = sess;
-			this.destination = (Destination) dest;
+			this.destination = theDest;
 			this.rawDestinationName = Destination.encoding.GetBytes(this.destination.Name);
 			this.acknowledgementMode = ackMode;
 		}
@@ -268,7 +290,7 @@ namespace Apache.NMS.ZMQ
 		/// </returns>
 		protected virtual IMessage ToNmsMessage(byte[] msgData)
 		{
-			IMessage nmsMessage = null;
+			BaseMessage nmsMessage = null;
 			int messageType = WireFormat.MT_UNKNOWN;
 			int fieldType = WireFormat.MFT_NONE;
 			DateTime messageTimestamp = DateTime.UtcNow;
@@ -278,7 +300,7 @@ namespace Apache.NMS.ZMQ
 			MsgDeliveryMode messageDeliveryMode = MsgDeliveryMode.NonPersistent;
 			MsgPriority messagePriority = MsgPriority.Normal;
 			TimeSpan messageTimeToLive = TimeSpan.FromTicks(0);
-			IPrimitiveMap messageProperties = null;
+			byte[] messageProperties = null;
 			int fieldLen;
 			int index = 0;
 			string messageID = string.Empty;
@@ -338,16 +360,10 @@ namespace Apache.NMS.ZMQ
 
 					case WireFormat.MFT_HEADERS:
 						fieldLen = ReadInt(msgData, ref index);
-						int numProperties = ReadInt(msgData, ref index);
-						if(numProperties > 0)
+						messageProperties = new byte[fieldLen];
+						for(int propIndex = 0; propIndex < fieldLen; propIndex++, index++)
 						{
-							messageProperties = new PrimitiveMap();
-							while(numProperties-- > 0)
-							{
-								string propertyKey = ReadString(msgData, ref index);
-								byte[] propertyVal = ReadBytes(msgData, ref index);
-								messageProperties.SetBytes(propertyKey, propertyVal);
-							}
+							messageProperties[propIndex] = msgData[index];
 						}
 						break;
 
@@ -411,10 +427,7 @@ namespace Apache.NMS.ZMQ
 					nmsMessage.NMSType = messageNMSType;
 					if(null != messageProperties)
 					{
-						foreach(string propertyKey in messageProperties.Keys)
-						{
-							nmsMessage.Properties.SetBytes(propertyKey, messageProperties.GetBytes(propertyKey));
-						}
+						nmsMessage.PropertiesMap = PrimitiveMap.Unmarshal(messageProperties);
 					}
 				}
 				catch(InvalidOperationException)
@@ -428,7 +441,7 @@ namespace Apache.NMS.ZMQ
 
 					if(null != transformedMessage)
 					{
-						nmsMessage = transformedMessage;
+						nmsMessage = transformedMessage as BaseMessage;
 					}
 				}
 			}

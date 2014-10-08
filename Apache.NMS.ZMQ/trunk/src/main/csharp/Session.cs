@@ -169,6 +169,11 @@ namespace Apache.NMS.ZMQ
         public void DeleteDestination(IDestination destination)
         {
             // Nothing to delete.  Resources automatically disappear.
+			if(destination.IsTemporary)
+			{
+				destination.Dispose();
+			}
+
             return;
         }
 

@@ -84,6 +84,11 @@ namespace Apache.NMS.ZMQ
 			get { return propertiesMap; }
 		}
 
+		internal PrimitiveMap PropertiesMap
+		{
+			get { return propertiesMap; }
+			set { propertiesMap = value; }
+		}
 
 		// NMS headers
 

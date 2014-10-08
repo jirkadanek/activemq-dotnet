@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Net;
+using Apache.NMS.Util;
 
 namespace Apache.NMS.ZMQ
 {
@@ -135,17 +136,7 @@ namespace Apache.NMS.ZMQ
 			IPrimitiveMap properties = message.Properties;
 			if(null != properties && properties.Count > 0)
 			{
-				// Encode into a temporary buffer, and then place a single buffer into the msgDataBuilder.
-				List<byte> propertiesBuilder = new List<byte>();
-
-				EncodeFieldData(propertiesBuilder, propertiesBuilder.Count);
-				foreach(string propertyKey in properties.Keys)
-				{
-					EncodeFieldData(propertiesBuilder, propertyKey);
-					EncodeFieldData(propertiesBuilder, properties.GetBytes(propertyKey));
-				}
-
-				EncodeField(msgDataBuilder, WireFormat.MFT_HEADERS, propertiesBuilder.ToArray());
+				EncodeField(msgDataBuilder, WireFormat.MFT_HEADERS, ((PrimitiveMap) properties).Marshal());
 			}
 
 			if(message is ITextMessage)
