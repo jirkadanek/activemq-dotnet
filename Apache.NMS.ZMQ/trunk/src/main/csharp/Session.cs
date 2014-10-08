@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Messaging;
 
 namespace Apache.NMS.ZMQ
@@ -28,6 +29,8 @@ namespace Apache.NMS.ZMQ
         private Connection connection;
         private AcknowledgementMode acknowledgementMode;
         private MessageQueueTransaction messageQueueTransaction;
+		private List<Destination> destinations = new List<Destination>();
+		private object destinationLock = new object();
 
         public Session(Connection connection, AcknowledgementMode acknowledgementMode)
         {
@@ -46,12 +49,48 @@ namespace Apache.NMS.ZMQ
 
         public void Close()
         {
-            if(MessageQueueTransaction != null)
+			List<Destination> closingDestinations = null;
+
+			lock(destinationLock)
+			{
+				if(destinations.Count > 0)
+				{
+					closingDestinations = new List<Destination>(destinations);
+				}
+
+				destinations.Clear();
+			}
+
+			if(null != closingDestinations)
+			{
+				foreach(Destination dest in closingDestinations)
+				{
+					dest.Dispose();
+				}
+			}
+			
+			if(MessageQueueTransaction != null)
             {
                 MessageQueueTransaction.Dispose();
                 MessageQueueTransaction = null;
             }
         }
+
+		internal void RegisterDestination(Destination dest)
+		{
+			lock(destinationLock)
+			{
+				destinations.Add(dest);
+			}
+		}
+
+		internal void UnregisterDestination(Destination dest)
+		{
+			lock(destinationLock)
+			{
+				destinations.Remove(dest);
+			}
+		}
 
         #region Producer methods
         public IMessageProducer CreateProducer()

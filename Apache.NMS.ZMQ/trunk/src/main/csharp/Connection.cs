@@ -73,6 +73,16 @@ namespace Apache.NMS.ZMQ
 			{
 				if(0 == --instanceCount)
 				{
+					lock(producerCacheLock)
+					{
+						foreach(KeyValuePair<string, ProducerRef> cacheItem in producerCache)
+						{
+							cacheItem.Value.producer.Unbind(cacheItem.Key);
+						}
+
+						producerCache.Clear();
+					}
+
 					Connection._context.Dispose();
 				}
 			}
@@ -248,16 +258,6 @@ namespace Apache.NMS.ZMQ
         public void Close()
         {
             Stop();
-
-			lock(producerCacheLock)
-			{
-				foreach(KeyValuePair<string, ProducerRef> cacheItem in producerCache)
-				{
-					cacheItem.Value.producer.Unbind(cacheItem.Key);
-				}
-
-				producerCache.Clear();
-			}
 		}
 
         public void PurgeTempDestinations()

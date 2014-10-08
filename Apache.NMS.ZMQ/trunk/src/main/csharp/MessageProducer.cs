@@ -18,9 +18,9 @@
 #define PUBSUB
 
 using System;
+using System.Collections.Generic;
 using System.Text;
-using ZeroMQ;
-
+using System.Net;
 
 namespace Apache.NMS.ZMQ
 {
@@ -59,24 +59,30 @@ namespace Apache.NMS.ZMQ
 
 		public void Send(IMessage message)
 		{
-			Send(this.destination, message);
-		}
-
-		public void Send(IMessage message, MsgDeliveryMode deliveryMode, MsgPriority priority, TimeSpan timeToLive)
-		{
-			Send(this.destination, message, deliveryMode, priority, timeToLive);
+			Send(this.destination, message, this.deliveryMode, this.priority, this.timeToLive, false);
 		}
 
 		public void Send(IDestination dest, IMessage message)
 		{
-			Send(dest, message, this.DeliveryMode, this.Priority, this.TimeToLive);
+			Send(dest, message, this.deliveryMode, this.priority, this.timeToLive, false);
+		}
+
+		public void Send(IMessage message, MsgDeliveryMode deliveryMode, MsgPriority priority, TimeSpan timeToLive)
+		{
+			Send(this.destination, message, deliveryMode, priority, timeToLive, true);
 		}
 
 		public void Send(IDestination dest, IMessage message, MsgDeliveryMode deliveryMode, MsgPriority priority, TimeSpan timeToLive)
 		{
-			// UNUSED_PARAM(deliveryMode);	// No concept of different delivery modes in ZMQ
-			// UNUSED_PARAM(priority);		// No concept of priority messages in ZMQ
-			// UNUSED_PARAM(timeToLive);	// No concept of time-to-live in ZMQ
+			Send(destination, message, deliveryMode, priority, timeToLive, true);
+		}
+
+		public void Send(IDestination dest, IMessage message, MsgDeliveryMode deliveryMode, MsgPriority priority, TimeSpan timeToLive, bool specifiedTimeToLive)
+		{
+			if(null == dest)
+			{
+				return;
+			}
 
 			if(null != this.ProducerTransformer)
 			{
@@ -88,14 +94,145 @@ namespace Apache.NMS.ZMQ
 				}
 			}
 
-			// TODO: Support encoding of all message types + all meta data (e.g., headers and properties)
+			// Serialize the message data
+			Destination theDest = (Destination) dest;
+			List<byte> msgDataBuilder = new List<byte>();
+
+			// Always set the message Id.
+			message.NMSMessageId = Guid.NewGuid().ToString();
+			message.NMSTimestamp = DateTime.UtcNow;
+			if(specifiedTimeToLive)
+			{
+				message.NMSTimeToLive = timeToLive;
+			}
 
 			// Prefix the message with the destination name. The client will subscribe to this destination name
 			// in order to receive messages.
-			Destination theDest = (Destination) dest;
+			msgDataBuilder.AddRange(Encoding.UTF8.GetBytes(theDest.Name));
 
-			string msg = theDest.Name + ((ITextMessage) message).Text;
-			theDest.Send(msg);
+			// Encode all meta data (e.g., headers and properties)
+			EncodeField(msgDataBuilder, WireFormat.MFT_MESSAGEID, message.NMSMessageId);
+			EncodeField(msgDataBuilder, WireFormat.MFT_TIMESTAMP, message.NMSTimestamp.ToBinary());
+			if(null != message.NMSType)
+			{
+				EncodeField(msgDataBuilder, WireFormat.MFT_NMSTYPE, message.NMSType);
+			}
+
+			if(null != message.NMSCorrelationID)
+			{
+				EncodeField(msgDataBuilder, WireFormat.MFT_CORRELATIONID, message.NMSCorrelationID);
+			}
+
+			if(null != message.NMSReplyTo)
+			{
+				EncodeField(msgDataBuilder, WireFormat.MFT_REPLYTO, ((Destination) message.NMSReplyTo).Name);
+			}
+
+			EncodeField(msgDataBuilder, WireFormat.MFT_DELIVERYMODE, message.NMSDeliveryMode);
+			EncodeField(msgDataBuilder, WireFormat.MFT_PRIORITY, message.NMSPriority);
+			EncodeField(msgDataBuilder, WireFormat.MFT_TIMETOLIVE, message.NMSTimeToLive.Ticks);
+
+			IPrimitiveMap properties = message.Properties;
+			if(null != properties && properties.Count > 0)
+			{
+				// Encode into a temporary buffer, and then place a single buffer into the msgDataBuilder.
+				List<byte> propertiesBuilder = new List<byte>();
+
+				EncodeFieldData(propertiesBuilder, propertiesBuilder.Count);
+				foreach(string propertyKey in properties.Keys)
+				{
+					EncodeFieldData(propertiesBuilder, propertyKey);
+					EncodeFieldData(propertiesBuilder, properties.GetBytes(propertyKey));
+				}
+
+				EncodeField(msgDataBuilder, WireFormat.MFT_HEADERS, propertiesBuilder.ToArray());
+			}
+
+			if(message is ITextMessage)
+			{
+				EncodeField(msgDataBuilder, WireFormat.MFT_MSGTYPE, WireFormat.MT_TEXTMESSAGE);
+				// Append the message text body to the msg.
+				string msgBody = ((ITextMessage) message).Text;
+
+				if(null != msgBody)
+				{
+					EncodeField(msgDataBuilder, WireFormat.MFT_BODY, msgBody);
+				}
+			}
+			else
+			{
+				// TODO: Add support for more message types
+				EncodeField(msgDataBuilder, WireFormat.MFT_MSGTYPE, WireFormat.MT_MESSAGE);
+			}
+
+			// Put the sentinal field marker.
+			EncodeField(msgDataBuilder, WireFormat.MFT_NONE, 0);
+			theDest.Send(msgDataBuilder.ToArray());
+		}
+
+		private void EncodeField(List<byte> msgDataBuilder, int msgFieldType, string fieldData)
+		{
+			if(null == fieldData)
+			{
+				fieldData = string.Empty;
+			}
+
+			EncodeField(msgDataBuilder, msgFieldType, Encoding.UTF8.GetBytes(fieldData));
+		}
+
+		private void EncodeField(List<byte> msgDataBuilder, int msgFieldType, Enum fieldData)
+		{
+			EncodeField(msgDataBuilder, msgFieldType, Convert.ToInt32(fieldData));
+		}
+
+		private void EncodeField(List<byte> msgDataBuilder, int msgFieldType, int fieldData)
+		{
+			EncodeField(msgDataBuilder, msgFieldType, BitConverter.GetBytes(IPAddress.HostToNetworkOrder(fieldData)));
+		}
+
+		private void EncodeField(List<byte> msgDataBuilder, int msgFieldType, long fieldData)
+		{
+			EncodeField(msgDataBuilder, msgFieldType, BitConverter.GetBytes(IPAddress.HostToNetworkOrder(fieldData)));
+		}
+
+		private void EncodeField(List<byte> msgDataBuilder, int msgFieldType, byte[] fieldData)
+		{
+			// Encode the field type
+			msgDataBuilder.AddRange(BitConverter.GetBytes(IPAddress.HostToNetworkOrder(msgFieldType)));
+			EncodeFieldData(msgDataBuilder, fieldData);
+		}
+
+		private void EncodeFieldData(List<byte> msgDataBuilder, int fieldData)
+		{
+			msgDataBuilder.AddRange(BitConverter.GetBytes(IPAddress.HostToNetworkOrder(fieldData)));
+		}
+
+		private void EncodeFieldData(List<byte> msgDataBuilder, string fieldData)
+		{
+			if(null == fieldData)
+			{
+				fieldData = string.Empty;
+			}
+
+			EncodeFieldData(msgDataBuilder, Encoding.UTF8.GetBytes(fieldData));
+		}
+
+		private void EncodeFieldData(List<byte> msgDataBuilder, byte[] fieldData)
+		{
+			// Encode the field length
+			int fieldLength = 0;
+
+			if(null != fieldData)
+			{
+				fieldLength = fieldData.Length;
+			}
+
+			EncodeFieldData(msgDataBuilder, fieldLength);
+			if(0 != fieldLength)
+			{
+				// Encode the field data
+				msgDataBuilder.AddRange(fieldData);
+			}
 		}
 
 		public void Dispose()

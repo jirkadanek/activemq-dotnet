@@ -74,6 +74,7 @@
     </Compile>
     <Compile Include="src\main\csharp\TextMessage.cs" />
     <Compile Include="src\main\csharp\Utils.cs" />
+    <Compile Include="src\main\csharp\WireFormat.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="lib\clrzmq\net-4.0\libzmq.dll">

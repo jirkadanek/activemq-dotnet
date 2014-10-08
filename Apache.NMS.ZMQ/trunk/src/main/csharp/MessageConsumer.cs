@@ -19,6 +19,8 @@ using System;
 using System.Diagnostics;
 using System.Text;
 using System.Threading;
+using System.Net;
+using Apache.NMS.Util;
 
 namespace Apache.NMS.ZMQ
 {
@@ -121,10 +123,15 @@ namespace Apache.NMS.ZMQ
 			if(size > 0)
 			{
 				// Strip off the subscribed destination name.
-				// TODO: Support decoding of all message types + all meta data (e.g., headers and properties)
-				int msgStart = this.rawDestinationName.Length;
-				int msgLength = receivedMsg.Length - msgStart;
-				string msgContent = Encoding.UTF8.GetString(receivedMsg, msgStart, msgLength);
+				int receivedMsgIndex = this.rawDestinationName.Length;
+				int msgLength = receivedMsg.Length - receivedMsgIndex;
+				byte[] msgContent = new byte[msgLength];
+
+				for(int index = 0; index < msgLength; index++, receivedMsgIndex++)
+				{
+					msgContent[index] = receivedMsg[receivedMsgIndex];
+				}
+
 				return ToNmsMessage(msgContent);
 			}
 
@@ -203,6 +210,7 @@ namespace Apache.NMS.ZMQ
 			Tracer.InfoFormat("Starting dispatcher thread consumer: {0}", this.asyncDeliveryThread.Name);
 			TimeSpan receiveWait = TimeSpan.FromSeconds(2);
 
+			this.destination.InitReceiver();
 			// Signal that this thread has started.
 			asyncInit = true;
 
@@ -227,7 +235,7 @@ namespace Apache.NMS.ZMQ
 						}
 						else
 						{
-							Thread.Sleep(0);
+							Thread.Sleep(1);
 						}
 					}
 				}
@@ -258,37 +266,219 @@ namespace Apache.NMS.ZMQ
 		/// <returns>
 		/// nms message object
 		/// </returns>
-		protected virtual IMessage ToNmsMessage(string messageText)
+		protected virtual IMessage ToNmsMessage(byte[] msgData)
 		{
-			// Strip off the destination name prefix.
-			IMessage nmsMessage = new TextMessage(messageText);
+			IMessage nmsMessage = null;
+			int messageType = WireFormat.MT_UNKNOWN;
+			int fieldType = WireFormat.MFT_NONE;
+			DateTime messageTimestamp = DateTime.UtcNow;
+			string messageNMSType = null;
+			string messageCorrelationId = null;
+			IDestination messageReplyTo = null;
+			MsgDeliveryMode messageDeliveryMode = MsgDeliveryMode.NonPersistent;
+			MsgPriority messagePriority = MsgPriority.Normal;
+			TimeSpan messageTimeToLive = TimeSpan.FromTicks(0);
+			IPrimitiveMap messageProperties = null;
+			int fieldLen;
+			int index = 0;
+			string messageID = string.Empty;
+			byte[] messageBody = null;
 
 			try
 			{
-				nmsMessage.NMSMessageId = "";
-				nmsMessage.NMSDestination = this.destination;
-				nmsMessage.NMSDeliveryMode = MsgDeliveryMode.NonPersistent;
-				nmsMessage.NMSPriority = MsgPriority.Normal;
-				nmsMessage.NMSTimestamp = DateTime.Now;
-				nmsMessage.NMSTimeToLive = new TimeSpan(0);
-				nmsMessage.NMSType = "";
-			}
-			catch(InvalidOperationException)
-			{
-				// Log error
-			}
-
-			if(null != this.ConsumerTransformer)
-			{
-				IMessage transformedMessage = ConsumerTransformer(this.session, this, nmsMessage);
-
-				if(null != transformedMessage)
+				// Parse the commond message fields
+				do
 				{
-					nmsMessage = transformedMessage;
+					fieldType = ReadInt(msgData, ref index);
+					switch(fieldType)
+					{
+					case WireFormat.MFT_NONE:
+						break;
+
+					case WireFormat.MFT_MESSAGEID:
+						messageID = ReadString(msgData, ref index);
+						break;
+
+					case WireFormat.MFT_TIMESTAMP:
+						fieldLen = ReadInt(msgData, ref index);
+						Debug.Assert(sizeof(long) == fieldLen);
+						messageTimestamp = DateTime.FromBinary(ReadLong(msgData, ref index));
+						break;
+
+					case WireFormat.MFT_NMSTYPE:
+						messageNMSType = ReadString(msgData, ref index);
+						break;
+
+					case WireFormat.MFT_CORRELATIONID:
+						messageCorrelationId = ReadString(msgData, ref index);
+						break;
+
+					case WireFormat.MFT_REPLYTO:
+						string replyToDestName = ReadString(msgData, ref index);
+						messageReplyTo = this.session.GetDestination(replyToDestName);
+						break;
+
+					case WireFormat.MFT_DELIVERYMODE:
+						fieldLen = ReadInt(msgData, ref index);
+						Debug.Assert(sizeof(int) == fieldLen);
+						messageDeliveryMode = (MsgDeliveryMode) ReadInt(msgData, ref index);
+						break;
+
+					case WireFormat.MFT_PRIORITY:
+						fieldLen = ReadInt(msgData, ref index);
+						Debug.Assert(sizeof(int) == fieldLen);
+						messagePriority = (MsgPriority) ReadInt(msgData, ref index);
+						break;
+
+					case WireFormat.MFT_TIMETOLIVE:
+						fieldLen = ReadInt(msgData, ref index);
+						Debug.Assert(sizeof(long) == fieldLen);
+						messageTimeToLive = TimeSpan.FromTicks(ReadLong(msgData, ref index));
+						break;
+
+					case WireFormat.MFT_HEADERS:
+						fieldLen = ReadInt(msgData, ref index);
+						int numProperties = ReadInt(msgData, ref index);
+						if(numProperties > 0)
+						{
+							messageProperties = new PrimitiveMap();
+							while(numProperties-- > 0)
+							{
+								string propertyKey = ReadString(msgData, ref index);
+								byte[] propertyVal = ReadBytes(msgData, ref index);
+								messageProperties.SetBytes(propertyKey, propertyVal);
+							}
+						}
+						break;
+
+					case WireFormat.MFT_MSGTYPE:
+						fieldLen = ReadInt(msgData, ref index);
+						Debug.Assert(sizeof(int) == fieldLen);
+						messageType = ReadInt(msgData, ref index);
+						break;
+
+					case WireFormat.MFT_BODY:
+						messageBody = ReadBytes(msgData, ref index);
+						break;
+
+					default:
+						// Skip past this field.
+						Tracer.WarnFormat("Unknown message field type: {0}", fieldType);
+						fieldLen = ReadInt(msgData, ref index);
+						index += fieldLen;
+						break;
+					}
+				} while(WireFormat.MFT_NONE != fieldType && index < msgData.Length);
+			}
+			catch(Exception ex)
+			{
+				Tracer.ErrorFormat("Exception parsing message: {0}", ex.Message);
+			}
+
+			// Instantiate the message type
+			switch(messageType)
+			{
+			case WireFormat.MT_MESSAGE:
+				nmsMessage = new BaseMessage();
+				break;
+
+			case WireFormat.MT_TEXTMESSAGE:
+				nmsMessage = new TextMessage();
+				if(null != messageBody)
+				{
+					((TextMessage) nmsMessage).Text = Encoding.UTF8.GetString(messageBody);
+				}
+				break;
+
+			case WireFormat.MT_UNKNOWN:
+			default:
+				break;
+			}
+
+			// Set the common headers.
+			if(null != nmsMessage)
+			{
+				try
+				{
+					nmsMessage.NMSMessageId = messageID;
+					nmsMessage.NMSCorrelationID = messageCorrelationId;
+					nmsMessage.NMSDestination = this.destination;
+					nmsMessage.NMSReplyTo = messageReplyTo;
+					nmsMessage.NMSDeliveryMode = messageDeliveryMode;
+					nmsMessage.NMSPriority = messagePriority;
+					nmsMessage.NMSTimestamp = messageTimestamp;
+					nmsMessage.NMSTimeToLive = messageTimeToLive;
+					nmsMessage.NMSType = messageNMSType;
+					if(null != messageProperties)
+					{
+						foreach(string propertyKey in messageProperties.Keys)
+						{
+							nmsMessage.Properties.SetBytes(propertyKey, messageProperties.GetBytes(propertyKey));
+						}
+					}
+				}
+				catch(InvalidOperationException)
+				{
+					// Log error
+				}
+
+				if(null != this.ConsumerTransformer)
+				{
+					IMessage transformedMessage = ConsumerTransformer(this.session, this, nmsMessage);
+
+					if(null != transformedMessage)
+					{
+						nmsMessage = transformedMessage;
+					}
 				}
 			}
 
 			return nmsMessage;
+		}
+
+		private long ReadLong(byte[] msgData, ref int index)
+		{
+			long val = BitConverter.ToInt64(msgData, index);
+			index += sizeof(long);
+			return IPAddress.NetworkToHostOrder(val);
+		}
+
+		private int ReadInt(byte[] msgData, ref int index)
+		{
+			int val = BitConverter.ToInt32(msgData, index);
+			index += sizeof(int);
+			return IPAddress.NetworkToHostOrder(val);
+		}
+
+		private string ReadString(byte[] msgData, ref int index)
+		{
+			int stringLen = ReadInt(msgData, ref index);
+			string stringVal = string.Empty;
+
+			if(stringLen > 0)
+			{
+				stringVal = Encoding.UTF8.GetString(msgData, index, stringLen);
+				index += stringLen;
+			}
+
+			return stringVal;
+		}
+
+		private byte[] ReadBytes(byte[] msgData, ref int index)
+		{
+			int bytesLen = ReadInt(msgData, ref index);
+			byte[] bytesVal = null;
+
+			if(bytesLen >= 0)
+			{
+				bytesVal = new byte[bytesLen];
+				for(int byteIndex = 0; byteIndex < bytesLen; byteIndex++, index++)
+				{
+					bytesVal[byteIndex] = msgData[index];
+				}
+			}
+
+			return bytesVal;
 		}
 	}
 }

@@ -16,9 +16,9 @@
  */
 
 using System;
+using System.Diagnostics;
 using System.Text;
 using ZeroMQ;
-using System.Diagnostics;
 
 namespace Apache.NMS.ZMQ
 {
@@ -47,6 +47,7 @@ namespace Apache.NMS.ZMQ
 		{
 			this.session = session;
 			this.destinationName = destName;
+			this.session.RegisterDestination(this);
 		}
 
 		~Destination()
@@ -103,6 +104,8 @@ namespace Apache.NMS.ZMQ
 				this.session.Connection.ReleaseConsumer(this.consumerEndpoint);
 				this.consumerEndpoint = null;
 			}
+
+			this.session.UnregisterDestination(this);
 		}
 
 		public string Name
