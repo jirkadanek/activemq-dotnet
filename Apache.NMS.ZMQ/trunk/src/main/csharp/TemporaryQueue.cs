@@ -25,7 +25,7 @@ namespace Apache.NMS.ZMQ
 	public class TemporaryQueue : Destination, ITemporaryQueue
 	{
 		public TemporaryQueue(Session session)
-			: base(session, Guid.NewGuid().ToString())
+			: base(session, "TEMPQUEUE." + Guid.NewGuid().ToString())
 		{
 		}
 

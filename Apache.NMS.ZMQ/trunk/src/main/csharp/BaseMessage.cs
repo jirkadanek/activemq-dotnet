@@ -36,12 +36,19 @@ namespace Apache.NMS.ZMQ
 		private string type;
 		private event AcknowledgeHandler Acknowledger;
 		private DateTime timestamp = new DateTime();
+		private bool readOnlyMsgProperties = false;
 		private bool readOnlyMsgBody = false;
 
-		public bool ReadOnlyBody
+		public virtual bool ReadOnlyProperties
 		{
-			get { return readOnlyMsgBody; }
-			set { readOnlyMsgBody = value; }
+			get { return this.readOnlyMsgProperties; }
+			set { this.readOnlyMsgProperties = value; }
+		}
+
+		public virtual bool ReadOnlyBody
+		{
+			get { return this.readOnlyMsgBody; }
+			set { this.readOnlyMsgBody = value; }
 		}
 
 		// IMessage interface
@@ -155,7 +162,6 @@ namespace Apache.NMS.ZMQ
 			set { }
 		}
 
-
 		/// <summary>
 		/// The destination that the consumer of this message should send replies to
 		/// </summary>
@@ -190,7 +196,6 @@ namespace Apache.NMS.ZMQ
 			set { type = value; }
 		}
 
-
 		public object GetObjectProperty(string name)
 		{
 			return null;
@@ -200,9 +205,15 @@ namespace Apache.NMS.ZMQ
 		{
 		}
 
+		public virtual void OnSend()
+		{
+			this.ReadOnlyProperties = true;
+			this.ReadOnlyBody = true;
+		}
+
 		protected void FailIfReadOnlyBody()
 		{
-			if(ReadOnlyBody == true)
+			if(ReadOnlyBody)
 			{
 				throw new MessageNotWriteableException("Message is in Read-Only mode.");
 			}
@@ -210,7 +221,7 @@ namespace Apache.NMS.ZMQ
 
 		protected void FailIfWriteOnlyBody()
 		{
-			if(ReadOnlyBody == false)
+			if(!ReadOnlyBody)
 			{
 				throw new MessageNotReadableException("Message is in Write-Only mode.");
 			}

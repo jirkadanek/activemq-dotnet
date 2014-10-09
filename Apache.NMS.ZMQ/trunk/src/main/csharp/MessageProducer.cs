@@ -19,8 +19,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Net;
+using System.Text;
 using Apache.NMS.Util;
 
 namespace Apache.NMS.ZMQ
@@ -48,13 +48,35 @@ namespace Apache.NMS.ZMQ
 
 		public MessageProducer(Session sess, IDestination dest)
 		{
-			if(null == sess.Connection.Context)
+			if(null == sess
+				|| null == sess.Connection
+				|| null == sess.Connection.Context)
 			{
 				throw new NMSConnectionException();
 			}
 
+			Destination theDest = dest as Destination;
+
+			if(null == theDest)
+			{
+				throw new InvalidDestinationException("Consumer cannot receive on Null Destinations.");
+			}
+			else if(null == theDest.Name)
+			{
+				throw new InvalidDestinationException("The destination object was not given a physical name.");
+			}
+			else if(theDest.IsTemporary)
+			{
+				String physicalName = theDest.Name;
+
+				if(String.IsNullOrEmpty(physicalName))
+				{
+					throw new InvalidDestinationException("Physical name of Destination should be valid: " + theDest);
+				}
+			}
+
 			this.session = sess;
-			this.destination = (Destination) dest;
+			this.destination = theDest;
 			this.destination.InitSender();
 		}
 
@@ -150,6 +172,17 @@ namespace Apache.NMS.ZMQ
 					EncodeField(msgDataBuilder, WireFormat.MFT_BODY, msgBody);
 				}
 			}
+			else if(message is IBytesMessage)
+			{
+				EncodeField(msgDataBuilder, WireFormat.MFT_MSGTYPE, WireFormat.MT_BYTESMESSAGE);
+				// Append the message text body to the msg.
+				byte[] msgBody = ((IBytesMessage) message).Content;
+
+				if(null != msgBody)
+				{
+					EncodeField(msgDataBuilder, WireFormat.MFT_BODY, msgBody);
+				}
+			}
 			else
 			{
 				// TODO: Add support for more message types
@@ -158,6 +191,8 @@ namespace Apache.NMS.ZMQ
 
 			// Put the sentinal field marker.
 			EncodeField(msgDataBuilder, WireFormat.MFT_NONE, 0);
+
+			((BaseMessage) message).OnSend();
 			theDest.Send(msgDataBuilder.ToArray());
 		}
 

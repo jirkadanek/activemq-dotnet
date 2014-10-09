@@ -40,7 +40,6 @@ namespace Apache.NMS.ZMQ
 		private object asyncDeliveryLock = new object();
 		private bool asyncDelivery = false;
 		private bool asyncInit = false;
-		private byte[] rawDestinationName;
 
 		private ConsumerTransformerDelegate consumerTransformer;
 		public ConsumerTransformerDelegate ConsumerTransformer
@@ -82,7 +81,6 @@ namespace Apache.NMS.ZMQ
 
 			this.session = sess;
 			this.destination = theDest;
-			this.rawDestinationName = Destination.encoding.GetBytes(this.destination.Name);
 			this.acknowledgementMode = ackMode;
 		}
 
@@ -145,7 +143,7 @@ namespace Apache.NMS.ZMQ
 			if(size > 0)
 			{
 				// Strip off the subscribed destination name.
-				int receivedMsgIndex = this.rawDestinationName.Length;
+				int receivedMsgIndex = this.destination.rawDestinationName.Length;
 				int msgLength = receivedMsg.Length - receivedMsgIndex;
 				byte[] msgContent = new byte[msgLength];
 
@@ -406,6 +404,14 @@ namespace Apache.NMS.ZMQ
 				}
 				break;
 
+			case WireFormat.MT_BYTESMESSAGE:
+				nmsMessage = new BytesMessage();
+				if(null != messageBody)
+				{
+					((BytesMessage) nmsMessage).Content = messageBody;
+				}
+				break;
+
 			case WireFormat.MT_UNKNOWN:
 			default:
 				break;
@@ -444,6 +450,9 @@ namespace Apache.NMS.ZMQ
 						nmsMessage = transformedMessage as BaseMessage;
 					}
 				}
+
+				nmsMessage.ReadOnlyBody = true;
+				nmsMessage.ReadOnlyProperties = true;
 			}
 
 			return nmsMessage;

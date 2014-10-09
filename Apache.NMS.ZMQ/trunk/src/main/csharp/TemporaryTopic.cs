@@ -25,7 +25,7 @@ namespace Apache.NMS.ZMQ
 	public class TemporaryTopic : Destination, ITemporaryTopic
 	{
 		public TemporaryTopic(Session session)
-			: base(session, Guid.NewGuid().ToString())
+			: base(session, "TEMPTOPIC." + Guid.NewGuid().ToString())
 		{
 		}
 

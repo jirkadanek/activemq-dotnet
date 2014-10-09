@@ -36,6 +36,7 @@ namespace Apache.NMS.ZMQ
 		protected ZmqSocket producerEndpoint = null;
 		protected ZmqSocket consumerEndpoint = null;
 		protected string destinationName;
+		internal byte[] rawDestinationName;
 
 		private bool disposed = false;
 
@@ -47,6 +48,7 @@ namespace Apache.NMS.ZMQ
 		{
 			this.session = session;
 			this.destinationName = destName;
+			this.rawDestinationName = Destination.encoding.GetBytes(this.destinationName);
 			this.session.RegisterDestination(this);
 		}
 
@@ -88,23 +90,8 @@ namespace Apache.NMS.ZMQ
 		/// </summary>
 		protected virtual void OnDispose()
 		{
-			if(null != this.producerEndpoint)
-			{
-				if(null != this.session
-					&& null != this.session.Connection)
-				{
-					this.session.Connection.ReleaseProducer(this.producerEndpoint);
-				}
-
-				this.producerEndpoint = null;
-			}
-
-			if(null != this.consumerEndpoint)
-			{
-				this.session.Connection.ReleaseConsumer(this.consumerEndpoint);
-				this.consumerEndpoint = null;
-			}
-
+			DeinitSender();
+			DeinitReceiver();
 			this.session.UnregisterDestination(this);
 		}
 
@@ -190,6 +177,20 @@ namespace Apache.NMS.ZMQ
 			}
 		}
 
+		internal void DeinitSender()
+		{
+			if(null != this.producerEndpoint)
+			{
+				if(null != this.session
+					&& null != this.session.Connection)
+				{
+					this.session.Connection.ReleaseProducer(this.producerEndpoint);
+				}
+
+				this.producerEndpoint = null;
+			}
+		}
+
 		internal void InitReceiver()
 		{
 			if(null == this.consumerEndpoint)
@@ -198,34 +199,27 @@ namespace Apache.NMS.ZMQ
 
 				this.consumerEndpoint = connection.GetConsumer();
 				// Must subscribe first before connecting to the endpoint binding
-				this.consumerEndpoint.Subscribe(Destination.encoding.GetBytes(this.destinationName));
+				this.consumerEndpoint.Subscribe(this.rawDestinationName);
 				this.consumerEndpoint.Connect(connection.GetConsumerBindingPath());
 			}
 		}
 
-		internal void Subscribe(string prefixName)
-		{
-			InitReceiver();
-			this.consumerEndpoint.Subscribe(Destination.encoding.GetBytes(prefixName));
-		}
-
-		internal void Unsubscribe(string prefixName)
+		internal void DeinitReceiver()
 		{
 			if(null != this.consumerEndpoint)
 			{
-				this.consumerEndpoint.Unsubscribe(Destination.encoding.GetBytes(prefixName));
+				this.session.Connection.ReleaseConsumer(this.consumerEndpoint);
+				this.consumerEndpoint = null;
 			}
 		}
 
 		internal SendStatus Send(string msg)
 		{
-			Debug.Assert(null != this.producerEndpoint, "Call InitSender() before calling Send().");
 			return this.producerEndpoint.Send(msg, Destination.encoding);
 		}
 
 		internal SendStatus Send(byte[] buffer)
 		{
-			Debug.Assert(null != this.producerEndpoint, "Call InitSender() before calling Send().");
 			return this.producerEndpoint.Send(buffer);
 		}
 
@@ -245,20 +239,6 @@ namespace Apache.NMS.ZMQ
 		{
 			this.InitReceiver();
 			return this.consumerEndpoint.Receive(null, flags, out size);
-		}
-
-		internal Frame ReceiveFrame()
-		{
-			// TODO: Implement
-			this.InitReceiver();
-			return null;
-		}
-
-		internal ZmqMessage ReceiveMessage()
-		{
-			// TODO: Implement
-			this.InitReceiver();
-			return null;
 		}
 	}
 }
