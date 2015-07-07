@@ -1,0 +1,121 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{AEBC857B-D693-4833-9F1E-F6A22787D0C9}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>vs2008mqtt</RootNamespace>
+    <AssemblyName>vs2008-mqtt</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Apache.NMS">
+      <HintPath>lib\Apache.NMS\net-2.0\Apache.NMS.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Web" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Compile Include="src\main\csharp\ConnectionFactory.cs" />
+    <Compile Include="src\main\csharp\ConnectionMetaData.cs" />
+    <Compile Include="src\main\csharp\Connection.cs" />
+    <Compile Include="src\main\csharp\CommonAssemblyInfo.cs" />
+    <Compile Include="src\main\csharp\Session.cs" />
+    <Compile Include="src\main\csharp\MessageConsumer.cs" />
+    <Compile Include="src\main\csharp\MessageProducer.cs" />
+    <Compile Include="src\main\csharp\Commands\CONNACK.cs" />
+    <Compile Include="src\main\csharp\Commands\CONNECT.cs" />
+    <Compile Include="src\main\csharp\Commands\DISCONNECT.cs" />
+    <Compile Include="src\main\csharp\Commands\PINGREQ.cs" />
+    <Compile Include="src\main\csharp\Commands\PINGRESP.cs" />
+    <Compile Include="src\main\csharp\Commands\PUBACK.cs" />
+    <Compile Include="src\main\csharp\Commands\PUBLISH.cs" />
+    <Compile Include="src\main\csharp\Commands\PUBREC.cs" />
+    <Compile Include="src\main\csharp\Commands\PUBREL.cs" />
+    <Compile Include="src\main\csharp\Commands\SUBACK.cs" />
+    <Compile Include="src\main\csharp\Commands\SUBSCRIBE.cs" />
+    <Compile Include="src\main\csharp\Commands\UNSUBACK.cs" />
+    <Compile Include="src\main\csharp\Commands\UNSUBSCRIBE.cs" />
+    <Compile Include="src\main\csharp\Threads\ThreadPoolExecutor.cs" />
+    <Compile Include="src\main\csharp\Transport\ITransport.cs" />
+    <Compile Include="src\main\csharp\Transport\ITransportFactory.cs" />
+    <Compile Include="src\main\csharp\Util\MQTTMessageTransformation.cs" />
+    <Compile Include="src\main\csharp\ConnectionClosedException.cs" />
+    <Compile Include="src\main\csharp\IDispatcher.cs" />
+    <Compile Include="src\main\csharp\IOException.cs" />
+    <Compile Include="src\main\csharp\SessionExecutor.cs" />
+    <Compile Include="src\main\csharp\Util\FifoMessageDispatchChannel.cs" />
+    <Compile Include="src\main\csharp\Util\MessageDispatchChannel.cs" />
+    <Compile Include="src\main\csharp\Threads\DedicatedTaskRunner.cs" />
+    <Compile Include="src\main\csharp\Threads\Scheduler.cs" />
+    <Compile Include="src\main\csharp\Threads\Task.cs" />
+    <Compile Include="src\main\csharp\Threads\TaskRunner.cs" />
+    <Compile Include="src\main\csharp\Threads\TaskRunnerFactory.cs" />
+    <Compile Include="src\main\csharp\Messages\MessageDispatch.cs" />
+    <Compile Include="src\main\csharp\Messages\BytesMessage.cs" />
+    <Compile Include="src\main\csharp\Messages\MQTTMessage.cs" />
+    <Compile Include="src\main\csharp\Transport\Command.cs" />
+    <Compile Include="src\main\csharp\Topic.cs" />
+    <Compile Include="src\main\csharp\Transport\BaseCommand.cs" />
+    <Compile Include="src\main\csharp\Transport\FutureResponse.cs" />
+    <Compile Include="src\main\csharp\Transport\Response.cs" />
+    <Compile Include="src\main\csharp\Threads\TimerEx.cs" />
+    <Compile Include="src\main\csharp\Threads\TimerTask.cs" />
+    <Compile Include="src\main\csharp\Util\FactoryAttribute.cs" />
+    <Compile Include="src\main\csharp\Util\FactoryFinder.cs" />
+    <Compile Include="src\main\csharp\Util\IdGenerator.cs" />
+    <Compile Include="src\main\csharp\ConnectionFailedException.cs" />
+    <Compile Include="src\main\csharp\Util\MQTTDestination.cs" />
+    <Compile Include="src\main\csharp\Transport\TransportFactory.cs" />
+    <Compile Include="src\main\csharp\Transport\MQTTTransportFactoryAttribute.cs" />
+    <Compile Include="src\main\csharp\Commands\PUBCOMP.cs" />
+    <Compile Include="src\main\csharp\RequestTimedOutException.cs" />
+    <Compile Include="src\main\csharp\Threads\DefaultThreadPools.cs" />
+    <Compile Include="src\main\csharp\Threads\PooledTaskRunner.cs" />
+    <Compile Include="src\main\csharp\Transport\Tcp\SslTransport.cs" />
+    <Compile Include="src\main\csharp\Transport\Tcp\SslTransportFactory.cs" />
+    <Compile Include="src\main\csharp\Transport\Tcp\TcpTransport.cs" />
+    <Compile Include="src\main\csharp\Transport\Tcp\TcpTransportFactory.cs" />
+    <Compile Include="src\main\csharp\Transport\IWireFormat.cs" />
+    <Compile Include="src\main\csharp\Transport\TransportFilter.cs" />
+    <Compile Include="src\main\csharp\Protocol\MQTTWireFormat.cs" />
+    <Compile Include="src\main\csharp\Transport\LoggingTransport.cs" />
+    <Compile Include="src\main\csharp\Transport\MutexTransport.cs" />
+    <Compile Include="src\main\csharp\Transport\ResponseCorrelator.cs" />
+    <Compile Include="src\main\csharp\Transport\ErrorResponse.cs" />
+    <Compile Include="src\main\csharp\Protocol\MQTTExceptionFactory.cs" />
+    <Compile Include="src\main\csharp\Protocol\Header.cs" />
+    <Compile Include="src\main\csharp\Protocol\MQTTCommandFactory.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <None Include="LICENSE.txt" />
+    <None Include="NOTICE.txt" />
+    <None Include="README.txt" />
+    <None Include="keyfile\NMSKey.snk" />
+    <None Include="nant.build" />
+    <None Include="nant-common.xml" />
+  </ItemGroup>
+</Project>
