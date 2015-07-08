@@ -324,15 +324,6 @@ namespace Apache.NMS.WCF
 		#endregion
 
 		/// <summary>
-		/// Dispatches the callback.
-		/// </summary>
-		/// <param name="state">The state.</param>
-		internal void DispatchCallback(object state)
-		{
-			Dispatch((Message) state);
-		}
-
-		/// <summary>
 		/// Matches an incoming message to its waiting listener,
 		/// using the FilterTable to dispatch the message to the correct
 		/// listener. If no listener is waiting for the message, it is silently
