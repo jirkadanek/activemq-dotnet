@@ -71,21 +71,45 @@ namespace Apache.NMS.WCF
 			ThrowIfDisposedOrNotOpen();
 			RemoteAddress.ApplyTo(message);
 
-			using(NMS.ISession session = _connection.CreateSession())
+			NMS.ISession session = _connection.CreateSession();
+
+			if(!session.Transacted)
+ 			{
+				using(session)
+ 				{
+					DoSendMessageForSession(session, message);
+ 				}
+ 			}
+			else
 			{
-				IDestination destination = SessionUtil.GetDestination(session, Destination, DestinationType);
-				using(IMessageProducer producer = session.CreateProducer(destination))
-				{
-					producer.DeliveryMode = MsgDeliveryMode.Persistent;
-
-					ITextMessage request = session.CreateTextMessage(TranslateMessage(message));
-					producer.Send(request);
-					producer.Close();
-
-					Tracer.Info("Sending message:");
-					Tracer.Info(request.Text);
-				}
+				// we are inside a transaction, so we should defer session disposing until transaction ends
+				session.TransactionCommittedListener += SessionOnTransactionEndHandler;
+				session.TransactionRolledBackListener += SessionOnTransactionEndHandler;
+				DoSendMessageForSession(session, message);
 			}
+		}
+
+		private void SessionOnTransactionEndHandler(ISession session)
+		{
+			session.TransactionCommittedListener -= SessionOnTransactionEndHandler;
+			session.TransactionRolledBackListener -= SessionOnTransactionEndHandler;
+			session.Dispose();
+		}
+
+		private void DoSendMessageForSession(ISession session, Message message)
+		{
+			IDestination destination = SessionUtil.GetDestination(session, Destination, DestinationType);
+			using (IMessageProducer producer = session.CreateProducer(destination))
+			{
+				producer.DeliveryMode = MsgDeliveryMode.Persistent;
+
+				ITextMessage request = session.CreateTextMessage(TranslateMessage(message));
+				producer.Send(request);
+				producer.Close();
+
+				Tracer.Info("Sending message:");
+				Tracer.Info(request.Text);
+			}			
 		}
 
 		/// <summary>

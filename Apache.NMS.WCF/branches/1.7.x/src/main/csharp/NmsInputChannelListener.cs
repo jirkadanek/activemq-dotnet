@@ -324,15 +324,6 @@ namespace Apache.NMS.WCF
 		#endregion
 
 		/// <summary>
-		/// Dispatches the callback.
-		/// </summary>
-		/// <param name="state">The state.</param>
-		internal void DispatchCallback(object state)
-		{
-			Dispatch((Message) state);
-		}
-
-		/// <summary>
 		/// Matches an incoming message to its waiting listener,
 		/// using the FilterTable to dispatch the message to the correct
 		/// listener. If no listener is waiting for the message, it is silently
@@ -363,6 +354,10 @@ namespace Apache.NMS.WCF
 			catch(Exception e)
 			{
 				Tracer.ErrorFormat("Error dispatching Message: {0}", e.ToString());
+				if(null != _session && _session.Transacted)
+				{
+					throw;
+				}
 			}
 		}
 
