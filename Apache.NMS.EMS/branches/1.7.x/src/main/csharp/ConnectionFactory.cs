@@ -17,7 +17,10 @@
 
 using System;
 using System.Collections;
+using System.Collections.Specialized;
+using Apache.NMS.EMS.Util;
 using Apache.NMS.Policies;
+using Apache.NMS.Util;
 
 namespace Apache.NMS.EMS
 {
@@ -30,6 +33,14 @@ namespace Apache.NMS.EMS
 		private Uri brokerUri;
 		private string clientId;
 		private Hashtable properties;
+		private bool exceptionOnFTEvents = true;
+		private bool exceptionOnFTSwitch = true;
+		private int connAttemptCount = Int32.MaxValue;   // Infinite
+		private int connAttemptDelay = 30000;            // 30 seconds
+		private int connAttemptTimeout = 5000;           // 5 seconds
+		private int reconnAttemptCount = Int32.MaxValue; // Infinite
+		private int reconnAttemptDelay = 30000;          // 30 seconds
+		private int reconnAttemptTimeout = 5000;         // 5 seconds
 
 		private IRedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
 
@@ -38,6 +49,7 @@ namespace Apache.NMS.EMS
 			try
 			{
 				this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory();
+				ConfigureConnectionFactory();
 			}
 			catch(Exception ex)
 			{
@@ -77,10 +89,11 @@ namespace Apache.NMS.EMS
 		{
 			try
 			{
-				this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(serverUrl.AbsolutePath, clientId, properties);
-				this.brokerUri = serverUrl;
+				this.brokerUri = ParseUriProperties(serverUrl);
+				this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(TrimParens(this.brokerUri.AbsolutePath), clientId, properties);
 				this.clientId = clientId;
 				this.properties = properties;
+				ConfigureConnectionFactory();
 			}
 			catch(Exception ex)
 			{
@@ -91,6 +104,22 @@ namespace Apache.NMS.EMS
 			VerifyConnectionFactory();
 		}
 
+		private void ConfigureConnectionFactory()
+		{
+			TIBCO.EMS.Tibems.SetExceptionOnFTEvents(this.ExceptionOnFTEvents);
+			TIBCO.EMS.Tibems.SetExceptionOnFTSwitch(this.ExceptionOnFTSwitch);
+
+			// Set the initial connection retry settings.
+			this.tibcoConnectionFactory.SetConnAttemptCount(this.ConnAttemptCount);
+			this.tibcoConnectionFactory.SetConnAttemptDelay(this.ConnAttemptDelay);
+			this.tibcoConnectionFactory.SetConnAttemptTimeout(this.ConnAttemptTimeout);
+
+			// Set the failover reconnect retry settings
+			this.tibcoConnectionFactory.SetReconnAttemptCount(this.ReconnAttemptCount);
+			this.tibcoConnectionFactory.SetReconnAttemptDelay(this.ReconnAttemptDelay);
+			this.tibcoConnectionFactory.SetReconnAttemptTimeout(this.ReconnAttemptTimeout);
+		}
+
 		private void VerifyConnectionFactory()
 		{
 			if(null == this.tibcoConnectionFactory)
@@ -98,6 +127,58 @@ namespace Apache.NMS.EMS
 				throw new Apache.NMS.NMSException("Error instantiating TIBCO connection factory object.");
 			}
 		}
+
+		#region Connection Factory Properties (configure via URL parameters)
+
+		public bool ExceptionOnFTEvents
+		{
+			get { return this.exceptionOnFTEvents; }
+			set { this.exceptionOnFTEvents = value; }
+		}
+
+		public bool ExceptionOnFTSwitch
+		{
+			get { return this.exceptionOnFTSwitch; }
+			set { this.exceptionOnFTSwitch = value; }
+		}
+
+		public int ConnAttemptCount
+		{
+			get { return this.connAttemptCount; }
+			set { this.connAttemptCount = value; }
+		}
+
+		public int ConnAttemptDelay
+		{
+			get { return this.connAttemptDelay; }
+			set { this.connAttemptDelay = value; }
+		}
+
+		public int ConnAttemptTimeout
+		{
+			get { return this.connAttemptTimeout; }
+			set { this.connAttemptTimeout = value; }
+		}
+
+		public int ReconnAttemptCount
+		{
+			get { return this.reconnAttemptCount; }
+			set { this.reconnAttemptCount = value; }
+		}
+
+		public int ReconnAttemptDelay
+		{
+			get { return this.reconnAttemptDelay; }
+			set { this.reconnAttemptDelay = value; }
+		}
+
+		public int ReconnAttemptTimeout
+		{
+			get { return this.reconnAttemptTimeout; }
+			set { this.reconnAttemptTimeout = value; }
+		}
+
+		#endregion
 
 		#region IConnectionFactory Members
 
@@ -162,39 +243,69 @@ namespace Apache.NMS.EMS
 			{
 				try
 				{
-					if(null == this.brokerUri || !this.brokerUri.Equals(value))
+					// Create or Re-create the TIBCO connection factory.
+					this.brokerUri = ParseUriProperties(value);
+					if(null == this.brokerUri)
 					{
-						// Re-create the TIBCO connection factory.
-						this.brokerUri = value;
-						if(null == this.brokerUri)
+						this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory();
+					}
+					else
+					{
+						if(null == this.clientId)
 						{
-							this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory();
+							this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(TrimParens(this.brokerUri.AbsolutePath));
 						}
 						else
 						{
-							if(null == this.clientId)
+							if(null == this.properties)
 							{
-								this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(this.brokerUri.OriginalString);
+								this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(TrimParens(this.brokerUri.AbsolutePath), this.clientId);
 							}
 							else
 							{
-								if(null == this.properties)
-								{
-									this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(this.brokerUri.OriginalString, this.clientId);
-								}
-								else
-								{
-									this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(this.brokerUri.OriginalString, this.clientId, this.properties);
-								}
+								this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(TrimParens(this.brokerUri.AbsolutePath), this.clientId, this.properties);
 							}
 						}
 					}
+
+					ConfigureConnectionFactory();
 				}
 				catch(Exception ex)
 				{
 					ExceptionUtil.WrapAndThrowNMSException(ex);
 				}
 			}
+		}
+
+		private Uri ParseUriProperties(Uri rawUri)
+		{
+			Tracer.InfoFormat("BrokerUri set = {0}", rawUri.OriginalString);
+			Uri parsedUri = rawUri;
+
+			if(!String.IsNullOrEmpty(rawUri.Query) && !rawUri.OriginalString.EndsWith(")"))
+			{
+				parsedUri = new Uri(rawUri.OriginalString);
+				// Since the Uri class will return the end of a Query string found in a Composite
+				// URI we must ensure that we trim that off before we proceed.
+				string query = parsedUri.Query.Substring(parsedUri.Query.LastIndexOf(")") + 1);
+
+				StringDictionary properties = URISupport.ParseQuery(query);
+
+				StringDictionary connection = URISupport.ExtractProperties(properties, "connection.");
+				StringDictionary nms = URISupport.ExtractProperties(properties, "nms.");
+
+				IntrospectionSupport.SetProperties(this, connection, "connection.");
+				IntrospectionSupport.SetProperties(this, nms, "nms.");
+
+				parsedUri = URISupport.CreateRemainingUri(parsedUri, properties);
+			}
+
+			return parsedUri;
+		}
+
+		private string TrimParens(string stringWithParens)
+		{
+			return stringWithParens.TrimStart('(').TrimEnd(')');
 		}
 
 		/// <summary>

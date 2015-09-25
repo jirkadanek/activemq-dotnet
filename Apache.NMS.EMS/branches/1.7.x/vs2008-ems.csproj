@@ -74,6 +74,7 @@
     <Compile Include="src\main\csharp\ConnectionFactory.cs" />
     <Compile Include="src\main\csharp\ConnectionMetaData.cs" />
     <Compile Include="src\main\csharp\ExceptionUtil.cs" />
+    <Compile Include="src\main\csharp\IntrospectionSupport.cs" />
     <Compile Include="src\main\csharp\StreamMessage.cs" />
     <Compile Include="src\main\csharp\QueueBrowser.cs" />
     <Compile Include="src\main\csharp\Destination.cs" />
