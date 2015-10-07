@@ -14,9 +14,9 @@
 # limitations under the License.
 
 $pkgname = "Apache.NMS.EMS"
-$pkgver = "1.6-SNAPSHOT"
+$pkgver = "1.8-SNAPSHOT"
 $configurations = "release", "debug"
-$frameworks = "net-2.0", "net-3.5", "net-4.0"
+$frameworks = "net-4.0"
 
 write-progress "Creating package directory." "Initializing..."
 if(!(test-path package))
@@ -43,16 +43,8 @@ if(test-path build)
 			zip -9 -u "$zipfile" "$framework\$configuration\nmsprovider*.config"
 			zip -9 -u "$zipfile" "$framework\$configuration\$pkgname.Test.dll"
 			zip -9 -u "$zipfile" "$framework\$configuration\$pkgname.Test.xml"
-			if($framework -ieq "mono-2.0")
-			{
-				zip -9 -u "$zipfile" "$framework\$configuration\$pkgname.dll.mdb"
-				zip -9 -u "$zipfile" "$framework\$configuration\$pkgname.Test.dll.mdb"
-			}
-			else
-			{
-				zip -9 -u "$zipfile" "$framework\$configuration\$pkgname.pdb"
-				zip -9 -u "$zipfile" "$framework\$configuration\$pkgname.Test.pdb"
-			}
+			zip -9 -u "$zipfile" "$framework\$configuration\$pkgname.pdb"
+			zip -9 -u "$zipfile" "$framework\$configuration\$pkgname.Test.pdb"
 		}
 	}
 
@@ -63,7 +55,7 @@ write-progress "Packaging Source code files." "Scanning..."
 $pkgdir = "package"
 $zipfile = "$pkgdir\$pkgname-$pkgver-src.zip"
 
-zip -9 -u "$zipfile" LICENSE.txt NOTICE.txt nant-common.xml nant.build package.ps1 vs2008-ems-test.csproj vs2008-ems.csproj vs2008-ems.sln
+zip -9 -u "$zipfile" LICENSE.txt NOTICE.txt nant-common.xml nant.build package.ps1 vs2013-ems-test.csproj vs2013-ems.csproj vs2013-ems.sln
 zip -9 -u -r "$zipfile" keyfile src
 
 write-progress -Completed "Packaging" "Complete."
