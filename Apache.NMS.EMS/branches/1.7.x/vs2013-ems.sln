@@ -1,9 +1,11 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vs2008-ems", "vs2008-ems.csproj", "{2AF5EBB5-9873-4B35-A8FC-8B6E74242767}"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.40629.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vs2013-ems", "vs2013-ems.csproj", "{2AF5EBB5-9873-4B35-A8FC-8B6E74242767}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vs2008-ems-test", "vs2008-ems-test.csproj", "{EB943C69-2C9B-45E7-B95B-FB916E7057ED}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vs2013-ems-test", "vs2013-ems-test.csproj", "{EB943C69-2C9B-45E7-B95B-FB916E7057ED}"
 EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
