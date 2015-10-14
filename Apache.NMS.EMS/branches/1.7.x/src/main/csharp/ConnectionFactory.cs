@@ -89,11 +89,9 @@ namespace Apache.NMS.EMS
 		{
 			try
 			{
-				this.brokerUri = ParseUriProperties(serverUrl);
-				this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(TrimParens(this.brokerUri.AbsolutePath), clientId, properties);
 				this.clientId = clientId;
 				this.properties = properties;
-				ConfigureConnectionFactory();
+				this.BrokerUri = serverUrl;
 			}
 			catch(Exception ex)
 			{
@@ -133,13 +131,21 @@ namespace Apache.NMS.EMS
 		public bool ExceptionOnFTEvents
 		{
 			get { return this.exceptionOnFTEvents; }
-			set { this.exceptionOnFTEvents = value; }
+			set
+			{
+				this.exceptionOnFTEvents = value;
+				TIBCO.EMS.Tibems.SetExceptionOnFTEvents(value);
+			}
 		}
 
 		public bool ExceptionOnFTSwitch
 		{
 			get { return this.exceptionOnFTSwitch; }
-			set { this.exceptionOnFTSwitch = value; }
+			set
+			{
+				this.exceptionOnFTSwitch = value;
+				TIBCO.EMS.Tibems.SetExceptionOnFTSwitch(value);
+			}
 		}
 
 		public int ConnAttemptCount
@@ -251,19 +257,21 @@ namespace Apache.NMS.EMS
 					}
 					else
 					{
+						string brokerPath = TrimParens(this.brokerUri.AbsolutePath);
+
 						if(null == this.clientId)
 						{
-							this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(TrimParens(this.brokerUri.AbsolutePath));
+							this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(brokerPath);
 						}
 						else
 						{
 							if(null == this.properties)
 							{
-								this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(TrimParens(this.brokerUri.AbsolutePath), this.clientId);
+								this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(brokerPath, this.clientId);
 							}
 							else
 							{
-								this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(TrimParens(this.brokerUri.AbsolutePath), this.clientId, this.properties);
+								this.tibcoConnectionFactory = new TIBCO.EMS.ConnectionFactory(brokerPath, this.clientId, this.properties);
 							}
 						}
 					}
