@@ -107,12 +107,37 @@ namespace Apache.NMS.EMS
 			get { return EMSConvert.ToNMSQueue(this.tibcoQueueBrowser.Queue); }
 		}
 
+		internal class Enumerator : IEnumerator
+		{
+			private IEnumerator innerEnumerator;
+
+			public Enumerator(IEnumerator innerEnumerator)
+			{
+				this.innerEnumerator = innerEnumerator;
+			}
+
+			public object Current
+			{
+				get
+				{
+					return EMSConvert.ToNMSMessage((TIBCO.EMS.Message)this.innerEnumerator.Current);
+				}
+			}
+
+			public bool MoveNext()
+			{
+				return this.innerEnumerator.MoveNext();
+			}
+
+			public void Reset()
+			{
+				this.innerEnumerator.Reset();
+			}
+		}
+
 		public IEnumerator GetEnumerator()
 		{
-			// TODO: This enumerator will need to be adapted.  As it is now, the low-level EMS
-			// objects will be enumerated.  We need to wrap these objects into the NMS interface
-			// types to fit into the provider agnostic system.
-			return this.tibcoQueueBrowser.GetEnumerator();
+			return new Enumerator(this.tibcoQueueBrowser.GetEnumerator());
 		}
 	}
 }
